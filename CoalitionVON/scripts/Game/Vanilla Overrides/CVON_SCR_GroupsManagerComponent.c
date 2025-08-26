@@ -22,7 +22,6 @@ modded class SCR_GroupsManagerComponent
 	//==========================================================================================================================================================================
 	void TuneFreqDelay(int playerId, IEntity player)
 	{
-		Print("tuning");
 		if (!player)
 			return;
 		
@@ -38,13 +37,12 @@ modded class SCR_GroupsManagerComponent
 		if (index == -1)
 			return;
 	
-		Print(playerController.m_aRadios.Count());
 		if (playerFaction.GetCallsignInfo().m_aGroupFrequency.Count() < index + 1)
 			return;		
-		CRF_GroupFrequencyContainer freqContainer = playerFaction.GetCallsignInfo().m_aGroupFrequency.Get(index);
+		CVON_GroupFrequencyContainer freqContainer = playerFaction.GetCallsignInfo().m_aGroupFrequency.Get(index);
 		for (int i = 0; i < playerController.m_aRadios.Count(); i++)
 		{
-			CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(playerController.m_aRadios.Get(i).FindComponent(CRF_RadioComponent));
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(playerController.m_aRadios.Get(i).FindComponent(CVON_RadioComponent));
 			switch (i)
 			{
 				case 0: 

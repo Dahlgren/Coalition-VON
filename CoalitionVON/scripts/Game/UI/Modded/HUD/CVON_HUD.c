@@ -1,5 +1,5 @@
 
-class CVVR_HUD: SCR_InfoDisplay {
+class CVON_HUD: SCR_InfoDisplay {
 	protected SCR_PlayerController m_PlayerController;
 	protected ProgressBarWidget m_wVoiceRangeSlider;
 	protected TextWidget m_wVoiceRangeText;
@@ -15,8 +15,8 @@ class CVVR_HUD: SCR_InfoDisplay {
 	override event void OnStartDraw(IEntity owner)
 	{
 		super.OnStartDraw(owner);
-		GetGame().GetInputManager().AddActionListener("CVVR_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
-		GetGame().GetInputManager().AddActionListener("CVVR_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
+		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
+		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
 		GetGame().GetInputManager().AddActionListener("VONChannel", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().AddActionListener("VONLongRange", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().AddActionListener("VONMediumRange", EActionTrigger.DOWN, ShowVON);
@@ -29,8 +29,8 @@ class CVVR_HUD: SCR_InfoDisplay {
 	override event void OnStopDraw(IEntity owner)
 	{
 		super.OnStopDraw(owner);
-		GetGame().GetInputManager().RemoveActionListener("CVVR_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
-		GetGame().GetInputManager().RemoveActionListener("CVVR_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
+		GetGame().GetInputManager().RemoveActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
+		GetGame().GetInputManager().RemoveActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
 		GetGame().GetInputManager().RemoveActionListener("VONChannel", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().RemoveActionListener("VONChannel", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().RemoveActionListener("VONLongRange", EActionTrigger.DOWN, ShowVON);
@@ -59,12 +59,11 @@ class CVVR_HUD: SCR_InfoDisplay {
 	
 	void ShowDirectToggle()
 	{
-		GetGame().GetCallqueue().CallLater(DirectToggleDelay, 100, false);
+		GetGame().GetCallqueue().CallLater(DirectToggleDelay, 200, false);
 	}
 	
 	void DirectToggleDelay()
 	{
-		Print(m_bIsToggled);
 		m_bIsToggled = !m_bIsToggled;
 		if (m_bIsToggled)
 		{
@@ -95,7 +94,7 @@ class CVVR_HUD: SCR_InfoDisplay {
 			return;
 		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
 		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		TextWidget.Cast(m_wRoot.FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
@@ -104,7 +103,6 @@ class CVVR_HUD: SCR_InfoDisplay {
 	
 	void ShowVON()
 	{
-		Print("SHOWINGVON");
 		SCR_VONController vonController = SCR_VONController.Cast(GetGame().GetPlayerController().FindComponent(SCR_VONController));
 		if (!vonController)
 			return;
@@ -112,8 +110,6 @@ class CVVR_HUD: SCR_InfoDisplay {
 		if (!vonController.m_CurrentVONContainer)
 			return;
 		
-		Print(vonController.m_CurrentVONContainer.m_iRadioId);
-	
 		if (!Replication.FindItem(vonController.m_CurrentVONContainer.m_iRadioId))
 			return;
 		
@@ -122,7 +118,7 @@ class CVVR_HUD: SCR_InfoDisplay {
 			return;
 		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
 		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		TextWidget.Cast(m_wRoot.FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
@@ -155,8 +151,8 @@ class CVVR_HUD: SCR_InfoDisplay {
 			m_wVoiceRangeText.SetOpacity(currentTextOpacity + 0.025);
 		};
 		
-		int actionValueUp = m_InputManager.GetActionValue("CVVR_VoiceRangeUp");
-		int actionValueDown = m_InputManager.GetActionValue("CVVR_VoiceRangeDown");
+		int actionValueUp = m_InputManager.GetActionValue("CVON_VoiceRangeUp");
+		int actionValueDown = m_InputManager.GetActionValue("CVON_VoiceRangeDown");
 		
 		if (actionValueUp != 0 || actionValueDown != 0) {
 			m_PlayerController.ChangeVoiceRange(actionValueUp + actionValueDown);

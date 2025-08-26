@@ -1,14 +1,14 @@
-enum CRF_EVONType
+enum CVON_EVONType
 {
 	DIRECT,
 	RADIO
 }
 
-class CRF_VONGameModeComponentClass: SCR_BaseGameModeComponentClass
+class CVON_VONGameModeComponentClass: SCR_BaseGameModeComponentClass
 {
 }
 
-class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
+class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 {
 	//These are stored from server settings on the server so clients can know what ChannelName and whats the password to join that VOIP channel.
 	[RplProp()] string m_sTeamSpeakChannelName = "";
@@ -18,13 +18,13 @@ class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
 	[Attribute("1")] bool m_bUseFactionEcncryption;
 	
 	//Wow a pointer, so performant
-	static CRF_VONGameModeComponent m_Instance;
+	static CVON_VONGameModeComponent m_Instance;
 	
 	//When the gamemode is created on the server we need to create a server setting file.
 	//If already created lets populate that data into the gamemode for clients to us.
 	//Delay is necessary
 	//==========================================================================================================================================================================
-	void CRF_VONGameModeComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
+	void CVON_VONGameModeComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
 		m_Instance = this;
 		if (!System.IsConsoleApp())
@@ -60,7 +60,7 @@ class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
 	
 	//mmmm more pointer
 	//==========================================================================================================================================================================
-	static CRF_VONGameModeComponent GetInstance()
+	static CVON_VONGameModeComponent GetInstance()
 	{
 		return m_Instance;
 	}
@@ -69,7 +69,7 @@ class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
 	//This makes it so only the players that need to get the VONEntry get it, saving on that sweet sweet sweet network.
 	//Broadcasts are only tracked on the clients, server doesn't track it anywhere.
 	//==========================================================================================================================================================================
-	void AddLocalVONBroadcasts(CRF_VONContainer VONContainer, array<int> playerIds, int playerIdToAdd, RplId radioId)
+	void AddLocalVONBroadcasts(CVON_VONContainer VONContainer, array<int> playerIds, int playerIdToAdd, RplId radioId)
 	{
 		int maxDist = 0;
 		if (radioId != RplId.Invalid())
@@ -81,7 +81,7 @@ class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
 			if (!radio)
 				return;
 			
-			CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 			if (!radioComp)
 				return;
 			
@@ -115,7 +115,7 @@ class CRF_VONGameModeComponent: SCR_BaseGameModeComponent
 		inventoryComp.GetItems(items);
 		foreach (IEntity item: items)
 		{
-			if (!item.FindComponent(CRF_RadioComponent))
+			if (!item.FindComponent(CVON_RadioComponent))
 				continue;
 			
 			radios.Insert(RplComponent.Cast(item.FindComponent(RplComponent)).Id());

@@ -2,7 +2,7 @@
 //So the first group created gets the first GroupFrequencyContainer assigned to them for all their radios
 //Auto assigning freqs based on this.
 [BaseContainerProps()]
-class CRF_GroupFrequencyContainer
+class CVON_GroupFrequencyContainer
 {
 	[Attribute()] string m_sSRFrequency;
 	[Attribute()] string m_sLRFrequency;
@@ -12,5 +12,5 @@ class CRF_GroupFrequencyContainer
 [BaseContainerProps()]
 modded class SCR_FactionCallsignInfo
 {
-	[Attribute()] ref array<ref CRF_GroupFrequencyContainer> m_aGroupFrequency;
+	[Attribute()] ref array<ref CVON_GroupFrequencyContainer> m_aGroupFrequency;
 }

@@ -10,7 +10,7 @@ modded class SCR_CharacterInventoryStorageComponent
 		if (!item)
 			return;
 		
-		if (!item.FindComponent(CRF_RadioComponent))
+		if (!item.FindComponent(CVON_RadioComponent))
 			return;
 		
 		int playerId = GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(storageOwner.GetOwner().GetRootParent());
@@ -18,7 +18,7 @@ modded class SCR_CharacterInventoryStorageComponent
 			return;
 		
 		if (GetGame().GetPlayerController())
-			CRF_RadioComponent.Cast(item.FindComponent(CRF_RadioComponent)).WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+			CVON_RadioComponent.Cast(item.FindComponent(CVON_RadioComponent)).WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 		
 		SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId)).m_aRadios.Insert(item);
 	}
@@ -30,7 +30,7 @@ modded class SCR_CharacterInventoryStorageComponent
 		if (!item)
 			return;
 		
-		if (!item.FindComponent(CRF_RadioComponent))
+		if (!item.FindComponent(CVON_RadioComponent))
 			return;
 		
 		int playerId = GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(storageOwner.GetOwner().GetRootParent());
@@ -38,7 +38,7 @@ modded class SCR_CharacterInventoryStorageComponent
 			return;
 		
 		if (GetGame().GetPlayerController())
-			CRF_RadioComponent.Cast(item.FindComponent(CRF_RadioComponent)).WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+			CVON_RadioComponent.Cast(item.FindComponent(CVON_RadioComponent)).WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 		SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId)).m_aRadios.RemoveItemOrdered(item);
 	}
 }

@@ -1,15 +1,15 @@
-class CRF_VONContainer
+class CVON_VONContainer
 {
 	//==========================================================================================================================================================================
 	//Some of this is stored locally on the client, and some is gather from the sender.if
-	//This all gets written into a JSON file in CRF_SCR_VONController
+	//This all gets written into a JSON file in CVON_SCR_VONController
 	//Theres a more indepth explanatation there of what these values mean and how it works.
 	//==========================================================================================================================================================================
 	
 	
 	//Server values sent initially
 	//If its a radio or direct VONEntry
-	CRF_EVONType m_eVonType;
+	CVON_EVONType m_eVonType;
 	
 	//Who sent this container
 	RplId m_SenderRplId;
@@ -47,7 +47,7 @@ class CRF_VONContainer
 	//Where the source of this entry is if we can find it.
 	IEntity m_SoundSource;
 	
-	static bool Extract(CRF_VONContainer instance, ScriptCtx ctx, SSnapSerializerBase snapshot)
+	static bool Extract(CVON_VONContainer instance, ScriptCtx ctx, SSnapSerializerBase snapshot)
 	{	
 		snapshot.SerializeInt(instance.m_eVonType);
 		snapshot.SerializeInt(instance.m_SenderRplId);
@@ -59,7 +59,7 @@ class CRF_VONContainer
 		return true;
 	}
 	
-	static bool Inject(SSnapSerializerBase snapshot, ScriptCtx ctx, CRF_VONContainer instance)
+	static bool Inject(SSnapSerializerBase snapshot, ScriptCtx ctx, CVON_VONContainer instance)
 	{
 		snapshot.SerializeInt(instance.m_eVonType);
 		snapshot.SerializeInt(instance.m_SenderRplId);
@@ -103,7 +103,7 @@ class CRF_VONContainer
 		&& lhs.CompareStringSnapshots(rhs);
 	}
 	
-	static bool PropCompare(CRF_VONContainer instance, SSnapSerializerBase snapshot, ScriptCtx ctx)
+	static bool PropCompare(CVON_VONContainer instance, SSnapSerializerBase snapshot, ScriptCtx ctx)
 	{
 		return snapshot.CompareInt(instance.m_eVonType)
 		&& snapshot.CompareInt(instance.m_SenderRplId)

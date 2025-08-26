@@ -1,5 +1,5 @@
 //What type of transmission we are trying to send so we can send the right data to the other clients.
-enum CRF_EVONTransmitType
+enum CVON_EVONTransmitType
 {
 	NONE,
 	DIRECT,
@@ -14,14 +14,14 @@ modded class SCR_VONController
 	SCR_PlayerController m_PlayerController;
 	
 	//MMM... stores the gamemode
-	CRF_VONGameModeComponent m_VONGameModeComponent;
+	CVON_VONGameModeComponent m_VONGameModeComponent;
 	PlayerManager m_PlayerManager;
 	
 	//Who we are currently broadcasting to, this is how we know who we have to send remove calls to
 	ref array<int> m_aPlayerIdsBroadcastedTo = {};
 	
 	//What is our current broadcast
-	ref CRF_VONContainer m_CurrentVONContainer = null;
+	ref CVON_VONContainer m_CurrentVONContainer = null;
 	
 	//Am I broadcasting
 	bool m_bIsBroadcasting = false;
@@ -31,14 +31,14 @@ modded class SCR_VONController
 	bool m_bToggleTurnedOffByRadio = false;
 	
 	//Stores the HUD so we can deactivate it after a transmissions end
-	CVVR_HUD m_VONHud;
+	CVON_HUD m_VONHud;
 	
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
 	//==========================================================================================================================================================================
 	void ActivateCRFDirect()
 	{
-		ActivateCRFVON(CRF_EVONTransmitType.DIRECT);
+		ActivateCRFVON(CVON_EVONTransmitType.DIRECT);
 	}
 	
 	//==========================================================================================================================================================================
@@ -46,7 +46,7 @@ modded class SCR_VONController
 	{
 		m_bToggleBuffer = !m_bToggleBuffer;
 		m_VONHud.ShowDirectToggle();
-		ActivateCRFVON(CRF_EVONTransmitType.DIRECT);
+		ActivateCRFVON(CVON_EVONTransmitType.DIRECT);
 	}
 	
 	//==========================================================================================================================================================================
@@ -59,7 +59,7 @@ modded class SCR_VONController
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CRF_EVONTransmitType.SR);
+		ActivateCRFVON(CVON_EVONTransmitType.SR);
 	}
 	
 	//==========================================================================================================================================================================
@@ -72,7 +72,7 @@ modded class SCR_VONController
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CRF_EVONTransmitType.LR);
+		ActivateCRFVON(CVON_EVONTransmitType.LR);
 	}
 	
 	//==========================================================================================================================================================================
@@ -85,7 +85,7 @@ modded class SCR_VONController
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CRF_EVONTransmitType.MR);
+		ActivateCRFVON(CVON_EVONTransmitType.MR);
 	}
 	
 	//How we rotate what radio is assigned to caps-lock, aka active.
@@ -95,8 +95,6 @@ modded class SCR_VONController
 		if (m_PlayerController.m_aRadios.Count() < 2)
 			return;
 		
-		Print(m_PlayerController.m_aRadios.Count() - 1);
-		Print(m_PlayerController.m_aRadios);
 		IEntity radioEntity = m_PlayerController.m_aRadios.Get(m_PlayerController.m_aRadios.Count() - 1);
 		m_PlayerController.m_aRadios.RemoveOrdered(m_PlayerController.m_aRadios.Count() - 1);
 		m_PlayerController.m_aRadios.InsertAt(radioEntity, 0);
@@ -168,10 +166,10 @@ modded class SCR_VONController
 		GetGame().GetHUDManager().GetInfoDisplays(displays);
 		foreach (BaseInfoDisplay display: displays)
 		{
-			if (!CVVR_HUD.Cast(display))
+			if (!CVON_HUD.Cast(display))
 				continue;
 			
-			m_VONHud = CVVR_HUD.Cast(display);
+			m_VONHud = CVON_HUD.Cast(display);
 		}
 	}
 	
@@ -184,26 +182,26 @@ modded class SCR_VONController
 	
 	//This builds our VON Container with all the data we need to send to other clients based on the data sent out. This starts the talking process.
 	//==========================================================================================================================================================================
-	void ActivateCRFVON(CRF_EVONTransmitType transmitType = CRF_EVONTransmitType.NONE)
+	void ActivateCRFVON(CVON_EVONTransmitType transmitType = CVON_EVONTransmitType.NONE)
 	{
 		if (m_CurrentVONContainer)
 			DeactivateCRFVON();
-		CRF_VONContainer container = new CRF_VONContainer();
-		if (transmitType == CRF_EVONTransmitType.NONE)
+		CVON_VONContainer container = new CVON_VONContainer();
+		if (transmitType == CVON_EVONTransmitType.NONE)
 			return;
-		if (transmitType == CRF_EVONTransmitType.DIRECT)
-			container.m_eVonType = CRF_EVONType.DIRECT;
-		else if (transmitType == CRF_EVONTransmitType.SR || transmitType == CRF_EVONTransmitType.LR || transmitType == CRF_EVONTransmitType.MR)
-			container.m_eVonType = CRF_EVONType.RADIO;
+		if (transmitType == CVON_EVONTransmitType.DIRECT)
+			container.m_eVonType = CVON_EVONType.DIRECT;
+		else if (transmitType == CVON_EVONTransmitType.SR || transmitType == CVON_EVONTransmitType.LR || transmitType == CVON_EVONTransmitType.MR)
+			container.m_eVonType = CVON_EVONType.RADIO;
 		
 		container.m_iVolume = m_PlayerController.m_iLocalVolume;
 		container.m_SenderRplId = RplComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(RplComponent)).Id();
 		container.m_iClientId = m_PlayerController.m_iTeamSpeakClientId;
-		if (container.m_eVonType == CRF_EVONType.RADIO)
+		if (container.m_eVonType == CVON_EVONType.RADIO)
 		{
 			switch (transmitType)
 			{
-				case CRF_EVONTransmitType.SR:
+				case CVON_EVONTransmitType.SR:
 				{
 					if (m_PlayerController.m_aRadios.Count() < 1)
 						return;
@@ -211,13 +209,13 @@ modded class SCR_VONController
 					if (radio == null)
 						return;
 					
-					CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+					CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
 					break;
 				}
-				case CRF_EVONTransmitType.LR:
+				case CVON_EVONTransmitType.LR:
 				{
 					if (m_PlayerController.m_aRadios.Count() < 2)
 						return;
@@ -225,13 +223,13 @@ modded class SCR_VONController
 					if (radio == null)
 						return;
 					
-					CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+					CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
 					break;
 				}
-				case CRF_EVONTransmitType.MR:
+				case CVON_EVONTransmitType.MR:
 				{
 					if (m_PlayerController.m_aRadios.Count() < 3)
 						return;
@@ -239,7 +237,7 @@ modded class SCR_VONController
 					if (radio == null)
 						return;
 					
-					CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent));
+					CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
@@ -269,7 +267,7 @@ modded class SCR_VONController
 			return;
 		if (!m_CurrentVONContainer)
 			return;
-		if (m_CurrentVONContainer.m_eVonType == CRF_EVONType.RADIO)
+		if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.RADIO)
 		{
 			AudioSystem.PlaySound("{B826EAACD5F6B6BB}UI/sounds/beepend.wav");
 			m_VONHud.HideVON();
@@ -315,11 +313,11 @@ modded class SCR_VONController
 		if (!m_PlayerController)
 			m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
 		if (!m_VONGameModeComponent)
-			m_VONGameModeComponent = CRF_VONGameModeComponent.GetInstance();
+			m_VONGameModeComponent = CVON_VONGameModeComponent.GetInstance();
 		if (!m_PlayerManager)
 			m_PlayerManager = GetGame().GetPlayerManager();
 		
-		foreach (CRF_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
+		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			if (!Replication.FindItem(container.m_SenderRplId))
 				continue;
@@ -348,7 +346,7 @@ modded class SCR_VONController
 					continue;
 				#endif
 				
-				if (m_CurrentVONContainer.m_eVonType == CRF_EVONType.DIRECT)
+				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
 				{
 					IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
 					if (!player)
@@ -370,7 +368,7 @@ modded class SCR_VONController
 			}
 			if (broadcastToPlayerIds.Count() > 0)
 			{
-				if (m_CurrentVONContainer.m_eVonType == CRF_EVONType.DIRECT)
+				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
 					m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), RplId.Invalid());
 				else
 					m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), m_CurrentVONContainer.m_iRadioId);
@@ -558,7 +556,7 @@ modded class SCR_VONController
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		VONSave.WriteValue("IsTransmitting", m_bIsBroadcasting);
 		IEntity localEntity = SCR_PlayerController.GetLocalControlledEntity();
-		foreach (CRF_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
+		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			IEntity soundSource;
 			float left = 0;
@@ -574,7 +572,7 @@ modded class SCR_VONController
 				ComputeStereoLR(localEntity, container.m_SoundSource.GetOrigin(), left, right);
 			}
 			
-			if (container.m_eVonType == CRF_EVONType.RADIO)
+			if (container.m_eVonType == CVON_EVONType.RADIO)
 				container.m_fConnectionQuality = GetSignalStrength(vector.Distance(localEntity.GetOrigin(), container.m_vSenderLocation), container.m_iMaxDistance);
 				
 			VONSave.StartObject(container.m_iClientId.ToString());

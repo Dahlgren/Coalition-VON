@@ -4,22 +4,22 @@ SCR_FactionManager FactionManager_Editor1 : "{4A188E44289B9A50}Prefabs/MP/Manage
   SCR_Faction "{56DEAC40D2DBC8B1}" {
    m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
     m_GroupFrequency {
-     CRF_GroupFrequencyContainer "{663308EFD7703B68}" {
+     CVON_GroupFrequencyContainer "{663308EFD7703B68}" {
       m_sSRFrequency "SQUAD1"
       m_sMRFrequency "JTAC"
       m_sLRFrequency "PLT1"
      }
-     CRF_GroupFrequencyContainer "{663308EFCF71502E}" {
+     CVON_GroupFrequencyContainer "{663308EFCF71502E}" {
       m_sSRFrequency "SQUAD2"
       m_sMRFrequency "JTAC"
       m_sLRFrequency "PLT1"
      }
-     CRF_GroupFrequencyContainer "{663308EFCF2F24B8}" {
+     CVON_GroupFrequencyContainer "{663308EFCF2F24B8}" {
       m_sSRFrequency "SQUAD3"
       m_sMRFrequency "JTAC"
       m_sLRFrequency "PLT1"
      }
-     CRF_GroupFrequencyContainer "{663308EFCFEBB745}" {
+     CVON_GroupFrequencyContainer "{663308EFCFEBB745}" {
       m_sSRFrequency "SQUAD4"
       m_sMRFrequency "JTAC"
       m_sLRFrequency "PLT1"

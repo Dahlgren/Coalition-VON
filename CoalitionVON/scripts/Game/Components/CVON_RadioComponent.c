@@ -1,21 +1,21 @@
-class CRF_RadioComponentClass: ScriptComponentClass
+class CVON_RadioComponentClass: ScriptComponentClass
 {
 }
 
-enum CRF_ERadioType
+enum CVON_ERadioType
 {
 	SHORT,
 	MEDIUM,
 	LONG
 }
 
-class CRF_RadioComponent: ScriptComponent
+class CVON_RadioComponent: ScriptComponent
 {
 	// What displays on the VON HUD
 	[Attribute("AN/PRC-148")] string m_sRadioName;
 	
 	//Used for allocating the frequencies to the radios in the SCR_CallsignBlahBlahsomething. Also is how we sort it out so your active first is always your SR.
-	[Attribute("0", UIWidgets.ComboBox, "Used for sorting frequencies", "", enumType: CRF_ERadioType )] int m_eRadioType;
+	[Attribute("0", UIWidgets.ComboBox, "Used for sorting frequencies", "", enumType: CVON_ERadioType )] int m_eRadioType;
 	
 	//How far it go...
 	[Attribute("5000")] int m_iRadioRange;
@@ -53,7 +53,7 @@ class CRF_RadioComponent: ScriptComponent
 	int m_iVolume = 9;
 	
 	//What ear it comes out of, neither needs to be tracked across clients cause who gives af.
-	CRF_EStereo m_eStereo = CRF_EStereo.BOTH;
+	CVON_EStereo m_eStereo = CVON_EStereo.BOTH;
 	
 	//==========================================================================================================================================================================	
 	
@@ -158,7 +158,7 @@ class CRF_RadioComponent: ScriptComponent
 		ref array<string> SRFrequencies = {};
 		ref array<string> MRFrequencies = {};
 		ref array<string> LRFrequencies = {};
-		foreach (ref CRF_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+		foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
 		{
 			if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
 				SRFrequencies.Insert(groupContainer.m_sSRFrequency);
@@ -176,7 +176,6 @@ class CRF_RadioComponent: ScriptComponent
 		
 		if (m_iTempChannel != m_iCurrentChannel || m_sTempFrequency != m_sFrequency || m_iTempTimeDeviation != m_iTimeDeviation || m_sTempFactionKey != m_sFactionKey)
 		{
-			Print("RewriteJSON");
 			m_iTempChannel = m_iCurrentChannel;
 			m_sTempFrequency = m_sFrequency;
 			m_iTempTimeDeviation = m_iTimeDeviation;
@@ -207,7 +206,7 @@ class CRF_RadioComponent: ScriptComponent
 			ref array<string> SRFrequencies = {};
 			ref array<string> MRFrequencies = {};
 			ref array<string> LRFrequencies = {};
-			foreach (ref CRF_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+			foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
 			{
 				if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
 					SRFrequencies.Insert(groupContainer.m_sSRFrequency);
@@ -230,7 +229,6 @@ class CRF_RadioComponent: ScriptComponent
 			//Woah the client, just checking if anythings changed, this is mostly redundant but neccessary mostly for unit creation and onccupation.
 			if (m_iTempChannel != m_iCurrentChannel || m_sTempFrequency != m_sFrequency || m_iTempTimeDeviation != m_iTimeDeviation || m_sTempFactionKey != m_sFactionKey)
 			{
-				Print("RewriteJSON");
 				m_iTempChannel = m_iCurrentChannel;
 				m_sTempFrequency = m_sFrequency;
 				m_iTempTimeDeviation = m_iTimeDeviation;
@@ -245,7 +243,7 @@ class CRF_RadioComponent: ScriptComponent
 	//==========================================================================================================================================================================
 	void OpenMenu()
 	{
-		CRF_RadioMenu radioUI = CRF_RadioMenu.Cast(GetGame().GetMenuManager().OpenMenu(m_eRadioMenu));
+		CVON_RadioMenu radioUI = CVON_RadioMenu.Cast(GetGame().GetMenuManager().OpenMenu(m_eRadioMenu));
 		radioUI.m_RadioEntity = GetOwner();
 	}
 	
@@ -257,17 +255,17 @@ class CRF_RadioComponent: ScriptComponent
 	void WriteJSON(IEntity entity)
 	{
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
-		ref array<RplId> radios = CRF_VONGameModeComponent.GetInstance().GetRadios(entity);
+		ref array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(entity);
 		foreach (RplId radio: radios)
 		{
 			IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radio)).GetEntity();
-			CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 			VONSave.StartObject(radio.ToString());
 			VONSave.WriteValue("Freq", radioComp.m_sFrequency);
 			VONSave.WriteValue("TimeDeviation", radioComp.m_iTimeDeviation);
 			VONSave.WriteValue("Volume", radioComp.m_iVolume);
 			VONSave.WriteValue("Stereo", radioComp.m_eStereo);
-			if (CRF_VONGameModeComponent.GetInstance().m_bUseFactionEcncryption)
+			if (CVON_VONGameModeComponent.GetInstance().m_bUseFactionEcncryption)
 				VONSave.WriteValue("FactionKey", radioComp.m_sFactionKey);
 			else
 				VONSave.WriteValue("FactionKey", "");

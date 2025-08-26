@@ -1,5 +1,5 @@
 //The five volume levels of your voice, tracked here so its at a per player basis.
-enum CRF_EVONVolume
+enum CVON_EVONVolume
 {
 	WHISPER,
 	QUIET,
@@ -11,7 +11,7 @@ enum CRF_EVONVolume
 modded class SCR_PlayerController
 {
 	//This is how we store who is talking to us and how, we use this in the VONController to populate the JSON.
-	ref array<ref CRF_VONContainer> m_aLocalActiveVONEntries = {};
+	ref array<ref CVON_VONContainer> m_aLocalActiveVONEntries = {};
 	
 	//Used so we can find the entry by playerId
 	ref array<int> m_aLocalActiveVONEntriesIds = {};
@@ -24,7 +24,7 @@ modded class SCR_PlayerController
 	
 	//How we link what level the enum below should be at.
 	int m_iLocalVolume = 15;
-	CRF_EVONVolume m_eVONVolume = CRF_EVONVolume.NORMAL;
+	CVON_EVONVolume m_eVONVolume = CVON_EVONVolume.NORMAL;
 	
 	//Used to initials the m_aRadio array
 	//Delay is needed as it can take a sec for the entity to initialized for a client on the server.
@@ -37,7 +37,7 @@ modded class SCR_PlayerController
 	void InitializeRadios(IEntity to)
 	{
 		m_aRadios.Clear();
-		array<RplId> radios = CRF_VONGameModeComponent.GetInstance().GetRadios(to);
+		array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(to);
 		if (radios.Count() == 0)
 			return;
 		IEntity shortRangeRadio;
@@ -52,23 +52,22 @@ modded class SCR_PlayerController
 			if (!radioObject)
 				continue;
 			
-			CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioObject.FindComponent(CRF_RadioComponent));
-			Print(radioComp.m_eRadioType);
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioObject.FindComponent(CVON_RadioComponent));
 			switch (radioComp.m_eRadioType)
 			{
-				case CRF_ERadioType.SHORT:
+				case CVON_ERadioType.SHORT:
 				{
 					if (!shortRangeRadio)
 						shortRangeRadio = radioObject;
 					break;
 				}
-				case CRF_ERadioType.MEDIUM:
+				case CVON_ERadioType.MEDIUM:
 				{
 					if (!mediumRangeRadio)
 						mediumRangeRadio = radioObject;
 					break;
 				}
-				case CRF_ERadioType.LONG:
+				case CVON_ERadioType.LONG:
 				{
 					if (!longRangeRadio)
 						longRangeRadio = radioObject;
@@ -82,16 +81,15 @@ modded class SCR_PlayerController
 			m_aRadios.Insert(longRangeRadio);
 		if (mediumRangeRadio)
 			m_aRadios.Insert(mediumRangeRadio);
-		Print(m_aRadios);
 		IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radios.Get(0))).GetEntity();
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (GetGame().GetPlayerController())
 			radioComp.WriteJSON(to);
 	}
 	
 	//mmmmgetter
 	//==========================================================================================================================================================================
-	CRF_EVONVolume ReturnLocalVoiceRange()
+	CVON_EVONVolume ReturnLocalVoiceRange()
 	{
 		return m_eVONVolume;
 	}
@@ -119,29 +117,29 @@ modded class SCR_PlayerController
 	
 	//This is how we send our VONEntry to other clients so they can write it in their VONData.json
 	//==========================================================================================================================================================================
-	void BroadcastLocalVONToServer(CRF_VONContainer VONContainer, array<int> playerIds, int playerId, RplId radioId)
+	void BroadcastLocalVONToServer(CVON_VONContainer VONContainer, array<int> playerIds, int playerId, RplId radioId)
 	{
 		Rpc(RpcAsk_BroadcastLocalVONToServer, VONContainer, playerIds, playerId, radioId);
 	}
 	
 	//==========================================================================================================================================================================
 	[RplRpc(RplChannel.Reliable, RplRcver.Server)] 
-	void RpcAsk_BroadcastLocalVONToServer(CRF_VONContainer VONContainer, array<int> playerIds, int playerId, RplId radioId)
+	void RpcAsk_BroadcastLocalVONToServer(CVON_VONContainer VONContainer, array<int> playerIds, int playerId, RplId radioId)
 	{
-		CRF_VONGameModeComponent.GetInstance().AddLocalVONBroadcasts(VONContainer, playerIds, playerId, radioId);
+		CVON_VONGameModeComponent.GetInstance().AddLocalVONBroadcasts(VONContainer, playerIds, playerId, radioId);
 	}
 	
 	//This is how the server talks directly to us, by doing an Rpc to the owner, which is the player of this controller, it sends it directly to them.
 	//Performant
 	//==========================================================================================================================================================================
-	void AddLocalVONBroadcast(CRF_VONContainer VONContainer, int playerId, vector senderOrigin, float maxDistance)
+	void AddLocalVONBroadcast(CVON_VONContainer VONContainer, int playerId, vector senderOrigin, float maxDistance)
 	{
 		Rpc(RpcAsk_AddLocalVONBroadcast, VONContainer, playerId, senderOrigin, maxDistance);
 	}
 	
 	//==========================================================================================================================================================================
 	[RplRpc(RplChannel.Reliable, RplRcver.Owner)] 
-	void RpcAsk_AddLocalVONBroadcast(CRF_VONContainer VONContainer, int playerId, vector senderOrigin, float maxDistance)
+	void RpcAsk_AddLocalVONBroadcast(CVON_VONContainer VONContainer, int playerId, vector senderOrigin, float maxDistance)
 	{
 		VONContainer.m_iMaxDistance = maxDistance;
 		VONContainer.m_vSenderLocation = senderOrigin;
@@ -161,7 +159,7 @@ modded class SCR_PlayerController
 	[RplRpc(RplChannel.Reliable, RplRcver.Server)] 
 	void RpcAsk_BroadcastRemoveLocalVONToServer(int playerId, int playerIdToRemove)
 	{
-		CRF_VONGameModeComponent.GetInstance().RemoveLocalVONBroadcasts(playerId, playerIdToRemove);
+		CVON_VONGameModeComponent.GetInstance().RemoveLocalVONBroadcasts(playerId, playerIdToRemove);
 	}
 	
 	//Same concept as above, just direct communication from server to specific client to remove a VONEntry.
@@ -200,7 +198,7 @@ modded class SCR_PlayerController
 		if (!radioEntity)
 			return;
 		
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		
@@ -224,7 +222,7 @@ modded class SCR_PlayerController
 		if (!radioEntity)
 			return;
 		
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		
@@ -248,7 +246,7 @@ modded class SCR_PlayerController
 		if (!radioEntity)
 			return;
 		
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		
@@ -272,7 +270,7 @@ modded class SCR_PlayerController
 		if (!radioEntity)
 			return;
 		
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
 		
@@ -294,6 +292,5 @@ modded class SCR_PlayerController
 		IEntity radioEntity = playerController.m_aRadios.Get(playerController.m_aRadios.Count() - 1);
 		playerController.m_aRadios.RemoveOrdered(playerController.m_aRadios.Count() - 1);
 		playerController.m_aRadios.InsertAt(radioEntity, 0);
-		Print(m_aRadios);
 	}
 }

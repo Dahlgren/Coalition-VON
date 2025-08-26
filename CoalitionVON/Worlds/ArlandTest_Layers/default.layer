@@ -8,19 +8,19 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
      m_bIsPlayable 1
      m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
       m_aGroupFrequency {
-       CRF_GroupFrequencyContainer "{663308E7F3533121}" {
+       CVON_GroupFrequencyContainer "{663308E7F3533121}" {
         m_sSRFrequency "SQUAD1"
         m_sLRFrequency "PLT1"
        }
-       CRF_GroupFrequencyContainer "{663308E7EE9CD6C5}" {
+       CVON_GroupFrequencyContainer "{663308E7EE9CD6C5}" {
         m_sSRFrequency "SQUAD2"
         m_sLRFrequency "PLT1"
        }
-       CRF_GroupFrequencyContainer "{663308E7E8DF668E}" {
+       CVON_GroupFrequencyContainer "{663308E7E8DF668E}" {
         m_sSRFrequency "SQUAD3"
         m_sLRFrequency "PLT1"
        }
-       CRF_GroupFrequencyContainer "{663308E7EA5DD2B5}" {
+       CVON_GroupFrequencyContainer "{663308E7EA5DD2B5}" {
         m_sSRFrequency "SQUAD4"
         m_sLRFrequency "PLT1"
        }

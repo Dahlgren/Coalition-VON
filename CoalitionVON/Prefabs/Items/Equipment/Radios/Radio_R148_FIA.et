@@ -1,7 +1,7 @@
 GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
  ID "508AB2013EEE1E00"
  components {
-  CRF_RadioComponent "{662D5D04CFDC8BD3}" {
+  CVON_RadioComponent "{662D5D04CFDC8BD3}" {
    m_eRadioMenu ANPRC152
   }
  }

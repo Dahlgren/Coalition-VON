@@ -7,7 +7,7 @@ modded class SCR_VONMenu
 	{
 		SCR_VONEntryRadio entryRadioVON = SCR_VONEntryRadio.Cast(entry);
 		IEntity radio = entryRadioVON.GetTransceiver().GetRadio().GetOwner();
-		CRF_RadioComponent.Cast(radio.FindComponent(CRF_RadioComponent)).OpenMenu();
+		CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent)).OpenMenu();
 		
 		m_RadialMenu.UpdateEntries();
 	}

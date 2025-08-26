@@ -18,10 +18,10 @@ modded class SCR_VONRadialDisplay : SCR_RadialMenuDisplay
 		if (!item)
 			return;
 		
-		if (!item.FindComponent(CRF_RadioComponent))
+		if (!item.FindComponent(CVON_RadioComponent))
 			return;
 		
-		CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(item.FindComponent(CRF_RadioComponent));
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(item.FindComponent(CVON_RadioComponent));
 		ImageWidget radioIcon = ImageWidget.Cast(GetRootWidget().FindAnyWidget("RadioIcon"));
 		radioIcon.LoadImageTexture(0, radioComp.m_sRadioIcon);
 		radioIcon.SetImage(0);

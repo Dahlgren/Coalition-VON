@@ -7,7 +7,7 @@ modded enum ChimeraMenuPreset
 }
 
 //The different menus we can see on the screen.
-enum CRF_ERadioMenu
+enum CVON_ERadioMenu
 {
 	FREQ,
 	VOL,
@@ -16,14 +16,14 @@ enum CRF_ERadioMenu
 }
 
 //What ear to hear the radio transmission in.
-enum CRF_EStereo
+enum CVON_EStereo
 {
 	BOTH,
 	RIGHT,
 	LEFT
 }
 
-class CRF_RadioMenu: MenuBase
+class CVON_RadioMenu: MenuBase
 {
 	Widget m_wRoot;
 	
@@ -43,7 +43,7 @@ class CRF_RadioMenu: MenuBase
 	TextWidget m_wLine3;
 	
 	//Whats the current menu.
-	CRF_ERadioMenu m_ERadioMenu = CRF_ERadioMenu.FREQ;
+	CVON_ERadioMenu m_ERadioMenu = CVON_ERadioMenu.FREQ;
 	
 	//Whats the next number we're inserting into the frequency
 	int m_iToInsert = -1;
@@ -55,7 +55,7 @@ class CRF_RadioMenu: MenuBase
 	IEntity m_RadioEntity;
 	
 	//Radio component from the above.
-	CRF_RadioComponent m_RadioComponent;
+	CVON_RadioComponent m_RadioComponent;
 	
 	//Store the pointer cause we need this alot
 	SCR_PlayerController m_PlayerController;
@@ -131,13 +131,13 @@ class CRF_RadioMenu: MenuBase
 		//Initialize the radios channels
 		if (!m_RadioComponent)
 		{
-			m_RadioComponent = CRF_RadioComponent.Cast(m_RadioEntity.FindComponent(CRF_RadioComponent));
+			m_RadioComponent = CVON_RadioComponent.Cast(m_RadioEntity.FindComponent(CVON_RadioComponent));
 			UpdateChannelMenu();
 			LoadFrequencyMenu();
 		}
 			
 		//Update the time if its the time menu
-		if (m_ERadioMenu == CRF_ERadioMenu.TIME)
+		if (m_ERadioMenu == CVON_ERadioMenu.TIME)
 		{
 			ChimeraWorld world = GetGame().GetWorld();
 			int h, m, s;
@@ -186,22 +186,22 @@ class CRF_RadioMenu: MenuBase
 	{
 		switch (m_ERadioMenu)
 		{
-			case CRF_ERadioMenu.FREQ:
+			case CVON_ERadioMenu.FREQ:
 			{
 				ChangeChannel(1);
 				break;
 			}
-			case CRF_ERadioMenu.VOL:
+			case CVON_ERadioMenu.VOL:
 			{
 				ChangeVolume(1);
 				break;
 			}
-			case CRF_ERadioMenu.STEREO:
+			case CVON_ERadioMenu.STEREO:
 			{
 				ChangeStereo(1);
 				break;
 			}
-			case CRF_ERadioMenu.TIME:
+			case CVON_ERadioMenu.TIME:
 			{
 				m_RadioComponent.m_iTimeDeviation += 1;
 				m_RadioComponent.UpdateTimeDeviationClient(m_RadioComponent.m_iTimeDeviation);
@@ -216,22 +216,22 @@ class CRF_RadioMenu: MenuBase
 	{
 		switch (m_ERadioMenu)
 		{
-			case CRF_ERadioMenu.FREQ:
+			case CVON_ERadioMenu.FREQ:
 			{
 				ChangeChannel(-1);
 				break;
 			}
-			case CRF_ERadioMenu.VOL:
+			case CVON_ERadioMenu.VOL:
 			{
 				ChangeVolume(-1);
 				break;
 			}
-			case CRF_ERadioMenu.STEREO:
+			case CVON_ERadioMenu.STEREO:
 			{
 				ChangeStereo(-1);
 				break;
 			}
-			case CRF_ERadioMenu.TIME:
+			case CVON_ERadioMenu.TIME:
 			{
 				m_RadioComponent.m_iTimeDeviation -= 1;
 				m_RadioComponent.UpdateTimeDeviationClient(m_RadioComponent.m_iTimeDeviation);
@@ -322,10 +322,10 @@ class CRF_RadioMenu: MenuBase
 	{
 		switch (m_ERadioMenu)
 		{
-			case CRF_ERadioMenu.FREQ: {LoadFrequencyMenu(); break;}
-			case CRF_ERadioMenu.VOL: {LoadVolumeMenu(); break;}
-			case CRF_ERadioMenu.STEREO: {LoadStereoMenu(); break;}
-			case CRF_ERadioMenu.TIME: {LoadTimeMenu(); break;}
+			case CVON_ERadioMenu.FREQ: {LoadFrequencyMenu(); break;}
+			case CVON_ERadioMenu.VOL: {LoadVolumeMenu(); break;}
+			case CVON_ERadioMenu.STEREO: {LoadStereoMenu(); break;}
+			case CVON_ERadioMenu.TIME: {LoadTimeMenu(); break;}
 		}
 	}
 	
@@ -370,9 +370,9 @@ class CRF_RadioMenu: MenuBase
 		m_wLine1.SetText("Stereo");
 		switch (m_RadioComponent.m_eStereo)
 		{
-			case CRF_EStereo.BOTH: {m_wLine2.SetText("Both"); break;}
-			case CRF_EStereo.RIGHT: {m_wLine2.SetText("Right"); break;}
-			case CRF_EStereo.LEFT: {m_wLine2.SetText("Left"); break;}
+			case CVON_EStereo.BOTH: {m_wLine2.SetText("Both"); break;}
+			case CVON_EStereo.RIGHT: {m_wLine2.SetText("Right"); break;}
+			case CVON_EStereo.LEFT: {m_wLine2.SetText("Left"); break;}
 		}
 		m_wLine3.SetVisible(false);
 		
@@ -456,7 +456,7 @@ class CRF_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Button0()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 0;
@@ -465,7 +465,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button1()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 1;
@@ -474,7 +474,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button2()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 2;
@@ -483,7 +483,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button3()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 3;
@@ -492,7 +492,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button4()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 4;
@@ -501,7 +501,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button5()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 5;
@@ -510,7 +510,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button6()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 6;
@@ -519,7 +519,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button7()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 7;
@@ -528,7 +528,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button8()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 8;
@@ -537,7 +537,7 @@ class CRF_RadioMenu: MenuBase
 	
 	void Button9()
 	{
-		if (m_ERadioMenu != CRF_ERadioMenu.FREQ)
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
 		m_iToInsert = 9;

@@ -7,7 +7,7 @@ GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.
     }
    }
   }
-  CRF_RadioComponent "{662D5D04D93541AF}" {
+  CVON_RadioComponent "{662D5D04D93541AF}" {
    m_sRadioName "AN/PRC-117"
    m_eRadioType LONG
    m_sRadioIcon "{FFB5DD736483D225}UI/layouts/Radios/ANPRC117/data/ANPRC117Icon.edds"
