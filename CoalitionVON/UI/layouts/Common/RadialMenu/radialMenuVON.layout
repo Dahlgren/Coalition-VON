@@ -1,0 +1,19 @@
+FrameWidgetClass : "{8DE7D0C6EB809121}UI/layouts/Common/RadialMenu/radialMenu.layout" {
+ {
+  ImageWidgetClass "{6634B3D794B65C68}" {
+   Name "RadioIcon"
+   Slot FrameWidgetSlot "{6634B3D794B65CAC}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -120
+    OffsetLeft -120
+    PositionY -120
+    OffsetTop -120
+    SizeX 240
+    OffsetRight -120
+    SizeY 240
+    OffsetBottom -120
+   }
+   Size 1500 1371
+  }
+ }
+}

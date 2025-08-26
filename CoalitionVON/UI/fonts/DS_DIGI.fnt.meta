@@ -1,0 +1,17 @@
+MetaFileClass {
+ Name "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+ Configurations {
+  FNTResourceClass PC {
+  }
+  FNTResourceClass XBOX_ONE : PC {
+  }
+  FNTResourceClass XBOX_SERIES : PC {
+  }
+  FNTResourceClass PS4 : PC {
+  }
+  FNTResourceClass PS5 : PC {
+  }
+  FNTResourceClass HEADLESS : PC {
+  }
+ }
+}

@@ -1,0 +1,405 @@
+FrameWidgetClass {
+ Name "rootFrame"
+ {
+  ImageWidgetClass "{662A447270D180B8}" {
+   Name "Image0"
+   Slot FrameWidgetSlot "{662A447270D1FD33}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -420.182
+    OffsetLeft -420.182
+    PositionY -428.309
+    OffsetTop -428.309
+    SizeX 837.658
+    OffsetRight -417.476
+    SizeY 830.635
+    OffsetBottom -402.326
+   }
+   Texture "{DBF362B71CF87EBF}UI/layouts/Radios/ANPRC152/data/PRC152.edds"
+   Size 860 860
+   Filter 0
+  }
+  TextWidgetClass "{662A446ACCCCB119}" {
+   Name "Frequency"
+   Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -73.203
+    OffsetLeft -73.203
+    PositionY -107.626
+    OffsetTop -107.626
+    SizeX 145.401
+    OffsetRight -72.198
+    SizeY 30
+    OffsetBottom 77.626
+   }
+   Color 0 0 0 1
+   Text "01: 55500"
+   "Vertical Alignment" Center
+   FontProperties FontProperties "{662A446A2C1E4B56}" {
+    Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+   }
+  }
+  ButtonWidgetClass "{662A44765E14BA9C}" {
+   Name "Button1"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -66.148
+    OffsetLeft -66.148
+    PositionY -35.794
+    OffsetTop -35.794
+    SizeX 23.782
+    OffsetRight 42.366
+    SizeY 16.465
+    OffsetBottom 19.329
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DB4FFF0DB0}" {
+   Name "Button2"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -31.892
+    OffsetLeft -31.892
+    PositionY -35.794
+    OffsetTop -35.794
+    SizeX 23.782
+    OffsetRight 8.11
+    SizeY 16.465
+    OffsetBottom 19.329
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DB4A3BA0F0}" {
+   Name "Button3"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 4.303
+    OffsetLeft 4.303
+    PositionY -35.794
+    OffsetTop -35.794
+    SizeX 23.782
+    OffsetRight -28.085
+    SizeY 16.465
+    OffsetBottom 19.329
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABDE2BEF8}" {
+   Name "Button4"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -66.148
+    OffsetLeft -66.148
+    PositionY -6.062
+    OffsetTop -6.062
+    SizeX 23.782
+    OffsetRight 42.366
+    SizeY 16.465
+    OffsetBottom -10.403
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABDE2BD45}" {
+   Name "Button5"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -31.892
+    OffsetLeft -31.892
+    PositionY -6.062
+    OffsetTop -6.062
+    SizeX 23.782
+    OffsetRight 8.11
+    SizeY 16.465
+    OffsetBottom -10.403
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABDE2BD3D}" {
+   Name "Button6"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 4.303
+    OffsetLeft 4.303
+    PositionY -6.062
+    OffsetTop -6.062
+    SizeX 23.782
+    OffsetRight -28.085
+    SizeY 16.465
+    OffsetBottom -10.403
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABA398B5B}" {
+   Name "Button7"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -66.148
+    OffsetLeft -66.148
+    PositionY 24.316
+    OffsetTop 24.316
+    SizeX 23.782
+    OffsetRight 42.366
+    SizeY 16.465
+    OffsetBottom -40.781
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABA398B8C}" {
+   Name "Button8"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -31.892
+    OffsetLeft -31.892
+    PositionY 24.316
+    OffsetTop 24.316
+    SizeX 23.782
+    OffsetRight 8.11
+    SizeY 16.465
+    OffsetBottom -40.781
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DABA398B68}" {
+   Name "Button9"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 4.303
+    OffsetLeft 4.303
+    PositionY 24.316
+    OffsetTop 24.316
+    SizeX 23.782
+    OffsetRight -28.085
+    SizeY 16.465
+    OffsetBottom -40.781
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DCB58F5324}" {
+   Name "Button0"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -66.148
+    OffsetLeft -66.148
+    PositionY 54.062
+    OffsetTop 54.062
+    SizeX 23.782
+    OffsetRight 42.366
+    SizeY 16.465
+    OffsetBottom -70.527
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DA0EFDAF73}" {
+   Name "Clear"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 37.913
+    OffsetLeft 37.913
+    PositionY -35.794
+    OffsetTop -35.794
+    SizeX 23.782
+    OffsetRight -61.695
+    SizeY 16.465
+    OffsetBottom 19.329
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45DA041CFDFA}" {
+   Name "Enter"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 37.913
+    OffsetLeft 37.913
+    PositionY -6.062
+    OffsetTop -6.062
+    SizeX 23.782
+    OffsetRight -61.695
+    SizeY 16.465
+    OffsetBottom -10.403
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45D3829A628D}" {
+   Name "MenuLeft"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -30.679
+    OffsetLeft -30.679
+    PositionY 54.062
+    OffsetTop 54.062
+    SizeX 23.782
+    OffsetRight 6.897
+    SizeY 16.465
+    OffsetBottom -70.527
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662B45D3F57E8BDB}" {
+   Name "MenuRight"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 4.002
+    OffsetLeft 4.002
+    PositionY 54.062
+    OffsetTop 54.062
+    SizeX 23.782
+    OffsetRight -27.784
+    SizeY 16.465
+    OffsetBottom -70.527
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  TextWidgetClass "{662B45AAC93B3197}" {
+   Name "RadioText"
+   Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -72.923
+    OffsetLeft -72.923
+    PositionY -132.394
+    OffsetTop -132.394
+    SizeX 145.401
+    OffsetRight -72.479
+    SizeY 30
+    OffsetBottom 102.394
+   }
+   Color 0 0 0 1
+   Text "Frequency"
+   "Font Size" 20
+   "Min Font Size" 20
+   "Vertical Alignment" Center
+   FontProperties FontProperties "{662A446A2C1E4B56}" {
+    Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+   }
+  }
+  ButtonWidgetClass "{662CA85A3ECEACA7}" {
+   Name "MenuUp"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 38.852
+    OffsetLeft 38.852
+    PositionY 25.062
+    OffsetTop 25.062
+    SizeX 23.782
+    OffsetRight -62.634
+    SizeY 21.058
+    OffsetBottom -46.12
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ButtonWidgetClass "{662CA85A2A708AAF}" {
+   Name "MenuDown"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 38.852
+    OffsetLeft 38.852
+    PositionY 48.027
+    OffsetTop 48.027
+    SizeX 23.782
+    OffsetRight -62.634
+    SizeY 21.058
+    OffsetBottom -69.085
+   }
+   "Z Order" 1
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  TextWidgetClass "{662D27C3EA3744B5}" {
+   Name "Line3"
+   Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -10.428
+    OffsetLeft -10.428
+    PositionY -130.646
+    OffsetTop -130.646
+    SizeX 82.975
+    OffsetRight -72.548
+    SizeY 30
+    OffsetBottom 100.646
+   }
+   Color 0 0 0 1
+   Text "+100"
+   "Horizontal Alignment" Right
+   "Vertical Alignment" Center
+   FontProperties FontProperties "{662A446A2C1E4B56}" {
+    Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+   }
+  }
+ }
+}

@@ -1,0 +1,44 @@
+SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
+ coords 138.299 1 173.219
+ {
+  SCR_FactionManager "663308E0ACD96B6F" {
+   ID "56E685E92F1B7E7A"
+   Factions {
+    SCR_Faction "{56DEAC40D2DBC8B1}" {
+     m_bIsPlayable 1
+     m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
+      m_aGroupFrequency {
+       CRF_GroupFrequencyContainer "{663439DBA697E4BB}" {
+        m_sSRFrequency "SQUAD1"
+        m_sLRFrequency "PLT1"
+        m_sMRFrequency "JTAC"
+       }
+      }
+     }
+    }
+   }
+  }
+  SCR_LoadoutManager {
+   ID "56E685E92F1B7E2A"
+   m_aPlayerLoadouts {
+    SCR_FactionPlayerLoadout "{5596D845DBEEF78C}" {
+     m_sLoadoutResource "{DAB1983ABEE5F20F}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_RadioTest.et"
+    }
+    SCR_FactionPlayerLoadout "{663439DBF28356EF}" {
+     m_sLoadoutName "RadioTest"
+     m_sLoadoutResource "{DAB1983ABEE5F20F}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_RadioTest.et"
+     m_sAffiliatedFaction "US"
+    }
+   }
+  }
+ }
+}
+SCR_SpawnPoint : "{5A2220DD0C16958B}Prefabs/MP/Spawning/SpawnPoint_US.et" {
+ coords 137.887 1 171.251
+}
+GenericEntity : "{C204374F722D5229}Prefabs/Items/Equipment/Radios/Radio_ANPRC117.et" {
+ coords 122.629 1 159.274
+}
+GenericEntity : "{F8F7E82661C761DD}Prefabs/Items/Equipment/Radios/Radio_ANPRC160.et" {
+ coords 126.392 1 159.786
+}

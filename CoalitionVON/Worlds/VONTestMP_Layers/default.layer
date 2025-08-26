@@ -1,0 +1,6 @@
+GenericEntity SoundOrigin : "{3568138FF7A659A1}Prefabs/Compositions/Misc/CustomEntities/InteractionPoints/AmmoBoxArsenal_Equipment_US_Apparel.et" {
+ coords 1372.985 39.011 2162.064
+}
+SCR_ChimeraCharacter : "{48F96834C3289E04}Prefabs/Characters/Factions/INDFOR/FIA/Character_FIA_Ammo.et" {
+ coords 1391.492 39 2167.633
+}

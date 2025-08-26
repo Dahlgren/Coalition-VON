@@ -1,0 +1,131 @@
+FrameWidgetClass {
+ Name "rootFrame"
+ {
+  ImageWidgetClass "{663110197BC745B7}" {
+   Name "Mic"
+   Slot FrameWidgetSlot "{663110197BC745DA}" {
+    Anchor 0 0.5 0 0.5
+    PositionX -20.713
+    OffsetLeft -20.713
+    PositionY -50
+    OffsetTop -50
+    SizeX 99.999
+    OffsetRight -79.286
+    SizeY 100
+    OffsetBottom -50
+   }
+   "Is Visible" 0
+   Texture "{DD0F0179C8E33C44}UI/layouts/HUD/VON/microphone.edds"
+   Size 157 152
+  }
+  FrameWidgetClass "{6631100B5216B597}" {
+   Name "VONEntry"
+   Slot FrameWidgetSlot "{6631100B5216B58E}" {
+    Anchor 0 0.5 0 0.5
+    PositionX 0
+    OffsetLeft 0
+    PositionY -50
+    OffsetTop -50
+    SizeX 300
+    OffsetRight -300
+    SizeY 100
+    OffsetBottom -50
+   }
+   "Is Visible" 0
+   {
+    TextWidgetClass "{6631100B12B276C4}" {
+     Name "Radio"
+     Slot FrameWidgetSlot "{6631100B12B276EF}" {
+      Anchor 1 1 1 1
+      PositionX -286.35
+      OffsetLeft -286.35
+      PositionY -78.182
+      OffsetTop -78.182
+      SizeX 269.26
+      OffsetRight 17.09
+      SizeY 31.689
+      OffsetBottom 46.493
+     }
+     Text "Radio"
+     "Font Size" 15
+     "Min Font Size" 15
+     "Vertical Alignment" Center
+     FontProperties FontProperties "{663110032F734A0A}" {
+      Font "{EABA4FE9D014CCEF}UI/Fonts/RobotoCondensed/RobotoCondensed_Bold.fnt"
+      ShadowSize 10
+      ShadowColor 0 0 0 0.7
+      ShadowOffset 0 0
+     }
+    }
+    TextWidgetClass "{6631100B6EC7C0D2}" {
+     Name "Freq"
+     Slot FrameWidgetSlot "{6631100B12B276EF}" {
+      Anchor 1 1 1 1
+      PositionX -286.35
+      OffsetLeft -286.35
+      PositionY -58.363
+      OffsetTop -58.363
+      SizeX 269.26
+      OffsetRight 17.09
+      SizeY 31.69
+      OffsetBottom 26.673
+     }
+     Text "Freq"
+     "Font Size" 15
+     "Min Font Size" 15
+     "Vertical Alignment" Center
+     FontProperties FontProperties "{6631100325DF3712}" {
+      Font "{EABA4FE9D014CCEF}UI/Fonts/RobotoCondensed/RobotoCondensed_Bold.fnt"
+      ShadowSize 10
+      ShadowColor 0 0 0 0.7
+      ShadowOffset 0 0
+     }
+    }
+   }
+  }
+  TextWidgetClass "{616B027994139975}" {
+   Name "VoiceRangeText"
+   Slot FrameWidgetSlot "{616B027994139947}" {
+    Anchor 0.5 1 0.5 1
+    PositionX -92.5
+    OffsetLeft -92.5
+    PositionY -261.22
+    OffsetTop -261.22
+    SizeX 185
+    OffsetRight -92.5
+    SizeY 16.161
+    OffsetBottom 245.059
+   }
+   Opacity 0
+   Text "Whisper"
+   "Font Size" 15
+   "Min Font Size" 15
+   "Horizontal Alignment" Center
+   "Vertical Alignment" Center
+   FontProperties FontProperties "{616B0276BF6D951C}" {
+    Bold 1
+    OutlineSize 5
+    ShadowSize 10
+   }
+  }
+  ProgressBarWidgetClass "{6164972F999B6D86}" {
+   Name "VoiceRangeSlider"
+   Slot FrameWidgetSlot "{6164972F999B6DD7}" {
+    Anchor 0.5 1 0.5 1
+    PositionX -97.5
+    OffsetLeft -97.5
+    PositionY -292.134
+    OffsetTop -292.1
+    SizeX 195
+    OffsetRight -97.5
+    SizeY 28
+    OffsetBottom 264.1
+   }
+   Opacity 0
+   Color 0.561 0.439 0.071 1
+   Minimum 1
+   Maximum 5
+   Current 3
+  }
+ }
+}

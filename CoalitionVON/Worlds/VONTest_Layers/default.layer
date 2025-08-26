@@ -1,0 +1,40 @@
+SCR_FactionManager FactionManager_Editor1 : "{4A188E44289B9A50}Prefabs/MP/Managers/Factions/FactionManager_Editor.et" {
+ coords 124.856 1 134.426
+ Factions {
+  SCR_Faction "{56DEAC40D2DBC8B1}" {
+   m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
+    m_GroupFrequency {
+     CRF_GroupFrequencyContainer "{663308EFD7703B68}" {
+      m_sSRFrequency "SQUAD1"
+      m_sMRFrequency "JTAC"
+      m_sLRFrequency "PLT1"
+     }
+     CRF_GroupFrequencyContainer "{663308EFCF71502E}" {
+      m_sSRFrequency "SQUAD2"
+      m_sMRFrequency "JTAC"
+      m_sLRFrequency "PLT1"
+     }
+     CRF_GroupFrequencyContainer "{663308EFCF2F24B8}" {
+      m_sSRFrequency "SQUAD3"
+      m_sMRFrequency "JTAC"
+      m_sLRFrequency "PLT1"
+     }
+     CRF_GroupFrequencyContainer "{663308EFCFEBB745}" {
+      m_sSRFrequency "SQUAD4"
+      m_sMRFrequency "JTAC"
+      m_sLRFrequency "PLT1"
+     }
+    }
+   }
+  }
+ }
+}
+GenericEntity : "{540C08AD5F21A5FA}Prefabs/Items/Equipment/Radios/Radio_R148_FIA.et" {
+ coords 135.62 1 134.7
+}
+GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.et" {
+ coords 122.437 1 138.134
+}
+GenericEntity : "{E1A5D4B878AA8980}Prefabs/Items/Equipment/Radios/Radio_R148.et" {
+ coords 128.929 1 134.729
+}

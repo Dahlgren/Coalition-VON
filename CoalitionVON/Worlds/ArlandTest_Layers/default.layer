@@ -1,0 +1,36 @@
+SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
+ coords 2047.296 45.25 2063.422
+ {
+  SCR_FactionManager {
+   ID "56E685E92F1B7E7A"
+   Factions {
+    SCR_Faction "{56DEAC40D2DBC8B1}" {
+     m_bIsPlayable 1
+     m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
+      m_aGroupFrequency {
+       CRF_GroupFrequencyContainer "{663308E7F3533121}" {
+        m_sSRFrequency "SQUAD1"
+        m_sLRFrequency "PLT1"
+       }
+       CRF_GroupFrequencyContainer "{663308E7EE9CD6C5}" {
+        m_sSRFrequency "SQUAD2"
+        m_sLRFrequency "PLT1"
+       }
+       CRF_GroupFrequencyContainer "{663308E7E8DF668E}" {
+        m_sSRFrequency "SQUAD3"
+        m_sLRFrequency "PLT1"
+       }
+       CRF_GroupFrequencyContainer "{663308E7EA5DD2B5}" {
+        m_sSRFrequency "SQUAD4"
+        m_sLRFrequency "PLT1"
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}
+SCR_SpawnPoint : "{5A2220DD0C16958B}Prefabs/MP/Spawning/SpawnPoint_US.et" {
+ coords 2051.232 44.428 2063.095
+}

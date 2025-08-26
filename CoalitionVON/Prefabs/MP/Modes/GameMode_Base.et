@@ -1,0 +1,7 @@
+SCR_BaseGameMode {
+ ID "56B2B479C6B96951"
+ components {
+  CRF_VONGameModeComponent "{6624E607CC6D4CC8}" {
+  }
+ }
+}

@@ -1,0 +1,22 @@
+GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.et" {
+ ID "508AB2013EEE1E00"
+ components {
+  BaseRadioComponent "{5A30BAE7673C63CA}" {
+   Transceivers {
+    IntercomTransceiver "{5A8E721FD75D0F5F}" {
+    }
+   }
+  }
+  CRF_RadioComponent "{662D5D04D93541AF}" {
+   m_sRadioName "AN/PRC-152"
+  }
+  InventoryItemComponent "{5222EB4D0C73006B}" {
+   Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
+    ItemDisplayName UIInfo "{5222EB4D07D865FA}" {
+     Name "AN/PRC-152"
+     Description ""
+    }
+   }
+  }
+ }
+}

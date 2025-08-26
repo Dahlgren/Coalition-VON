@@ -1,0 +1,278 @@
+class CRF_RadioComponentClass: ScriptComponentClass
+{
+}
+
+enum CRF_ERadioType
+{
+	SHORT,
+	MEDIUM,
+	LONG
+}
+
+class CRF_RadioComponent: ScriptComponent
+{
+	// What displays on the VON HUD
+	[Attribute("AN/PRC-148")] string m_sRadioName;
+	
+	//Used for allocating the frequencies to the radios in the SCR_CallsignBlahBlahsomething. Also is how we sort it out so your active first is always your SR.
+	[Attribute("0", UIWidgets.ComboBox, "Used for sorting frequencies", "", enumType: CRF_ERadioType )] int m_eRadioType;
+	
+	//How far it go...
+	[Attribute("5000")] int m_iRadioRange;
+	
+	//The Icon at the center of the VON Radial Menu
+	[Attribute("{D9F335476016F8D7}UI/layouts/Radios/ANPRC152/data/ANPRC152Icon.edds", UIWidgets.ResourcePickerThumbnail, "Icon in the center of the radial menu", params: "edds")] ResourceName m_sRadioIcon;
+	
+	//The Menu we use whenever we open up this radio.
+	[Attribute(ChimeraMenuPreset.ANPRC152.ToString(), UIWidgets.ComboBox, "", "", enumType: ChimeraMenuPreset )] int m_eRadioMenu;
+	
+	//What channel we are on, used in conjunction with m_aChannels, make sure to -1 for the index;
+	[RplProp()] int m_iCurrentChannel = 1;
+	
+	//Yep : )
+	[RplProp()] string m_sFrequency = "55500";
+	
+	//Time Deviation, used to shift the times of the radio making it so others not on the same time cant hear you.
+	[RplProp()] int m_iTimeDeviation = 0;
+	
+	//This is used in conjuction with the gamemode setting m_bIsFactionEncryptionEnabled
+	//If enabled it makes it so only factions can hear just their factions radios, this is initialized when a radio is picked up for the first time
+	//This means if you pick up a russian radio you can hear a russian broadcast.
+	//If m_bIsFactionEncrypto.... disabled then this does nothing.
+	[RplProp()] string m_sFactionKey = "";
+	//Used to store any channels the player makes and the base channels definied in the faction.
+	[RplProp()] ref array<string> m_aChannels = {};
+	
+	//All of these are temp freqeuncies we check in case somehow a change slips through the cracks, this mostly happens when we first take over an entity.
+	int m_iTempChannel = 1;
+	string m_sTempFrequency = "55500";
+	int m_iTempTimeDeviation = 0;
+	string m_sTempFactionKey = "";
+	
+	//How loud the radio is
+	int m_iVolume = 9;
+	
+	//What ear it comes out of, neither needs to be tracked across clients cause who gives af.
+	CRF_EStereo m_eStereo = CRF_EStereo.BOTH;
+	
+	//==========================================================================================================================================================================	
+	
+	//Returns the RplId of the radio.
+	//==========================================================================================================================================================================
+	RplId GetRplId()
+	{
+		return RplComponent.Cast(GetOwner().FindComponent(RplComponent)).Id();
+	}
+	
+	
+	//Called on the authority, updates the channel.
+	//==========================================================================================================================================================================
+	void UpdateChannelServer(int input)
+	{
+		m_iCurrentChannel = input;
+		Replication.BumpMe();
+	}
+	
+	//Called on the authority, updates the Frequency.
+	//==========================================================================================================================================================================
+	void UpdateFrequncyServer(string freq)
+	{
+		//Update the channels array for the new freq
+		if (m_aChannels.Count() >= m_iCurrentChannel)
+			m_aChannels.Set(m_iCurrentChannel - 1, freq);
+		m_sFrequency = freq;
+		Replication.BumpMe();
+	}
+	
+	//Called on the authority, updates the TimeDeviation.
+	//==========================================================================================================================================================================
+	void UpdateTimeDeviationServer(int input)
+	{
+		m_iTimeDeviation = input;
+		Replication.BumpMe();
+	}
+	
+	//Called on the authority, updates the TimeDeviation.
+	//==========================================================================================================================================================================
+	void AddChannelServer()
+	{
+		m_aChannels.Insert("55500");
+		Replication.BumpMe();
+	}
+	
+	//==========================================================================================================================================================================
+	void UpdateChannelClient(int input)
+	{
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).UpdateRadioChannel(input, GetRplId());
+		WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+	}
+	
+	//==========================================================================================================================================================================
+	void UpdateFrequencyClient(string input)
+	{
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).UpdateRadioFrequency(input, GetRplId());
+		WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+	}
+	
+	//==========================================================================================================================================================================
+	void UpdateTimeDeviationClient(int input)
+	{
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).UpdateRadioTimeDeviation(input, GetRplId());
+		WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+	}
+	
+	//==========================================================================================================================================================================
+	void AddChannelClient()
+	{
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).AddChannelServer(GetRplId());
+		WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+	}
+	
+	//==========================================================================================================================================================================
+	override void OnPostInit(IEntity owner)
+	{
+		SetEventMask(owner, EntityEvent.FIXEDFRAME);
+	}
+	
+	//==========================================================================================================================================================================
+	override void EOnFixedFrame(IEntity owner, float timeSlice)
+	{
+		
+		//Have this ifdef here cause in the workshop its a listen server, I explain the code in the non workshop version.
+		#ifdef WORKBENCH
+		if (m_sFactionKey != "")
+		return;
+	
+		if (!GetOwner().GetRootParent())
+			return;
+
+		if (!SCR_ChimeraCharacter.Cast(GetOwner().GetRootParent()))
+			return;
+		
+		FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetOwner().GetRootParent().FindComponent(FactionAffiliationComponent));
+		if (!factionComp)
+			return;
+		m_sFactionKey = factionComp.GetAffiliatedFactionKey();
+		SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(m_sFactionKey));
+
+		ref array<string> SRFrequencies = {};
+		ref array<string> MRFrequencies = {};
+		ref array<string> LRFrequencies = {};
+		foreach (ref CRF_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+		{
+			if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
+				SRFrequencies.Insert(groupContainer.m_sSRFrequency);
+			if (!MRFrequencies.Contains(groupContainer.m_sMRFrequency) && groupContainer.m_sMRFrequency != "")
+				MRFrequencies.Insert(groupContainer.m_sMRFrequency);
+			if (!LRFrequencies.Contains(groupContainer.m_sLRFrequency) && groupContainer.m_sLRFrequency != "")
+				LRFrequencies.Insert(groupContainer.m_sLRFrequency);
+		}
+		m_aChannels.InsertAll(SRFrequencies);
+		m_aChannels.InsertAll(MRFrequencies);
+		m_aChannels.InsertAll(LRFrequencies);
+		if (m_aChannels.Count() > 0)
+			m_sFrequency = m_aChannels.Get(0);
+		Replication.BumpMe();
+		
+		if (m_iTempChannel != m_iCurrentChannel || m_sTempFrequency != m_sFrequency || m_iTempTimeDeviation != m_iTimeDeviation || m_sTempFactionKey != m_sFactionKey)
+		{
+			Print("RewriteJSON");
+			m_iTempChannel = m_iCurrentChannel;
+			m_sTempFrequency = m_sFrequency;
+			m_iTempTimeDeviation = m_iTimeDeviation;
+			m_sTempFactionKey = m_sFactionKey;
+			WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+		}
+		#else
+		if (System.IsConsoleApp())
+		{
+			//Faction found no longer needed.
+			if (m_sFactionKey != "")
+				return;
+		
+			if (!GetOwner().GetRootParent())
+				return;
+	
+			//Radio is in the inventory of a player.
+			if (!SCR_ChimeraCharacter.Cast(GetOwner().GetRootParent()))
+				return;
+			
+			FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetOwner().GetRootParent().FindComponent(FactionAffiliationComponent));
+			if (!factionComp)
+				return;
+			m_sFactionKey = factionComp.GetAffiliatedFactionKey();
+			//Add that faction to this radio and get the faction to prep to load the factions frequencies
+			SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(m_sFactionKey));
+	
+			ref array<string> SRFrequencies = {};
+			ref array<string> MRFrequencies = {};
+			ref array<string> LRFrequencies = {};
+			foreach (ref CRF_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+			{
+				if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
+					SRFrequencies.Insert(groupContainer.m_sSRFrequency);
+				if (!MRFrequencies.Contains(groupContainer.m_sMRFrequency) && groupContainer.m_sMRFrequency != "")
+					MRFrequencies.Insert(groupContainer.m_sMRFrequency);
+				if (!LRFrequencies.Contains(groupContainer.m_sLRFrequency) && groupContainer.m_sLRFrequency != "")
+					LRFrequencies.Insert(groupContainer.m_sLRFrequency);
+			}
+			m_aChannels.InsertAll(SRFrequencies);
+			m_aChannels.InsertAll(MRFrequencies);
+			m_aChannels.InsertAll(LRFrequencies);
+			//Gets all of the factions frequencies and organizes them.
+			if (m_aChannels.Count() > 0)
+				m_sFrequency = m_aChannels.Get(0);
+			//hehe
+			Replication.BumpMe();
+		}
+		else
+		{
+			//Woah the client, just checking if anythings changed, this is mostly redundant but neccessary mostly for unit creation and onccupation.
+			if (m_iTempChannel != m_iCurrentChannel || m_sTempFrequency != m_sFrequency || m_iTempTimeDeviation != m_iTimeDeviation || m_sTempFactionKey != m_sFactionKey)
+			{
+				Print("RewriteJSON");
+				m_iTempChannel = m_iCurrentChannel;
+				m_sTempFrequency = m_sFrequency;
+				m_iTempTimeDeviation = m_iTimeDeviation;
+				m_sTempFactionKey = m_sFactionKey;
+				WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+			}
+		}
+		#endif
+	}
+	
+	//Hmm I wonder what OpenMenu does... 
+	//==========================================================================================================================================================================
+	void OpenMenu()
+	{
+		CRF_RadioMenu radioUI = CRF_RadioMenu.Cast(GetGame().GetMenuManager().OpenMenu(m_eRadioMenu));
+		radioUI.m_RadioEntity = GetOwner();
+	}
+	
+	//This writes the RadioData.json, this is what teamspeak looks at and compares a object in VONData.json to.
+	//It does this to see if we match the freq, if we do do we match the faction key, if its not defined then its an automatic yes.
+	//Then determines volume and what ears.
+	//magik :)
+	//==========================================================================================================================================================================
+	void WriteJSON(IEntity entity)
+	{
+		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
+		ref array<RplId> radios = CRF_VONGameModeComponent.GetInstance().GetRadios(entity);
+		foreach (RplId radio: radios)
+		{
+			IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radio)).GetEntity();
+			CRF_RadioComponent radioComp = CRF_RadioComponent.Cast(radioEntity.FindComponent(CRF_RadioComponent));
+			VONSave.StartObject(radio.ToString());
+			VONSave.WriteValue("Freq", radioComp.m_sFrequency);
+			VONSave.WriteValue("TimeDeviation", radioComp.m_iTimeDeviation);
+			VONSave.WriteValue("Volume", radioComp.m_iVolume);
+			VONSave.WriteValue("Stereo", radioComp.m_eStereo);
+			if (CRF_VONGameModeComponent.GetInstance().m_bUseFactionEcncryption)
+				VONSave.WriteValue("FactionKey", radioComp.m_sFactionKey);
+			else
+				VONSave.WriteValue("FactionKey", "");
+			VONSave.EndObject();
+		}
+		VONSave.SaveToFile("$profile:/RadioData.json");
+	}
+}

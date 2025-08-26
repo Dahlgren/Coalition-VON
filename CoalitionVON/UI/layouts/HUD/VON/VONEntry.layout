@@ -1,0 +1,55 @@
+FrameWidgetClass {
+ {
+  SizeLayoutWidgetClass "{5CEAF8054DC82357}" {
+   Prefab "{5CEAF8054DC82357}"
+   {
+    VerticalLayoutWidgetClass "{5CC6924FF67CE111}" {
+     Prefab "{5CC6924FF67CE111}"
+     {
+      TextWidgetClass "{662F62B5F59F2ACD}" {
+       Name "Radio"
+       Slot LayoutSlot "{662F62B4CF86638F}" {
+       }
+       Text "AN/PRC-152"
+       "Horizontal Alignment" Center
+       "Vertical Alignment" Center
+      }
+      HorizontalLayoutWidgetClass "{5D0A86953EF7769B}" {
+       Prefab "{5D0A86953EF7769B}"
+       {
+        ImageWidgetClass "{5D0A86950B6A29DD}" {
+         Prefab "{5D0A86950B6A29DD}"
+         "Is Visible" 0
+        }
+        TextWidgetClass "{5D0A869544D6DE67}" {
+         Prefab "{5D0A869544D6DE67}"
+         Slot LayoutSlot "{5D0A869544D6DE1F}" {
+          VerticalAlign 1
+         }
+         "Is Visible" 0
+        }
+        FrameWidgetClass "{5D0A869088DA3ACD}" {
+         Prefab "{5D0A869088DA3ACD}"
+         "Is Visible" 0
+        }
+       }
+      }
+      TextWidgetClass "{5D0A869549EE82A6}" {
+       Prefab "{5D0A869549EE82A6}"
+       Name "ChannelText"
+       "Is Visible" 0
+       Text "CH1"
+      }
+      TextWidgetClass "{5CCC91E0C44B6341}" {
+       Prefab "{5CCC91E0C44B6341}"
+       Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
+        HorizontalAlign 1
+       }
+       Text "55500"
+      }
+     }
+    }
+   }
+  }
+ }
+}
