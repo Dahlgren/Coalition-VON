@@ -49,6 +49,16 @@ class CVON_HUD: SCR_InfoDisplay {
 
 	//------------------------------------------------------------------------------------------------
 	
+	void ShowWarning()
+	{
+		m_wRoot.FindAnyWidget("VONWarning").SetOpacity(1);
+	}
+	
+	void HideWarning()
+	{
+		AnimateWidget.Opacity(m_wRoot.FindAnyWidget("VONWarning"), 0, 1/0.3);
+	}
+	
 	void ShowDirect()
 	{
 		if (m_bIsToggled)

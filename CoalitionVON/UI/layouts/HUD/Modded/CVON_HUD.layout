@@ -36,15 +36,15 @@ FrameWidgetClass {
     TextWidgetClass "{6631100B12B276C4}" {
      Name "Radio"
      Slot FrameWidgetSlot "{6631100B12B276EF}" {
-      Anchor 1 1 1 1
-      PositionX -286.35
-      OffsetLeft -286.35
-      PositionY -78.182
-      OffsetTop -78.182
+      Anchor 0 0.5 0 0.5
+      PositionX 13.65
+      OffsetLeft 13.65
+      PositionY -28.182
+      OffsetTop -28.182
       SizeX 269.26
-      OffsetRight 17.09
+      OffsetRight -282.91
       SizeY 31.689
-      OffsetBottom 46.493
+      OffsetBottom -3.507
      }
      Text "Radio"
      "Font Size" 15
@@ -60,15 +60,15 @@ FrameWidgetClass {
     TextWidgetClass "{6631100B6EC7C0D2}" {
      Name "Freq"
      Slot FrameWidgetSlot "{6631100B12B276EF}" {
-      Anchor 1 1 1 1
-      PositionX -286.35
-      OffsetLeft -286.35
-      PositionY -58.363
-      OffsetTop -58.363
+      Anchor 0 0.5 0 0.5
+      PositionX 13.65
+      OffsetLeft 13.65
+      PositionY -8.363
+      OffsetTop -8.363
       SizeX 269.26
-      OffsetRight 17.09
+      OffsetRight -282.91
       SizeY 31.69
-      OffsetBottom 26.673
+      OffsetBottom -23.327
      }
      Text "Freq"
      "Font Size" 15
@@ -126,6 +126,64 @@ FrameWidgetClass {
    Minimum 1
    Maximum 5
    Current 3
+  }
+  FrameWidgetClass "{663703726DAAA328}" {
+   Name "VONWarning"
+   Slot FrameWidgetSlot "{6631100B5216B58E}" {
+    Anchor 0 0.5 0 0.5
+    PositionX 0
+    OffsetLeft 0
+    PositionY -50
+    OffsetTop -50
+    SizeX 300
+    OffsetRight -300
+    SizeY 100
+    OffsetBottom -50
+   }
+   Opacity 0
+   {
+    ImageWidgetClass "{66370372497E74CF}" {
+     Name "Image0"
+     Slot FrameWidgetSlot "{66370372497E7314}" {
+      Anchor 0 0.5 0 0.5
+      PositionX 5.994
+      OffsetLeft 5.994
+      PositionY -18
+      OffsetTop -18
+      SizeX 30
+      OffsetRight -35.994
+      SizeY 30
+      OffsetBottom -12
+     }
+     Color 1 0.0627 0.0627 1
+     Texture "{9C5EEC72FF985CE3}UI/Textures/DeployMenu/warning-icon-200px.edds"
+     Size 200 200
+    }
+    TextWidgetClass "{663703726DAAA32D}" {
+     Name "Radio"
+     Slot FrameWidgetSlot "{6631100B12B276EF}" {
+      Anchor 0 0.5 0 0.5
+      PositionX 38.36
+      OffsetLeft 38.4
+      PositionY -18.008
+      OffsetTop -18
+      SizeX 269.26
+      OffsetRight -307.6
+      OffsetBottom -12
+     }
+     Color 1 0.0627 0.0627 1
+     Text "Teamspeak Plugin Is Not Detected!"
+     "Font Size" 15
+     "Min Font Size" 15
+     "Vertical Alignment" Center
+     FontProperties FontProperties "{663110032F734A0A}" {
+      Font "{EABA4FE9D014CCEF}UI/Fonts/RobotoCondensed/RobotoCondensed_Bold.fnt"
+      ShadowSize 10
+      ShadowColor 0 0 0 0.7
+      ShadowOffset 0 0
+     }
+    }
+   }
   }
  }
 }

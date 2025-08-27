@@ -26,6 +26,12 @@ modded class SCR_PlayerController
 	int m_iLocalVolume = 15;
 	CVON_EVONVolume m_eVONVolume = CVON_EVONVolume.NORMAL;
 	
+	//Used so we don't spam the player with initial warnings if their TS crashes, just when they first connect.
+	bool m_bHasBeenGivenInitialWarning = false;
+	
+	//Teamspeak has been detected, also used to not have the annoying game locking popup everytime TS wants to crash
+	bool m_bHasConnectedToTeamspeakForFirstTime = false;
+	
 	//Used to initials the m_aRadio array
 	//Delay is needed as it can take a sec for the entity to initialized for a client on the server.
 	override void OnControlledEntityChanged(IEntity from, IEntity to)

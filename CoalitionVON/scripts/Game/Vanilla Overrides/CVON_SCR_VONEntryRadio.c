@@ -22,6 +22,8 @@ modded class SCR_VONEntryRadio
 		
 		BaseRadioComponent radio = m_RadioTransceiver.GetRadio();
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.GetOwner().FindComponent(CVON_RadioComponent));
+		if (!radioComp)
+			return;
 		entryComp.SetTransceiverText("CH" + m_iTransceiverNumber.ToString());
 		entryComp.SetFrequencyText(radioComp.m_sFrequency);
 		entryComp.SetChannelText("CH" + radioComp.m_iCurrentChannel);

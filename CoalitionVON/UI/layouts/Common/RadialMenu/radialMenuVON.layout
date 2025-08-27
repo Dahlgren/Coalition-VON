@@ -13,6 +13,7 @@ FrameWidgetClass : "{8DE7D0C6EB809121}UI/layouts/Common/RadialMenu/radialMenu.la
     SizeY 240
     OffsetBottom -120
    }
+   Opacity 0
    Size 1500 1371
   }
  }

@@ -33,11 +33,21 @@ modded class SCR_VONController
 	//Stores the HUD so we can deactivate it after a transmissions end
 	CVON_HUD m_VONHud;
 	
+	//Used if we are warning the player their VON is not connected after initial connection
+	bool m_bShowingSecondWarning = false;
+	
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
 	//==========================================================================================================================================================================
 	void ActivateCRFDirect()
 	{
+		if (m_bToggleBuffer)
+		{
+			m_bToggleBuffer = false;
+			DeactivateCRFVON();
+			m_VONHud.ShowDirectToggle();
+			return;
+		}
 		ActivateCRFVON(CVON_EVONTransmitType.DIRECT);
 	}
 	
@@ -553,6 +563,26 @@ modded class SCR_VONController
 				VONServerData.SaveToFile("$profile:/VONServerData.json");
 			}
 		}
+		#ifdef WORKBENCH
+		#else
+		//Hijack this whole process to load the initial warning menu
+		if (m_PlayerController.m_iTeamSpeakClientId == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
+		{
+			m_PlayerController.m_bHasBeenGivenInitialWarning = true;
+			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
+		}
+		else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId == 0 && SCR_PlayerController.GetLocalControlledEntity())
+		{
+			m_VONHud.ShowWarning();
+			m_bShowingSecondWarning = true;
+
+		}
+		else if (m_bShowingSecondWarning)
+		{
+			m_VONHud.HideWarning();
+			m_bShowingSecondWarning = false;
+		}
+		#endif
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		VONSave.WriteValue("IsTransmitting", m_bIsBroadcasting);
 		IEntity localEntity = SCR_PlayerController.GetLocalControlledEntity();

@@ -1,0 +1,182 @@
+FrameWidgetClass {
+ Name "rootFrame"
+ {
+  FrameWidgetClass "{6637037B57988980}" {
+   Name "EditorHider"
+   Slot FrameWidgetSlot "{59D673B92EBF779F}" {
+    Anchor 0 0 1 1
+    PositionX 0
+    OffsetLeft 0
+    PositionY 0
+    OffsetTop 0
+    SizeX -1820
+    OffsetRight 0
+    SizeY -1050
+    OffsetBottom 0
+   }
+   components {
+    SCR_ShowHideInEditorUIComponent "{59D673B9596F89F9}" {
+     m_bShowInEditor 0
+    }
+   }
+   {
+    OverlayWidgetClass "{6637037B57988986}" {
+     Name "WarningZoneDistanceVisuals"
+     Slot FrameWidgetSlot "{59D0B50D495D33B9}" {
+      Anchor 0 0 1 1
+      PositionX 0
+      OffsetLeft 0
+      PositionY 0
+      OffsetTop 0
+      SizeX -1820
+      OffsetRight 0
+      SizeY -1050
+      OffsetBottom 0
+     }
+     {
+      ImageWidgetClass "{6637037B5798898B}" {
+       Name "Image0"
+       Slot OverlayWidgetSlot "{59D0B50D71D54AD5}" {
+        HorizontalAlign 3
+        VerticalAlign 3
+       }
+       Color 0 0 0 1
+       Texture "{6FE2C64CB67BA627}UI/Textures/Editor/Overlays/Vignette/Overlay_Vignette.edds"
+       Size 512 512
+      }
+      ImageWidgetClass "{6637037B57988989}" {
+       Name "Image1"
+       Slot OverlayWidgetSlot "{59D0B50D71D54AD5}" {
+        HorizontalAlign 3
+        VerticalAlign 3
+       }
+       Color 0 0 0 1
+       Texture "{6FE2C64CB67BA627}UI/Textures/Editor/Overlays/Vignette/Overlay_Vignette.edds"
+       Size 512 512
+      }
+      ImageWidgetClass "{6637037B5798898F}" {
+       Name "Image2"
+       Slot OverlayWidgetSlot "{59D0B50D71D54AD5}" {
+        HorizontalAlign 3
+        VerticalAlign 3
+       }
+       Color 0 0 0 0.627
+       Size 512 512
+      }
+     }
+    }
+    OverlayWidgetClass "{6637037B5798898E}" {
+     Name "WarningVisualsHolder"
+     Slot FrameWidgetSlot "{587EA36B864B5661}" {
+      Anchor 0 0.5 1 0.5
+      PositionX 960
+      OffsetLeft 960
+      PositionY 0
+      OffsetTop 0
+      SizeX 0
+      OffsetRight -960
+      SizeY 250
+      OffsetBottom -250
+      Alignment 0.5 0.5
+     }
+     {
+      HorizontalLayoutWidgetClass "{6637037B5798898C}" {
+       Name "HorizontalLayout0"
+       Slot OverlayWidgetSlot "{59AACB43BDCEC12F}" {
+        HorizontalAlign 3
+        VerticalAlign 3
+       }
+       Opacity 0.75
+       Color 0 0 0 1
+       {
+        ImageWidgetClass "{6637037B579889B3}" {
+         Name "Background"
+         Slot LayoutSlot "{59AACB43B95173CA}" {
+          Padding 0 0 0 0
+          SizeMode Fill
+         }
+         "Inherit Color" 1
+         Texture "{C8356C245709D063}UI/Textures/Common/gradient_transparent_white_linear_photoshop.edds"
+         Size 256 256
+        }
+        ImageWidgetClass "{6637037B579889B1}" {
+         Name "Image0"
+         Slot LayoutSlot "{59AACB43EC84ADF3}" {
+          Padding 0 0 0 0
+          SizeMode Fill
+         }
+         "Inherit Color" 1
+        }
+        ImageWidgetClass "{6637037B579889B0}" {
+         Name "Background0"
+         Slot LayoutSlot "{59AACB43B808EFED}" {
+          Padding 0 0 0 0
+          SizeMode Fill
+         }
+         "Inherit Color" 1
+         Rotation 0
+         Texture "{95C893319DCF22D1}UI/Textures/Common/gradient_transparent_white_linear_photoshop_mirrored.edds"
+         Size 256 256
+        }
+       }
+      }
+      ImageWidgetClass "{6637037B579889B6}" {
+       Name "Icon"
+       Slot OverlayWidgetSlot "{59AAD42021594147}" {
+        VerticalAlign 0
+        Padding 0 15 0 0
+       }
+       Color 0.947 0.056 0.056 1
+       Texture "{9C5EEC72FF985CE3}UI/Textures/DeployMenu/warning-icon-200px.edds"
+       Size 100 100
+      }
+      TextWidgetClass "{6637037B579889B5}" : "{6F198A46CBC549CE}UI/layouts/WidgetLibrary/TextWidgets/Text_Heading1.layout" {
+       Name "Explanation"
+       Slot OverlayWidgetSlot "{59AACB43FCDD60C1}" {
+        HorizontalAlign 3
+        Padding 0 50 0 0
+       }
+       Text "Teamspeak Plugin Not Detected!"
+       "Horizontal Alignment" Center
+       "Vertical Alignment" Center
+      }
+      ButtonWidgetClass "{66370378BE8FD299}" {
+       Name "CopyButton"
+       Slot OverlayWidgetSlot "{66370378BE8FD2D6}" {
+        Padding 200 150 0 0
+       }
+       Tooltip TextWidgetTooltip "{66370378E9001B4D}" {
+        Text "Copy To Clipboard"
+       }
+       Color 1 1 1 0
+       components {
+        SCR_ButtonTextComponent "{66370378E0AA4461}" {
+        }
+       }
+       {
+        ImageWidgetClass "{66370378917F7D7B}" {
+         Name "Image0"
+         Slot ButtonWidgetSlot "{66370378917F7DB2}" {
+         }
+         Texture "{FFBA31A5D6034B08}UI/layouts/HUD/VON/Clipboard_Icon.edds"
+         Size 32 32
+        }
+       }
+      }
+      TextWidgetClass "{6637037B579889BB}" : "{0D7FF083FDE39877}UI/layouts/WidgetLibrary/TextWidgets/Text_Heading4.layout" {
+       Name "Warning"
+       Slot OverlayWidgetSlot "{59AACB43FCDD63A7}" {
+        HorizontalAlign 3
+        Padding 0 150 0 0
+       }
+       Color 0.947 0.056 0.056 1
+       Text "Install Here"
+       "Horizontal Alignment" Center
+       "Vertical Alignment" Center
+      }
+     }
+    }
+   }
+  }
+ }
+}
