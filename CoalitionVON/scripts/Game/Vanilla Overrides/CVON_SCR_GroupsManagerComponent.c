@@ -43,7 +43,7 @@ modded class SCR_GroupsManagerComponent
 		for (int i = 0; i < playerController.m_aRadios.Count(); i++)
 		{
 			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(playerController.m_aRadios.Get(i).FindComponent(CVON_RadioComponent));
-			switch (i)
+			switch (radioComp.m_eRadioType)
 			{
 				case 0: 
 				{
@@ -55,18 +55,18 @@ modded class SCR_GroupsManagerComponent
 				}
 				case 1: 
 				{
-					if (!radioComp.m_aChannels.Contains(freqContainer.m_sLRFrequency))
-						break;
-					radioComp.UpdateFrequncyServer(freqContainer.m_sLRFrequency);
-					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sLRFrequency) + 1);
-					break;
-				}
-				case 2: 
-				{
 					if (!radioComp.m_aChannels.Contains(freqContainer.m_sMRFrequency))
 						break;
 					radioComp.UpdateFrequncyServer(freqContainer.m_sMRFrequency);
 					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sMRFrequency) + 1);
+					break;
+				}
+				case 2: 
+				{
+					if (!radioComp.m_aChannels.Contains(freqContainer.m_sLRFrequency))
+						break;
+					radioComp.UpdateFrequncyServer(freqContainer.m_sLRFrequency);
+					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sLRFrequency) + 1);
 					break;
 				}
 			}

@@ -256,6 +256,8 @@ class CVON_RadioComponent: ScriptComponent
 	{
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		ref array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(entity);
+		if (!radios)
+			return;
 		foreach (RplId radio: radios)
 		{
 			IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radio)).GetEntity();

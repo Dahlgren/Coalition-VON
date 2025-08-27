@@ -38,6 +38,8 @@ modded class SCR_PlayerController
 	{
 		m_aRadios.Clear();
 		array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(to);
+		if (!radios)
+			return;
 		if (radios.Count() == 0)
 			return;
 		IEntity shortRangeRadio;
