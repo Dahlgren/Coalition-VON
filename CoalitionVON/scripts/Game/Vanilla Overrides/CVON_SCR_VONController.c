@@ -102,14 +102,18 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	void RotateActiveRadio()
 	{
-		if (m_PlayerController.m_aRadios.Count() < 2)
-			return;
-		
-		IEntity radioEntity = m_PlayerController.m_aRadios.Get(m_PlayerController.m_aRadios.Count() - 1);
-		m_PlayerController.m_aRadios.RemoveOrdered(m_PlayerController.m_aRadios.Count() - 1);
-		m_PlayerController.m_aRadios.InsertAt(radioEntity, 0);
-		m_PlayerController.RotateActiveChannelServer();
-		
+		int count = m_PlayerController.m_aRadios.Count();
+		if (count < 2) return;
+	
+		IEntity last = m_PlayerController.m_aRadios[count - 1];
+	
+	    for (int i = count - 1; i > 0; i--)
+	    {
+	        m_PlayerController.m_aRadios[i] = m_PlayerController.m_aRadios[i - 1];
+	    }
+	    m_PlayerController.m_aRadios[0] = last;
+	
+	    m_PlayerController.RotateActiveChannelServer();
 	}
 	
 	//! Initialize component, done once per controller
@@ -194,6 +198,11 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	void ActivateCRFVON(CVON_EVONTransmitType transmitType = CVON_EVONTransmitType.NONE)
 	{
+		#ifdef WORKBENCH
+		#else
+		if (m_PlayerController.m_iTeamSpeakClientId == 0)
+			return;
+		#endif
 		if (m_CurrentVONContainer)
 			DeactivateCRFVON();
 		CVON_VONContainer container = new CVON_VONContainer();

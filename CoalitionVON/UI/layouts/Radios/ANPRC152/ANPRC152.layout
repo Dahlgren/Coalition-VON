@@ -292,6 +292,9 @@ FrameWidgetClass {
     OffsetBottom -70.527
    }
    "Z Order" 1
+   Tooltip TextWidgetTooltip "{66371559EF893059}" {
+    Text "Menu Left"
+   }
    Color 1 1 1 0
    components {
     SCR_ButtonTextComponent "{662A44FEA39790E2}" {
@@ -312,6 +315,9 @@ FrameWidgetClass {
     OffsetBottom -70.527
    }
    "Z Order" 1
+   Tooltip TextWidgetTooltip "{66371559EAC97503}" {
+    Text "Menu Right"
+   }
    Color 1 1 1 0
    components {
     SCR_ButtonTextComponent "{662A44FEA39790E2}" {
@@ -354,6 +360,9 @@ FrameWidgetClass {
     OffsetBottom -46.12
    }
    "Z Order" 1
+   Tooltip TextWidgetTooltip "{66371559E067A38B}" {
+    Text "Menu Up"
+   }
    Color 1 1 1 0
    components {
     SCR_ButtonTextComponent "{662A44FEA39790E2}" {
@@ -374,6 +383,9 @@ FrameWidgetClass {
     OffsetBottom -69.085
    }
    "Z Order" 1
+   Tooltip TextWidgetTooltip "{66371559DDEF5F71}" {
+    Text "Menu Down"
+   }
    Color 1 1 1 0
    components {
     SCR_ButtonTextComponent "{662A44FEA39790E2}" {

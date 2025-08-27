@@ -397,6 +397,8 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Clear()
 	{
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
+			return;
 		m_sTempFrequency = "_____";
 		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency));
 		m_bIsEditing = true;
@@ -406,6 +408,8 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Enter()
 	{
+		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
+			return;
 		int tempFreq = m_sTempFrequency.ToInt();
 		if (tempFreq < 30000 || tempFreq > 87975 || tempFreq % 25 != 0)
 		{

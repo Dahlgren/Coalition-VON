@@ -61,6 +61,11 @@ class CVON_HUD: SCR_InfoDisplay {
 	
 	void ShowDirect()
 	{
+		#ifdef WORKBENCH
+		#else
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+			return;
+		#endif
 		if (m_bIsToggled)
 			return;
 		m_wRoot.FindAnyWidget("Mic").SetOpacity(1);
@@ -69,6 +74,11 @@ class CVON_HUD: SCR_InfoDisplay {
 	
 	void ShowDirectToggle()
 	{
+		#ifdef WORKBENCH
+		#else
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+			return;
+		#endif
 		GetGame().GetCallqueue().CallLater(DirectToggleDelay, 200, false);
 	}
 	
@@ -113,6 +123,11 @@ class CVON_HUD: SCR_InfoDisplay {
 	
 	void ShowVON()
 	{
+		#ifdef WORKBENCH
+		#else
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+			return;
+		#endif
 		SCR_VONController vonController = SCR_VONController.Cast(GetGame().GetPlayerController().FindComponent(SCR_VONController));
 		if (!vonController)
 			return;
