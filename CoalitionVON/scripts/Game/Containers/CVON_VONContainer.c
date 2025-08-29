@@ -47,6 +47,9 @@ class CVON_VONContainer
 	//Where the source of this entry is if we can find it.
 	IEntity m_SoundSource;
 	
+	//Is there any muffling
+	int m_iLoweredDecibles;
+	
 	static bool Extract(CVON_VONContainer instance, ScriptCtx ctx, SSnapSerializerBase snapshot)
 	{	
 		snapshot.SerializeInt(instance.m_eVonType);

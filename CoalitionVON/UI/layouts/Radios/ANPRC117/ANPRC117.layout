@@ -5,34 +5,34 @@ FrameWidgetClass {
    Name "Image0"
    Slot FrameWidgetSlot "{662A447270D1FD33}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -420.743
-    OffsetLeft -420.743
-    PositionY -323.364
-    OffsetTop -323.364
-    SizeX 807.711
-    OffsetRight -386.969
-    SizeY 489.873
-    OffsetBottom -166.509
+    PositionX -960
+    OffsetLeft -960
+    PositionY -540
+    OffsetTop -540
+    SizeX 1920
+    OffsetRight -960
+    SizeY 1080
+    OffsetBottom -540
    }
    Texture "{3F60BBE12269B784}UI/layouts/Radios/ANPRC117/data/ANPRC117.edds"
    Size 782 419
-   Filter 0
   }
   TextWidgetClass "{6634B3D0CAC25AFD}" {
    Name "Frequency"
    Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -72.627
-    OffsetLeft -72.627
-    PositionY -117.412
-    OffsetTop -117.412
-    SizeX 145.401
-    OffsetRight -72.774
-    SizeY 30
-    OffsetBottom 87.412
+    PositionX -176.62
+    OffsetLeft -176.62
+    PositionY -117.227
+    OffsetTop -117.227
+    SizeX 279.032
+    OffsetRight -102.412
+    SizeY 61.955
+    OffsetBottom 55.271
    }
    Color 0 0 0 1
    Text "01: 55500"
+   "Font Size" 44
    "Vertical Alignment" Center
    FontProperties FontProperties "{662A446A2C1E4B56}" {
     Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
@@ -42,14 +42,14 @@ FrameWidgetClass {
    Name "Button1"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -52.921
-    OffsetLeft -52.921
-    PositionY -19.574
-    OffsetTop -19.574
-    SizeX 23.782
-    OffsetRight 29.139
-    SizeY 16.465
-    OffsetBottom 3.109
+    PositionX -93.942
+    OffsetLeft -93.942
+    PositionY 36.254
+    OffsetTop 36.254
+    SizeX 80
+    OffsetRight 13.943
+    SizeY 60
+    OffsetBottom -96.254
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -62,14 +62,14 @@ FrameWidgetClass {
    Name "Button2"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -11.44
-    OffsetLeft -11.44
-    PositionY -19.574
-    OffsetTop -19.574
-    SizeX 23.782
-    OffsetRight -12.342
-    SizeY 16.465
-    OffsetBottom 3.109
+    PositionX 22.74
+    OffsetLeft 22.74
+    PositionY 36.254
+    OffsetTop 36.254
+    SizeX 80
+    OffsetRight -102.74
+    SizeY 60
+    OffsetBottom -96.254
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -82,14 +82,14 @@ FrameWidgetClass {
    Name "Button3"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 30.264
-    OffsetLeft 30.264
-    PositionY -19.574
-    OffsetTop -19.574
-    SizeX 23.782
-    OffsetRight -54.046
-    SizeY 16.465
-    OffsetBottom 3.109
+    PositionX 139.64
+    OffsetLeft 139.64
+    PositionY 36.254
+    OffsetTop 36.254
+    SizeX 80
+    OffsetRight -219.64
+    SizeY 60
+    OffsetBottom -96.254
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -102,14 +102,14 @@ FrameWidgetClass {
    Name "Button4"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -52.921
-    OffsetLeft -52.921
-    PositionY 13.036
-    OffsetTop 13.036
-    SizeX 23.782
-    OffsetRight 29.139
-    SizeY 16.466
-    OffsetBottom -29.502
+    PositionX -93.942
+    OffsetLeft -93.942
+    PositionY 119.032
+    OffsetTop 119.032
+    SizeX 80
+    OffsetRight 13.943
+    SizeY 60
+    OffsetBottom -179.032
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -122,14 +122,14 @@ FrameWidgetClass {
    Name "Button5"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -11.44
-    OffsetLeft -11.44
-    PositionY 13.036
-    OffsetTop 13.036
-    SizeX 23.782
-    OffsetRight -12.342
-    SizeY 16.466
-    OffsetBottom -29.502
+    PositionX 22.74
+    OffsetLeft 22.74
+    PositionY 119.032
+    OffsetTop 119.032
+    SizeX 80
+    OffsetRight -102.74
+    SizeY 60
+    OffsetBottom -179.032
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -142,14 +142,14 @@ FrameWidgetClass {
    Name "Button6"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 30.264
-    OffsetLeft 30.264
-    PositionY 13.036
-    OffsetTop 13.036
-    SizeX 23.782
-    OffsetRight -54.046
-    SizeY 16.466
-    OffsetBottom -29.502
+    PositionX 139.64
+    OffsetLeft 139.64
+    PositionY 119.032
+    OffsetTop 119.032
+    SizeX 80
+    OffsetRight -219.64
+    SizeY 60
+    OffsetBottom -179.032
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -162,14 +162,14 @@ FrameWidgetClass {
    Name "Button7"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -52.921
-    OffsetLeft -52.921
-    PositionY 48.019
-    OffsetTop 48.019
-    SizeX 23.782
-    OffsetRight 29.139
-    SizeY 16.465
-    OffsetBottom -64.484
+    PositionX -93.942
+    OffsetLeft -93.942
+    PositionY 196.154
+    OffsetTop 196.154
+    SizeX 80
+    OffsetRight 13.943
+    SizeY 60
+    OffsetBottom -256.154
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -182,14 +182,14 @@ FrameWidgetClass {
    Name "Button8"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -11.44
-    OffsetLeft -11.44
-    PositionY 48.019
-    OffsetTop 48.019
-    SizeX 23.782
-    OffsetRight -12.342
-    SizeY 16.465
-    OffsetBottom -64.484
+    PositionX 22.74
+    OffsetLeft 22.74
+    PositionY 196.154
+    OffsetTop 196.154
+    SizeX 80
+    OffsetRight -102.74
+    SizeY 60
+    OffsetBottom -256.154
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -202,14 +202,14 @@ FrameWidgetClass {
    Name "Button9"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 30.264
-    OffsetLeft 30.264
-    PositionY 48.019
-    OffsetTop 48.019
-    SizeX 23.782
-    OffsetRight -54.046
-    SizeY 16.465
-    OffsetBottom -64.484
+    PositionX 139.64
+    OffsetLeft 139.64
+    PositionY 196.154
+    OffsetTop 196.154
+    SizeX 80
+    OffsetRight -219.64
+    SizeY 60
+    OffsetBottom -256.154
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -222,14 +222,14 @@ FrameWidgetClass {
    Name "Button0"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -51.77
-    OffsetLeft -51.77
-    PositionY 80.068
-    OffsetTop 80.068
-    SizeX 23.782
-    OffsetRight 27.988
-    SizeY 16.465
-    OffsetBottom -96.533
+    PositionX -92.743
+    OffsetLeft -92.743
+    PositionY 262.393
+    OffsetTop 262.393
+    SizeX 80
+    OffsetRight 12.743
+    SizeY 60
+    OffsetBottom -322.393
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -242,14 +242,14 @@ FrameWidgetClass {
    Name "Clear"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -94.67
-    OffsetLeft -94.67
-    PositionY 47.022
-    OffsetTop 47.022
-    SizeX 23.782
-    OffsetRight 70.888
-    SizeY 16.465
-    OffsetBottom -63.487
+    PositionX -220.021
+    OffsetLeft -220.021
+    PositionY 195.154
+    OffsetTop 195.154
+    SizeX 80
+    OffsetRight 140.021
+    SizeY 60
+    OffsetBottom -255.154
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -262,14 +262,14 @@ FrameWidgetClass {
    Name "Enter"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 73.471
-    OffsetLeft 73.471
-    PositionY 47.198
-    OffsetTop 47.198
-    SizeX 23.782
-    OffsetRight -97.253
-    SizeY 16.465
-    OffsetBottom -63.663
+    PositionX 266.093
+    OffsetLeft 266.093
+    PositionY 193.1
+    OffsetTop 193.1
+    SizeX 80
+    OffsetRight -346.093
+    SizeY 60
+    OffsetBottom -253.1
    }
    "Z Order" 1
    Color 1 1 1 0
@@ -282,14 +282,14 @@ FrameWidgetClass {
    Name "MenuLeft"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -9.076
-    OffsetLeft -9.076
-    PositionY 80.068
-    OffsetTop 80.068
-    SizeX 23.782
-    OffsetRight -14.706
-    SizeY 16.465
-    OffsetBottom -96.533
+    PositionX 22.7
+    OffsetLeft 22.7
+    PositionY 262.393
+    OffsetTop 262.393
+    SizeX 80
+    OffsetRight -102.7
+    SizeY 60
+    OffsetBottom -322.393
    }
    "Z Order" 1
    Tooltip TextWidgetTooltip "{66371559CF31DC60}" {
@@ -305,14 +305,14 @@ FrameWidgetClass {
    Name "MenuRight"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 31.114
-    OffsetLeft 31.114
-    PositionY 80.068
-    OffsetTop 80.068
-    SizeX 23.782
-    OffsetRight -54.896
-    SizeY 16.465
-    OffsetBottom -96.533
+    PositionX 139.6
+    OffsetLeft 139.6
+    PositionY 262.393
+    OffsetTop 262.393
+    SizeX 80
+    OffsetRight -219.6
+    SizeY 60
+    OffsetBottom -322.393
    }
    "Z Order" 1
    Tooltip TextWidgetTooltip "{66371559D5A7F8C4}" {
@@ -328,18 +328,18 @@ FrameWidgetClass {
    Name "RadioText"
    Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -72.347
-    OffsetLeft -72.347
-    PositionY -142.18
-    OffsetTop -142.18
-    SizeX 145.402
-    OffsetRight -73.055
-    SizeY 30
-    OffsetBottom 112.18
+    PositionX -177.308
+    OffsetLeft -177.308
+    PositionY -172.013
+    OffsetTop -172.013
+    SizeX 287.748
+    OffsetRight -110.44
+    SizeY 46.462
+    OffsetBottom 125.551
    }
    Color 0 0 0 1
    Text "Frequency"
-   "Font Size" 20
+   "Font Size" 44
    "Min Font Size" 20
    "Vertical Alignment" Center
    FontProperties FontProperties "{662A446A2C1E4B56}" {
@@ -350,14 +350,14 @@ FrameWidgetClass {
    Name "MenuUp"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 73.177
-    OffsetLeft 73.177
-    PositionY -16.346
-    OffsetTop -16.346
-    SizeX 23.782
-    OffsetRight -96.959
-    SizeY 21.058
-    OffsetBottom -4.712
+    PositionX 264.54
+    OffsetLeft 264.54
+    PositionY 36.087
+    OffsetTop 36.087
+    SizeX 80
+    OffsetRight -344.54
+    SizeY 70.253
+    OffsetBottom -106.34
    }
    "Z Order" 1
    Tooltip TextWidgetTooltip "{66371559D16AF75A}" {
@@ -373,14 +373,14 @@ FrameWidgetClass {
    Name "MenuDown"
    Slot FrameWidgetSlot "{662A44765E14B87A}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX 73.177
-    OffsetLeft 73.177
-    PositionY 6.619
-    OffsetTop 6.619
-    SizeX 23.782
-    OffsetRight -96.959
-    SizeY 21.058
-    OffsetBottom -27.677
+    PositionX 264.54
+    OffsetLeft 264.54
+    PositionY 111.393
+    OffsetTop 111.393
+    SizeX 80
+    OffsetRight -344.54
+    SizeY 69.114
+    OffsetBottom -180.507
    }
    "Z Order" 1
    Tooltip TextWidgetTooltip "{66371559D2178508}" {
@@ -396,22 +396,63 @@ FrameWidgetClass {
    Name "Line3"
    Slot FrameWidgetSlot "{662A446ACCCCB08D}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -9.852
-    OffsetLeft -9.852
-    PositionY -140.432
-    OffsetTop -140.432
-    SizeX 82.976
-    OffsetRight -73.124
-    SizeY 30
-    OffsetBottom 110.432
+    PositionX 184.145
+    OffsetLeft 184.145
+    PositionY -182.854
+    OffsetTop -182.854
+    SizeX 118.095
+    OffsetRight -302.24
+    SizeY 54.584
+    OffsetBottom 128.27
    }
    Color 0 0 0 1
    Text "+100"
+   "Font Size" 44
+   "Min Font Size" 20
    "Horizontal Alignment" Right
    "Vertical Alignment" Center
    FontProperties FontProperties "{662A446A2C1E4B56}" {
     Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
    }
+  }
+  ButtonWidgetClass "{66393512EA78F777}" {
+   Name "Power"
+   Slot FrameWidgetSlot "{662A44765E14B87A}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX 438.303
+    OffsetLeft 438.303
+    PositionY -217.573
+    OffsetTop -217.573
+    SizeX 114.745
+    OffsetRight -553.048
+    SizeY 110.543
+    OffsetBottom 107.03
+   }
+   "Z Order" 1
+   Tooltip TextWidgetTooltip "{6639351BAFECDB1F}" {
+    Text "Power"
+   }
+   Color 1 1 1 0
+   components {
+    SCR_ButtonTextComponent "{662A44FEA39790E2}" {
+    }
+   }
+  }
+  ImageWidgetClass "{66393512EA78F7D4}" {
+   Name "Knob"
+   Slot FrameWidgetSlot "{662A447270D1FD33}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -960
+    OffsetLeft -960
+    PositionY -540
+    OffsetTop -540
+    SizeX 1920
+    OffsetRight -960
+    SizeY 1080
+    OffsetBottom -540
+   }
+   Texture "{52C708D6FBA2E5CA}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOn.edds"
+   Size 2560 1440
   }
  }
 }

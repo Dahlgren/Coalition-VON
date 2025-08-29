@@ -1,39 +1,29 @@
-SCR_FactionManager FactionManager_Editor1 : "{4A188E44289B9A50}Prefabs/MP/Managers/Factions/FactionManager_Editor.et" {
- coords 124.856 1 134.426
- Factions {
-  SCR_Faction "{56DEAC40D2DBC8B1}" {
-   m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
-    m_GroupFrequency {
-     CVON_GroupFrequencyContainer "{663308EFD7703B68}" {
-      m_sSRFrequency "SQUAD1"
-      m_sMRFrequency "JTAC"
-      m_sLRFrequency "PLT1"
-     }
-     CVON_GroupFrequencyContainer "{663308EFCF71502E}" {
-      m_sSRFrequency "SQUAD2"
-      m_sMRFrequency "JTAC"
-      m_sLRFrequency "PLT1"
-     }
-     CVON_GroupFrequencyContainer "{663308EFCF2F24B8}" {
-      m_sSRFrequency "SQUAD3"
-      m_sMRFrequency "JTAC"
-      m_sLRFrequency "PLT1"
-     }
-     CVON_GroupFrequencyContainer "{663308EFCFEBB745}" {
-      m_sSRFrequency "SQUAD4"
-      m_sMRFrequency "JTAC"
-      m_sLRFrequency "PLT1"
-     }
-    }
-   }
-  }
- }
+Vehicle LAV1 : "{0FBF8F010F81A4E5}Prefabs/Vehicles/Wheeled/LAV25/LAV25.et" {
+ coords 131.616 1 132.306
+}
+SCR_ChimeraCharacter : "{11EB9A0D2A5899EA}Prefabs/Characters/Factions/CIV/GenericCivilians/Character_CIV_DenimJacket_1.et" {
+ coords 125.772 2.9 118.834
+}
+SCR_DestructibleBuildingEntity : "{3F91DEEC9C78E473}Prefabs/Structures/Military/Houses/GuardHouse_01/GuardHouse_01.et" {
+ coords 127.58 0 117.671
+}
+GenericEntity : "{4DE60347B19D0354}Prefabs/Props/Furniture/Chair_03/Chair_03_Base.et" {
+ coords 122.507 1 138.731
+}
+GenericEntity : "{5358FBC7146F4A45}Prefabs/Props/Furniture/Chair_01/Dst/Chair_01_dst_01_white.et" {
+ coords 127.524 1 136.658
 }
 GenericEntity : "{540C08AD5F21A5FA}Prefabs/Items/Equipment/Radios/Radio_R148_FIA.et" {
  coords 135.62 1 134.7
 }
 GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.et" {
  coords 122.437 1 138.134
+}
+GenericEntity : "{9D41F9933FEC41DE}Prefabs/Props/Furniture/Chair_02/Dst/Chair_02_dst_01_green.et" {
+ coords 124.724 1 136.012
+}
+SCR_DestructibleBuildingEntity : "{ACCE1E281C0C1DAB}Prefabs/Structures/Houses/Prefabricated/House_Prefab_2I02/House_Prefab_2I02t.et" {
+ coords 119.502 0 128.481
 }
 GenericEntity : "{E1A5D4B878AA8980}Prefabs/Items/Equipment/Radios/Radio_R148.et" {
  coords 128.929 1 134.729

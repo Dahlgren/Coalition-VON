@@ -8,6 +8,20 @@ enum CVON_EVONVolume
 	YELLING
 }
 
+class CVON_RadioSettingObject
+{
+	string m_sFreq = "";
+	CVON_EStereo m_Stereo = CVON_EStereo.BOTH;
+	int m_iVolume = 9;
+}
+
+class CVON_RadioSettings
+{
+	ref array<ref CVON_RadioSettingObject> m_aSRRadioSettings = {};
+	ref array<ref CVON_RadioSettingObject> m_aMRsRadioSettings = {};
+	ref array<ref CVON_RadioSettingObject> m_aLRRadioSettings = {};
+}
+
 modded class SCR_PlayerController
 {
 	//This is how we store who is talking to us and how, we use this in the VONController to populate the JSON.
@@ -22,15 +36,21 @@ modded class SCR_PlayerController
 	//Used to store the Id from the JSON that teamspeak rights to, this is so we can track teamspeak clientIds in game.
 	int m_iTeamSpeakClientId = 0;
 	
+	float m_fTeamspeakPluginVersion = 0;
+	
 	//How we link what level the enum below should be at.
 	int m_iLocalVolume = 15;
 	CVON_EVONVolume m_eVONVolume = CVON_EVONVolume.NORMAL;
+	int m_aVolumeValues[5] = {3, 10, 15, 25, 40};
 	
 	//Used so we don't spam the player with initial warnings if their TS crashes, just when they first connect.
 	bool m_bHasBeenGivenInitialWarning = false;
 	
 	//Teamspeak has been detected, also used to not have the annoying game locking popup everytime TS wants to crash
 	bool m_bHasConnectedToTeamspeakForFirstTime = false;
+	
+	//Used so we can keep Stereo and Volume values
+	ref CVON_RadioSettings m_RadioSettings = new CVON_RadioSettings();
 	
 	//Used to initials the m_aRadio array
 	//Delay is needed as it can take a sec for the entity to initialized for a client on the server.
@@ -48,9 +68,12 @@ modded class SCR_PlayerController
 			return;
 		if (radios.Count() == 0)
 			return;
-		IEntity shortRangeRadio;
-		IEntity longRangeRadio;
-		IEntity mediumRangeRadio;
+		ref array<IEntity> shortRangeRadios = {};
+		ref array<IEntity> longRangeRadios = {};
+		ref array<IEntity> mediumRangeRadios = {};
+		int SRIndex = 0;
+		int MRIndex = 0;
+		int LRIndex = 0;
 		foreach (RplId radio: radios)
 		{
 			if (!Replication.FindItem(radio))
@@ -61,38 +84,166 @@ modded class SCR_PlayerController
 				continue;
 			
 			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioObject.FindComponent(CVON_RadioComponent));
+			FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetControlledEntity().FindComponent(FactionAffiliationComponent));
+			if (!factionComp)
+				return;
+			string factionKey = factionComp.GetAffiliatedFactionKey();
+			//Used so we can assing settings to frequencies.
+			SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(factionKey));
+			SCR_GroupsManagerComponent groupManager = SCR_GroupsManagerComponent.GetInstance();
+			array<SCR_AIGroup> groups = groupManager.GetPlayableGroupsByFaction(faction);
+			SCR_AIGroup playersGroup = groupManager.GetPlayerGroup(GetPlayerId());
+			CVON_GroupFrequencyContainer freqContainer;
+			int index = groups.Find(playersGroup);
+			if (index != -1)
+				freqContainer = faction.GetCallsignInfo().m_aGroupFrequency.Get(index);
 			switch (radioComp.m_eRadioType)
 			{
 				case CVON_ERadioType.SHORT:
 				{
-					if (!shortRangeRadio)
-						shortRangeRadio = radioObject;
+					if (!shortRangeRadios.Contains(radioObject))
+					{
+						Print("Inserting sr");
+						shortRangeRadios.Insert(radioObject);
+						if (System.IsConsoleApp())
+							break;
+						if (!freqContainer)
+							break;
+						if (!freqContainer.m_aSRFrequencies)
+							break;
+						if (freqContainer.m_aSRFrequencies.Count() < SRIndex + 1)
+							break;
+						if (m_RadioSettings.m_aSRRadioSettings)
+						{
+							if (m_RadioSettings.m_aSRRadioSettings.Count() - 1 < SRIndex)
+							{
+								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+								settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
+								m_RadioSettings.m_aSRRadioSettings.Insert(settings);
+								SRIndex++;
+							}
+							else
+							{
+								Print("Creating setting");
+								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aSRRadioSettings.Get(SRIndex);
+								radioComp.m_eStereo = settings.m_Stereo;
+								radioComp.m_iVolume = settings.m_iVolume;
+								SRIndex++;
+							}
+						}
+						else
+						{
+							Print("Creating setting");
+							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+							settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
+							m_RadioSettings.m_aSRRadioSettings.Insert(settings);
+							SRIndex++;
+						}
+					}
+						
 					break;
 				}
 				case CVON_ERadioType.MEDIUM:
 				{
-					if (!mediumRangeRadio)
-						mediumRangeRadio = radioObject;
+					if (!mediumRangeRadios.Contains(radioObject))
+					{
+						mediumRangeRadios.Insert(radioObject);
+						if (System.IsConsoleApp())
+							break;
+						if (!freqContainer)
+							break;
+						if (!freqContainer.m_aMRFrequencies)
+							break;
+						if (freqContainer.m_aMRFrequencies.Count() < SRIndex + 1)
+							break;
+						if (m_RadioSettings.m_aMRsRadioSettings)
+						{
+							if (m_RadioSettings.m_aMRsRadioSettings.Count() - 1 < MRIndex)
+							{
+								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+								settings.m_sFreq = freqContainer.m_aMRFrequencies.Get(MRIndex);
+								m_RadioSettings.m_aMRsRadioSettings.Insert(settings);
+								MRIndex++;
+							}
+							else
+							{
+								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aMRsRadioSettings.Get(MRIndex);
+								radioComp.m_eStereo = settings.m_Stereo;
+								radioComp.m_iVolume = settings.m_iVolume;
+								MRIndex++;
+							}
+						}
+						else
+						{
+							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+							settings.m_sFreq = freqContainer.m_aMRFrequencies.Get(MRIndex);
+							m_RadioSettings.m_aMRsRadioSettings.Insert(settings);
+							MRIndex++;
+						}
+					}
+						
 					break;
 				}
 				case CVON_ERadioType.LONG:
 				{
-					if (!longRangeRadio)
-						longRangeRadio = radioObject;
+					if (!longRangeRadios.Contains(radioObject))
+					{
+						longRangeRadios.Insert(radioObject);
+						if (System.IsConsoleApp())
+							break;
+						if (!freqContainer)
+							break;
+						if (!freqContainer.m_aLRFrequencies)
+							break;
+						if (freqContainer.m_aLRFrequencies.Count() < SRIndex + 1)
+							break;
+						if (m_RadioSettings.m_aLRRadioSettings)
+						{
+							if (m_RadioSettings.m_aLRRadioSettings.Count() - 1 < LRIndex)
+							{
+								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+								settings.m_sFreq = freqContainer.m_aLRFrequencies.Get(LRIndex);
+								m_RadioSettings.m_aLRRadioSettings.Insert(settings);
+								LRIndex++;
+							}
+							else
+							{
+								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aLRRadioSettings.Get(LRIndex);
+								radioComp.m_eStereo = settings.m_Stereo;
+								radioComp.m_iVolume = settings.m_iVolume;
+								LRIndex++;
+							}
+						}
+						else
+						{
+							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
+							settings.m_sFreq = freqContainer.m_aLRFrequencies.Get(LRIndex);
+							m_RadioSettings.m_aLRRadioSettings.Insert(settings);
+							LRIndex++;
+						}
+					}
+						
 					break;
 				}
 			}
 		}
-		if (shortRangeRadio)
-			m_aRadios.Insert(shortRangeRadio);
-		if (longRangeRadio)
-			m_aRadios.Insert(longRangeRadio);
-		if (mediumRangeRadio)
-			m_aRadios.Insert(mediumRangeRadio);
+		Print(m_RadioSettings.m_aSRRadioSettings);
+		if (shortRangeRadios)
+			m_aRadios.InsertAll(shortRangeRadios);
+		if (longRangeRadios)
+			m_aRadios.InsertAll(longRangeRadios);
+		if (mediumRangeRadios)
+			m_aRadios.InsertAll(mediumRangeRadios);
+		Print(m_aRadios);
 		IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radios.Get(0))).GetEntity();
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (GetGame().GetPlayerController())
+		{
+			SCR_VONController vonController = SCR_VONController.Cast(GetGame().GetPlayerController().FindComponent(SCR_VONController));
+			vonController.m_CharacterController = SCR_CharacterControllerComponent.Cast(to.FindComponent(SCR_CharacterControllerComponent));
 			radioComp.WriteJSON(to);
+		}
+			
 	}
 	
 	//mmmmgetter
@@ -115,11 +266,11 @@ modded class SCR_PlayerController
 		m_eVONVolume += input;
 		switch(m_eVONVolume)
 		{
-			case 0: {m_iLocalVolume = 3;  break;}
-			case 1: {m_iLocalVolume = 10; break;}
-			case 2: {m_iLocalVolume = 15; break;}
-			case 3: {m_iLocalVolume = 25; break;}
-			case 4: {m_iLocalVolume = 40; break;}
+			case 0: {m_iLocalVolume = m_aVolumeValues[0];  break;}
+			case 1: {m_iLocalVolume = m_aVolumeValues[1]; break;}
+			case 2: {m_iLocalVolume = m_aVolumeValues[2]; break;}
+			case 3: {m_iLocalVolume = m_aVolumeValues[3]; break;}
+			case 4: {m_iLocalVolume = m_aVolumeValues[4]; break;}
 		}
 	}
 	
@@ -190,6 +341,28 @@ modded class SCR_PlayerController
 	
 	//All these are described already in the radio component, this is just how we get the authority to do it from the proxy.
 	//==========================================================================================================================================================================
+	void ToggleRadioPower(RplId radio)
+	{
+		Rpc(RpcAsk_ToggleRadioPower, radio);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Server)] 
+	void RpcAsk_ToggleRadioPower(RplId radio)
+	{
+		if (!Replication.FindItem(radio))
+			return;
+		
+		IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radio)).GetEntity();
+		if (!radioEntity)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
+		if (!radioComp)
+			return;
+		
+		radioComp.TogglePowerServer();
+	}
+	
 	void UpdateRadioChannel(int input, RplId radio)
 	{
 		Rpc(RpcAsk_UpdateRadioChannel, input, radio);

@@ -2,7 +2,7 @@
 modded enum ChimeraMenuPreset
 {
 	ANPRC152,
-	ANPRC160,
+	ANPRC150,
 	ANPRC117
 }
 
@@ -41,6 +41,9 @@ class CVON_RadioMenu: MenuBase
 	
 	//Left most number, used in the time menu to show + or - time.
 	TextWidget m_wLine3;
+	
+	//Knob Image Widget
+	ImageWidget m_wKnobWidget;
 	
 	//Whats the current menu.
 	CVON_ERadioMenu m_ERadioMenu = CVON_ERadioMenu.FREQ;
@@ -82,6 +85,7 @@ class CVON_RadioMenu: MenuBase
 		GetGame().GetInputManager().AddActionListener("Numpad9", EActionTrigger.DOWN, Button9);
 		GetGame().GetInputManager().AddActionListener("Numpad0", EActionTrigger.DOWN, Button0);
 		GetGame().GetInputManager().AddActionListener("Backspace", EActionTrigger.DOWN, Backspace);
+		GetGame().GetInputManager().AddActionListener("VONMenu", EActionTrigger.DOWN, Close);
 		
 		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("Clear").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(Clear);
 		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("Enter").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(Enter);
@@ -99,11 +103,13 @@ class CVON_RadioMenu: MenuBase
 		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("MenuRight").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(MenuRight);
 		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("MenuUp").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(MenuUp);
 		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("MenuDown").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(MenuDown);
+		SCR_ButtonTextComponent.Cast(m_wRoot.FindWidget("Power").FindHandler(SCR_ButtonTextComponent)).m_OnClicked.Insert(TogglePower);
 		
 		m_wLine1 = TextWidget.Cast(m_wRoot.FindWidget("RadioText"));
 		m_wLine2 = TextWidget.Cast(m_wRoot.FindWidget("Frequency"));
 		m_wLine3 = TextWidget.Cast(m_wRoot.FindWidget("Line3"));
 		m_wLine3.SetVisible(false);
+		m_wKnobWidget = ImageWidget.Cast(m_wRoot.FindAnyWidget("Knob"));
 		
 		m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
 		m_InputManager = GetGame().GetInputManager();
@@ -123,6 +129,7 @@ class CVON_RadioMenu: MenuBase
 		GetGame().GetInputManager().RemoveActionListener("Numpad9", EActionTrigger.DOWN, Button9);
 		GetGame().GetInputManager().RemoveActionListener("Numpad0", EActionTrigger.DOWN, Button0);
 		GetGame().GetInputManager().RemoveActionListener("Backspace", EActionTrigger.DOWN, Backspace);
+		GetGame().GetInputManager().RemoveActionListener("VONMenu", EActionTrigger.DOWN, Close);
 	}
 	
 	//==========================================================================================================================================================================
@@ -132,8 +139,10 @@ class CVON_RadioMenu: MenuBase
 		if (!m_RadioComponent)
 		{
 			m_RadioComponent = CVON_RadioComponent.Cast(m_RadioEntity.FindComponent(CVON_RadioComponent));
-			UpdateChannelMenu();
-			LoadFrequencyMenu();
+			if (m_RadioComponent.m_bPower)
+				PowerOn();
+			else
+				PowerOff();
 		}
 			
 		//Update the time if its the time menu
@@ -148,12 +157,14 @@ class CVON_RadioMenu: MenuBase
 				m_wLine3.SetText("+" + m_RadioComponent.m_iTimeDeviation.ToString());
 			m_wLine2.SetText(((h * 60 * 60) + ((m + m_RadioComponent.m_iTimeDeviation) * 60) + s).ToString());
 		}
-	}
-	
+	}	
 	//Shifts the menu down the enum
 	//==========================================================================================================================================================================
 	void MenuLeft()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu == 0)
 		{
 			m_ERadioMenu = 3;
@@ -169,6 +180,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void MenuRight()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu == 3)
 		{
 			m_ERadioMenu = 0;
@@ -184,6 +198,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void MenuUp()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		switch (m_ERadioMenu)
 		{
 			case CVON_ERadioMenu.FREQ:
@@ -214,6 +231,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void MenuDown()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		switch (m_ERadioMenu)
 		{
 			case CVON_ERadioMenu.FREQ:
@@ -238,6 +258,43 @@ class CVON_RadioMenu: MenuBase
 				break;
 			}
 		}
+	}
+	
+	void PowerOff()
+	{
+		m_wLine1.SetVisible(false);
+		m_wLine2.SetVisible(false);
+		m_wLine3.SetVisible(false);
+		m_wKnobWidget.LoadImageTexture(1, m_RadioComponent.m_sDialOff);
+		m_wKnobWidget.SetImage(1);
+		m_bIsEditing = false;
+	}
+	
+	void PowerOn()
+	{
+		m_wLine1.SetVisible(true);
+		m_wLine2.SetVisible(true);
+		m_wLine3.SetVisible(true);
+		UpdateChannelMenu();
+		LoadFrequencyMenu();
+		m_wKnobWidget.LoadImageTexture(1, m_RadioComponent.m_sDialOn);
+		m_wKnobWidget.SetImage(1);
+		m_bIsEditing = false;
+	}
+	
+	void TogglePower()
+	{
+		m_RadioComponent.m_bPower = !m_RadioComponent.m_bPower;
+		#ifdef WORKBENCH
+		#else
+		m_RadioComponent.TogglePowerClient();
+		#endif
+		if (m_RadioComponent.m_bPower)
+			PowerOn();
+		else
+			PowerOff();
+		
+		AudioSystem.PlaySound("{E6153160DA26A03A}UI/sounds/RadioKnobClick.wav");
 	}
 	
 	//Changes the channel based on the input from the MenuUp and Down methods
@@ -334,7 +391,7 @@ class CVON_RadioMenu: MenuBase
 	void UpdateChannelMenu()
 	{
 		int channels = m_RadioComponent.m_aChannels.Count();
-		if (channels - 1 < m_RadioComponent.m_iCurrentChannel)
+		if (channels < m_RadioComponent.m_iCurrentChannel)
 		{
 			m_RadioComponent.m_sFrequency = "55500";
 			m_RadioComponent.UpdateFrequencyClient("55500");
@@ -361,6 +418,42 @@ class CVON_RadioMenu: MenuBase
 	{
 		m_wLine1.SetText("Volume");
 		m_wLine2.SetText(m_RadioComponent.m_iVolume.ToString());
+		switch (m_RadioComponent.m_eRadioType)
+		{
+			case CVON_ERadioType.SHORT: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
+				}
+				break;
+			}
+			case CVON_ERadioType.MEDIUM: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
+				}
+				break;
+			}
+			case CVON_ERadioType.LONG: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
+				}
+				break;
+			}
+		}
 		m_wLine3.SetVisible(false);
 	}
 	
@@ -373,6 +466,42 @@ class CVON_RadioMenu: MenuBase
 			case CVON_EStereo.BOTH: {m_wLine2.SetText("Both"); break;}
 			case CVON_EStereo.RIGHT: {m_wLine2.SetText("Right"); break;}
 			case CVON_EStereo.LEFT: {m_wLine2.SetText("Left"); break;}
+		}
+		switch (m_RadioComponent.m_eRadioType)
+		{
+			case CVON_ERadioType.SHORT: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.MEDIUM: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.LONG: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
+				}
+				break;
+			}
 		}
 		m_wLine3.SetVisible(false);
 		
@@ -397,6 +526,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Clear()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		m_sTempFrequency = "_____";
@@ -408,6 +540,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Enter()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		int tempFreq = m_sTempFrequency.ToInt();
@@ -446,6 +581,8 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Backspace()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
 		
 		if (!m_bIsEditing)
 			return;
@@ -460,6 +597,9 @@ class CVON_RadioMenu: MenuBase
 	//==========================================================================================================================================================================
 	void Button0()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -469,6 +609,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button1()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -478,6 +621,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button2()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -487,6 +633,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button3()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -496,6 +645,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button4()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -505,6 +657,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button5()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -514,6 +669,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button6()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -523,6 +681,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button7()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -532,6 +693,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button8()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		
@@ -541,6 +705,9 @@ class CVON_RadioMenu: MenuBase
 	
 	void Button9()
 	{
+		if (!m_RadioComponent.m_bPower)
+			return;
+		
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		

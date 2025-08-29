@@ -10,6 +10,9 @@ enum CVON_EVONTransmitType
 
 modded class SCR_VONController
 {
+	static const int CVON_DB_ATTEN_VEHICLE  = -12; // speaker inside vehicle
+	static const int CVON_DB_ATTEN_BUILDING = -18; // speaker inside building
+	
 	//MMMM POINTER
 	SCR_PlayerController m_PlayerController;
 	
@@ -33,8 +36,17 @@ modded class SCR_VONController
 	//Stores the HUD so we can deactivate it after a transmissions end
 	CVON_HUD m_VONHud;
 	
+	//Used to check life state for VON
+	SCR_CharacterControllerComponent m_CharacterController;
+	
 	//Used if we are warning the player their VON is not connected after initial connection
 	bool m_bShowingSecondWarning = false;
+	
+	int m_iRangeWhisper;
+	int m_iRangeQuiet;
+	int m_iRangeNormal;
+	int m_iRangeLoud;
+	int m_iRangeYelling;
 	
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
@@ -142,6 +154,12 @@ modded class SCR_VONController
 			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.DOWN, ActivateCRFMR);
 			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.UP, DeactivateCRFVON);
 			m_InputManager.AddActionListener("VONRotateActive", EActionTrigger.DOWN, RotateActiveRadio);
+			m_InputManager.AddActionListener("VONChannelUp", EActionTrigger.DOWN, ChannelUp);
+			m_InputManager.AddActionListener("VONChannelDown", EActionTrigger.DOWN, ChannelDown);
+			m_InputManager.AddActionListener("VONOpenActive", EActionTrigger.DOWN, OpenActiveRadio);
+			m_InputManager.AddActionListener("VONRadioEarRight", EActionTrigger.DOWN, SetActiveEarRight);
+			m_InputManager.AddActionListener("VONRadioEarLeft", EActionTrigger.DOWN, SetActiveEarLeft);
+			m_InputManager.AddActionListener("VONRadioEarBoth", EActionTrigger.DOWN, SetActiveEarBoth);
 		}
 
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetOwner());
@@ -170,6 +188,218 @@ modded class SCR_VONController
 		UpdateSystemState();
 		
 		GetGame().GetCallqueue().CallLater(GetHud, 500, false);
+	}
+	
+	//Change ear keybind
+	//==========================================================================================================================================================================
+	void SetActiveEarRight()
+	{
+		if (m_PlayerController.m_aRadios.Count() == 0)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
+		radioComp.m_eStereo = CVON_EStereo.RIGHT;
+		switch (radioComp.m_eRadioType)
+		{
+			case CVON_ERadioType.SHORT: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.MEDIUM: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.LONG: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+		}
+		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+		m_VONHud.ShowVONChange();
+	}
+	
+	//Change ear keybind
+	//==========================================================================================================================================================================
+	void SetActiveEarLeft()
+	{
+		if (m_PlayerController.m_aRadios.Count() == 0)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
+		radioComp.m_eStereo = CVON_EStereo.LEFT;
+		switch (radioComp.m_eRadioType)
+		{
+			case CVON_ERadioType.SHORT: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.MEDIUM: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.LONG: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+		}
+		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+		m_VONHud.ShowVONChange();
+	}
+	
+	//Change ear keybind
+	//==========================================================================================================================================================================
+	void SetActiveEarBoth()
+	{
+		if (m_PlayerController.m_aRadios.Count() == 0)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
+		radioComp.m_eStereo = CVON_EStereo.BOTH;
+		switch (radioComp.m_eRadioType)
+		{
+			case CVON_ERadioType.SHORT: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.MEDIUM: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+			case CVON_ERadioType.LONG: 
+			{
+				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
+				{
+					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
+						continue;
+					
+					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
+				}
+				break;
+			}
+		}
+		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
+		m_VONHud.ShowVONChange();
+	}
+	
+	//Keybind to open active radio
+	//==========================================================================================================================================================================
+	void OpenActiveRadio()
+	{
+		if (m_PlayerController.m_aRadios.Count() == 0)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
+		radioComp.OpenMenu();
+	}
+	
+	//Used as input
+	//==========================================================================================================================================================================
+	void ChannelUp()
+	{
+		ChangeChannel(1);
+	}
+	
+	//used as input
+	//==========================================================================================================================================================================
+	void ChannelDown()
+	{
+		ChangeChannel(-1);
+	}
+	
+	//Used for changing channel keybind to rotate through channels without opening radio
+	//==========================================================================================================================================================================
+	void ChangeChannel(int input)
+	{
+		array<IEntity> radios = m_PlayerController.m_aRadios;
+		Print(m_PlayerController.m_aRadios);
+		if (radios.Count() == 0)
+			return;
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radios.Get(0).FindComponent(CVON_RadioComponent));
+		int channelCount = radioComp.m_aChannels.Count();
+		if (channelCount < 2)
+			return;
+
+		if (radioComp.m_iCurrentChannel == 1 && input == -1)
+		{
+			radioComp.m_iCurrentChannel = radioComp.m_aChannels.Count();
+			radioComp.UpdateChannelClient(radioComp.m_aChannels.Count());
+		}
+		else if (radioComp.m_iCurrentChannel == 99 && input == 1)
+		{
+			radioComp.m_iCurrentChannel = 1;
+			radioComp.UpdateChannelClient(1);
+		}
+		else
+		{
+			radioComp.m_iCurrentChannel += input;
+			radioComp.UpdateChannelClient(radioComp.m_iCurrentChannel);
+		}
+		
+		if (radioComp.m_iCurrentChannel > channelCount)
+		{
+			radioComp.m_iCurrentChannel = 1;
+			radioComp.UpdateChannelClient(1);
+		}
+		string freq = radioComp.m_aChannels.Get(radioComp.m_iCurrentChannel - 1);
+		radioComp.m_sFrequency = freq;
+		radioComp.UpdateFrequencyClient(freq);
+		m_VONHud.ShowVONChange();
 	}
 	
 	//Fetches the VON HUD, delay is necessary.
@@ -203,6 +433,10 @@ modded class SCR_VONController
 		if (m_PlayerController.m_iTeamSpeakClientId == 0)
 			return;
 		#endif
+		if (!SCR_PlayerController.GetLocalControlledEntity())
+			return;
+		if (m_CharacterController.GetLifeState() != ECharacterLifeState.ALIVE)
+			return;
 		if (m_CurrentVONContainer)
 			DeactivateCRFVON();
 		CVON_VONContainer container = new CVON_VONContainer();
@@ -330,23 +564,39 @@ modded class SCR_VONController
 	{
 		super.EOnFixedFrame(owner, timeSlice);
 		if (!m_PlayerController)
+		{
 			m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
+			m_iRangeWhisper = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[0]);
+			m_iRangeQuiet = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[1]);
+			m_iRangeNormal = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[2]);
+			m_iRangeLoud = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[3]);
+			m_iRangeYelling = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[4]);
+		}
+		if (!m_CharacterController)
+			if (SCR_PlayerController.GetLocalControlledEntity())
+				m_CharacterController = SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent));
 		if (!m_VONGameModeComponent)
 			m_VONGameModeComponent = CVON_VONGameModeComponent.GetInstance();
 		if (!m_PlayerManager)
 			m_PlayerManager = GetGame().GetPlayerManager();
 		
+		int maxDistance = 0;
+		switch (m_PlayerController.m_eVONVolume)
+		{
+			case CVON_EVONVolume.WHISPER: {maxDistance = m_iRangeWhisper; break;}
+			case CVON_EVONVolume.QUIET: {maxDistance = m_iRangeQuiet; break;}
+			case CVON_EVONVolume.NORMAL: {maxDistance = m_iRangeNormal; break;}
+			case CVON_EVONVolume.LOUD: {maxDistance = m_iRangeLoud; break;}
+			case CVON_EVONVolume.YELLING: {maxDistance = m_iRangeYelling; break;}
+			default: {maxDistance = m_iRangeNormal; break;}
+		}
 		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
-			if (!Replication.FindItem(container.m_SenderRplId))
+			if (!container.m_SoundSource)
 				continue;
 			
-			IEntity player = RplComponent.Cast(Replication.FindItem(container.m_SenderRplId)).GetEntity();
-			if (!player)
-				continue;
-			
-			float distance = vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
-			if (distance < 200)
+			float distance = vector.Distance(container.m_SoundSource.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
+			if (distance < maxDistance)
 				container.m_fDistanceToSender = distance;
 			else
 				container.m_fDistanceToSender = -1;
@@ -354,6 +604,20 @@ modded class SCR_VONController
 		
 		if (m_bIsBroadcasting)
 		{
+			if (m_CharacterController.GetLifeState() != ECharacterLifeState.ALIVE)
+			{
+				if (m_bToggleBuffer)
+				{
+					Print("Deactivating toggle");
+					m_bToggleBuffer = false;
+					DeactivateCRFVON();
+					m_VONHud.DirectToggleDelay();
+				}
+				else
+					DeactivateCRFVON();
+				return;
+			}
+				
 			ref array<int> playerIds = {};
 			ref array<int> broadcastToPlayerIds = {};
 			m_PlayerManager.GetPlayers(playerIds);
@@ -370,11 +634,14 @@ modded class SCR_VONController
 					IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
 					if (!player)
 						continue;
-					if (vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin()) > 200)
+
+					if (vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin()) > maxDistance)
 					{
 						if (m_aPlayerIdsBroadcastedTo.Contains(playerId))
+						{
 							m_aPlayerIdsBroadcastedTo.RemoveItem(playerId);
-						m_PlayerController.BroadcastRemoveLocalVONToServer(playerId, SCR_PlayerController.GetLocalPlayerId());
+							m_PlayerController.BroadcastRemoveLocalVONToServer(playerId, SCR_PlayerController.GetLocalPlayerId());
+						}
 						continue;
 					}
 				}
@@ -403,16 +670,60 @@ modded class SCR_VONController
 	// Geometry only: pan + rear shadow + elevation + bleed.
 	// Multiply the returned L/R by your own plugin volume afterward.
 	//==========================================================================================================================================================================
-	static void ComputeStereoLR(
+	static const float SPEECH_NORMAL_M       = 15.0;   // "normal talk" meters
+	static const float INTENSITY_FADE_FACTOR = 0.6;    // how quickly yelling falls off
+	static const float MAX_OUT_GAIN          = 2.0;    // safety cap; raise or set -1 for no cap
+	
+	static float LoudnessIntensity(float volume_m, float distance_m)
+	{
+	    if (volume_m <= 0.01) volume_m = 0.01;
+	    if (distance_m <  0.0) distance_m = 0.0;
+	
+	    // How "loud" compared to normal talk (15 m):
+	    float intent = volume_m / SPEECH_NORMAL_M;       // e.g. 40/15 ≈ 2.67 for screaming
+	    float base   = Math.Pow(intent, 0.5);            // gentle growth (sqrt): 1..~1.63
+	
+	    // Fade that extra loudness with distance, scaled by the loudness range itself
+	    float denom = INTENSITY_FADE_FACTOR * volume_m;  // larger volume_m → longer fade
+	    if (denom < 0.01) denom = 0.01;
+	    float x = distance_m / denom;
+		float fade = ExpNegFast(x);
+	
+	    return 1.0 + (base - 1.0) * fade;                // 1.0 at normal; >1 near loud sources
+	}
+	
+	// Approx exp(-x) ~ (1 + 0.5*x + 0.12*x*x) / (1 + x + 0.48*x*x)
+	// Max rel. error ~1–2% on [0, 8]
+	static float ExpNegFast(float x)
+	{
+	    float x2 = x * x;
+	    return (1.0 + 0.5 * x + 0.12 * x2) / (1.0 + x + 0.48 * x2);
+	}
+
+	//Distance rolloff helper
+	static float DistanceRolloffDynamic(float distance_m, float volume_m, float n = 1.4)
+	{
+	    if (volume_m <= 0.01)  volume_m  = 0.01;
+	    if (distance_m < 0.0)  distance_m = 0.0;
+	
+	    float base = volume_m / (volume_m + distance_m);   // 0..1
+	    base = Math.Clamp(base, 0.0, 1.0);
+	    return Math.Pow(base, n);                           // steeper falloff with n>1
+	}
+	
+	// --- Stereo with front/back cues + distance rolloff ---
+	void ComputeStereoLR(
 	    IEntity listener,
 	    vector  sourcePos,
+		float volume_m,
 	    out float outLeft,
 	    out float outRight,
-	    float   rearPanBoost=0.55,
-	    float   rearShadow =0.12,
-	    float   elevNarrow =0.25,
-	    float   bleed      =0.10,
-	    bool    normalizePeak = true   // <-- makes center ~1/1 instead of 0.707/0.707
+		out int silencedDecibels = 0,
+	    float   rearPanBoost = 0.55,
+	    float   rearShadow   = 0.12,
+	    float   elevNarrow   = 0.25,
+	    float   bleed        = 0.10,
+	    bool    normalizePeak = true,
 	)
 	{
 	    // ---- Listener pose ----
@@ -456,7 +767,7 @@ modded class SCR_VONController
 	    L = (1.0 - bleed) * Lb + bleed * Rb;
 	    R = (1.0 - bleed) * Rb + bleed * Lb;
 	
-	    // ---- Peak-normalize AFTER bleed (so center → ~1/1) ----
+	    // ---- Peak-normalize AFTER bleed (so center → ~1/1 per ear) ----
 	    if (normalizePeak) {
 	        float peak = Math.Max(L, R);
 	        if (peak > 0.0001) {
@@ -468,10 +779,100 @@ modded class SCR_VONController
 	
 	    // ---- Rear shadow (optional muffling behind) ----
 	    float rearAtt = 1.0 - rearShadow * back01;
-	
-	    outLeft  = Math.Clamp(L * rearAtt, 0.0, 1.0);
-	    outRight = Math.Clamp(R * rearAtt, 0.0, 1.0);
+		
+		// ---- Distance rolloff (0..1) ----
+		float roll = DistanceRolloffDynamic(dist, volume_m);
+		
+		// ---- Loudness boost (>1 when volume_m > normal, fades with distance) ----
+		float loud = LoudnessIntensity(volume_m, dist);
+		
+		// ---- Final per-ear gains (can exceed 1.0) ----
+		float gain = rearAtt * roll * loud;
+		outLeft  = L * gain;
+		outRight = R * gain;
+		
+		// Optional safety cap to avoid runaway values (matches plugin's 0..2 clamp):
+		if (MAX_OUT_GAIN > 0.0) 
+		{
+		    outLeft  = Math.Clamp(outLeft,  0.0, MAX_OUT_GAIN);
+		    outRight = Math.Clamp(outRight, 0.0, MAX_OUT_GAIN);
+		}
+
 	}
+	
+	// Convert attenuation in dB → linear (treats +/−dB the same)
+	static float AttenDbToLin(float dB)
+	{
+	    float a = Math.AbsFloat(dB);
+	    return Math.Pow(10.0, -a / 20.0);
+	}
+	
+	// Effective gain = rolloff * loudness (uses your existing helpers)
+	static float EffectiveGainAt(float volume_m, float dist, float n = 1.4)
+	{
+	    return DistanceRolloffDynamic(dist, volume_m, n) * LoudnessIntensity(volume_m, dist);
+	}
+	
+	// Max distance where PER-EAR level hits your chosen dB (e.g. 26 → −26 dB ~= 0.0501).
+	// normalizePeak must match your ComputeStereoLR call.
+	// rearAttRef is a budget for rear shadow at the boundary (1.0 = front).
+	// occLin lets you include level-only occlusion (<=1), e.g. AttenDbToLin(totalOccDb).
+	static int CalculateMaxDistance(
+	    float volume_m,
+	    float cutoffDb		= 20,
+	    float n             = 1.4,
+	    bool  normalizePeak = true,
+	    float rearAttRef    = 1.0,
+	    float occLin        = 1.0
+	)
+	{
+	    if (volume_m < 0.01) volume_m = 0.01;
+	    if (n <= 0.0)        n = 1.0;
+	
+	    // Desired per-ear linear threshold
+	    float tauEar = AttenDbToLin(cutoffDb);
+	
+	    // Peak-ear factor from stereo (no ternary for Enforce)
+	    float panPeak;
+	    if (normalizePeak) {
+	        panPeak = 1.0;           // after normalize, peak ear ≈ 1.0
+	    } else {
+	        panPeak = 0.70710678;    // sqrt(0.5) at center without normalize
+	    }
+	
+	    // Total per-ear scale applied after pre-stereo scalar
+	    float earScale = panPeak * rearAttRef * occLin;
+	    if (earScale < 0.0001) earScale = 0.0001;
+	
+	    // Convert per-ear target → equivalent pre-stereo threshold
+	    float tauPre = tauEar / earScale;
+	
+	    // Fast closed form when ≤ normal talk (no extra loudness tail)
+	    if (volume_m <= SPEECH_NORMAL_M + 0.0001) {
+	        float invRoot = 1.0 / Math.Pow(tauPre, 1.0 / n);
+	        float d       = volume_m * (invRoot - 1.0);
+	        return (int)Math.Ceil(d);
+	    }
+	
+	    // Loudness-aware solve (binary search)
+	    float invRoot = 1.0 / Math.Pow(tauPre, 1.0 / n);
+	    float baseHi  = volume_m * (invRoot - 1.0);
+	    float lo = 0.0;
+	    float hi = Math.Max(1.0, baseHi + 8.0 * volume_m);  // headroom for loudness tail
+	
+	    int guard = 0;
+	    while (EffectiveGainAt(volume_m, hi, n) >= tauPre && guard++ < 24) {
+	        hi *= 2.0;  // expand until below threshold
+	    }
+	
+	    for (int i = 0; i < 24; ++i) {
+	        float mid = 0.5 * (lo + hi);
+	        if (EffectiveGainAt(volume_m, mid, n) >= tauPre) lo = mid; else hi = mid;
+	    }
+	
+	    return (int)Math.Ceil(hi);
+	}
+
 
 	
 	//Also bless ChatGPT, handles the arcade signal calulations.
@@ -513,6 +914,113 @@ modded class SCR_VONController
 	    if (res > 1.0) res = 1.0;
 	    return res;
 	}
+	
+	vector GetHeadHeight(IEntity entity)
+	{
+		Animation anim = entity.GetAnimation();
+		TNodeId headIndex = anim.GetBoneIndex("head");
+		vector matPos[4];
+		anim.GetBoneMatrix(headIndex, matPos);
+		return entity.CoordToParent(matPos[3]);
+		
+	}
+	
+	bool IsInBuilding(IEntity senderEntity, out IEntity building = null)
+	{
+		
+		autoptr TraceParam p = new TraceParam;
+		vector end = senderEntity.GetOrigin();
+		end[1] = end[1] + 100;
+		p.Exclude = senderEntity;
+		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+		p.Start = GetHeadHeight(senderEntity);
+		p.End = end;
+		float distance = GetGame().GetWorld().TraceMove(p, null);
+		if (p.TraceEnt == null)
+			return false;
+		
+		building = p.TraceEnt;
+		return true;
+	}
+	
+	bool CanPlayerSeeSender(IEntity senderEntity)
+	{
+		
+		autoptr TraceParam p = new TraceParam;
+		IEntity player = SCR_PlayerController.GetLocalControlledEntity();
+		vector end = senderEntity.GetOrigin();
+		p.Exclude = player;
+		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+		p.Start = GetHeadHeight(senderEntity);
+		p.End = GetHeadHeight(player);
+		float distance = GetGame().GetWorld().TraceMove(p, null);
+		if (distance == 1)
+			return true;
+		return false;
+	}
+	
+	void DetermineHearingWindow(IEntity entity, out float top, out float bottom)
+	{
+		autoptr TraceParam p = new TraceParam;
+		vector end = entity.GetOrigin();
+		end[1] = end[1] + 100;
+		p.Exclude = entity;
+		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+		p.Start = GetHeadHeight(entity);
+		p.End = end;
+		float distanceUp = GetGame().GetWorld().TraceMove(p, null) * 100;
+		
+		end[1] = end[1] + -200;
+		p.End = end;
+		float distanceDown = GetGame().GetWorld().TraceMove(p, null) * 100;
+		vector origin = GetHeadHeight(entity);
+		top = origin[1] + distanceUp;
+		bottom = origin[1] - distanceDown;
+	}
+	
+	bool ShouldMuffleAudio(IEntity senderEntity, out int loweredDecibles = 0)
+	{
+		if (CanPlayerSeeSender(senderEntity))
+			return false;
+		
+		IEntity player = SCR_PlayerController.GetLocalControlledEntity();
+		IEntity receiverBuilding;
+		IEntity senderBuilding;
+		bool isSenderInBuilding = IsInBuilding(senderEntity, senderBuilding);
+		bool isPlayerInBuilding = IsInBuilding(player, receiverBuilding);
+		
+		if (Vehicle.Cast(senderBuilding))
+		{
+			loweredDecibles = CVON_DB_ATTEN_VEHICLE;
+			return true;
+		}
+		
+		if (!isSenderInBuilding && !isPlayerInBuilding)
+			return false;
+		
+		if (isPlayerInBuilding != isSenderInBuilding)
+		{
+			loweredDecibles = CVON_DB_ATTEN_BUILDING;
+			return true;
+		}
+		
+		if (senderBuilding != receiverBuilding)
+		{
+			loweredDecibles = CVON_DB_ATTEN_BUILDING * 2;
+			return true;
+		}
+		float top;
+		float bottom;
+		
+		DetermineHearingWindow(player, top, bottom);
+		vector senderOrigin = GetHeadHeight(senderEntity);
+		if (senderOrigin[1] > top || senderOrigin[1] < bottom)
+		{
+			loweredDecibles = CVON_DB_ATTEN_BUILDING;
+			return true;
+		}
+		return false;
+	}
 
 	
 	//VONServerData.JSON
@@ -544,8 +1052,10 @@ modded class SCR_VONController
 		{
 			SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 			VONServerData.StartObject("ServerData");
+			VONServerData.SetMaxDecimalPlaces(3);
 			VONServerData.WriteValue("InGame", true);
 			VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
+			VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
 			VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 			VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
 			VONServerData.EndObject();
@@ -558,14 +1068,17 @@ modded class SCR_VONController
 			VONLoad.StartObject("ServerData");
 			VONLoad.ReadValue("VONChannelName", ChannelName);
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
+			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
 			VONLoad.EndObject();
-			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword)
+			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
 			{
 				SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 				VONServerData.StartObject("ServerData");
+				VONServerData.SetMaxDecimalPlaces(3);
 				VONServerData.WriteValue("InGame", true);
 				VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
+				VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
 				VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 				VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
 				VONServerData.EndObject();
@@ -575,10 +1088,19 @@ modded class SCR_VONController
 		#ifdef WORKBENCH
 		#else
 		//Hijack this whole process to load the initial warning menu
+		if (m_PlayerController.m_fTeamspeakPluginVersion != 0 && m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
+		{
+			m_VONHud.ShowWarning();
+		}
 		if (m_PlayerController.m_iTeamSpeakClientId == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
 		{
 			m_PlayerController.m_bHasBeenGivenInitialWarning = true;
 			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
+		}
+		else if (!m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId != 0)
+		{
+			m_PlayerController.m_bHasBeenGivenInitialWarning = true;
+			m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
 		}
 		else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId == 0 && SCR_PlayerController.GetLocalControlledEntity())
 		{
@@ -594,34 +1116,59 @@ modded class SCR_VONController
 		#endif
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		VONSave.WriteValue("IsTransmitting", m_bIsBroadcasting);
-		IEntity localEntity = SCR_PlayerController.GetLocalControlledEntity();
+		IEntity localEntity = GetGame().GetCameraManager().CurrentCamera();
 		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			IEntity soundSource;
 			float left = 0;
 			float right = 0;
-			if (Replication.FindItem(container.m_SenderRplId) && !container.m_SoundSource)
+			int loweredDecibels = 0;
+			string frequency = container.m_sFrequency;
+			if (m_CharacterController.GetLifeState() == ECharacterLifeState.DEAD)
+			{
+				//Cuts off all incoming audio, cause we're dead.
+				left = 0;
+				right = 0;
+				frequency = "";
+			}
+			else if (Replication.FindItem(container.m_SenderRplId) && !container.m_SoundSource && container.m_fDistanceToSender != -1)
 			{
 				soundSource = RplComponent.Cast(Replication.FindItem(container.m_SenderRplId)).GetEntity();
 				container.m_SoundSource = soundSource;
-				ComputeStereoLR(localEntity, soundSource.GetOrigin(), left, right);
+				Print(container.m_SoundSource);
+				ShouldMuffleAudio(container.m_SoundSource, loweredDecibels);
+				if (loweredDecibels < 0)
+					ComputeStereoLR(localEntity, GetHeadHeight(soundSource), container.m_iVolume/2, left, right);
+				else
+					ComputeStereoLR(localEntity, GetHeadHeight(soundSource), container.m_iVolume, left, right);
 			}
-			else if (container.m_SoundSource)
+			else if (container.m_SoundSource && container.m_fDistanceToSender != -1)
 			{
-				ComputeStereoLR(localEntity, container.m_SoundSource.GetOrigin(), left, right);
+				ShouldMuffleAudio(container.m_SoundSource, loweredDecibels);
+				if (loweredDecibels < 0)
+					ComputeStereoLR(localEntity, GetHeadHeight(container.m_SoundSource), container.m_iVolume/2, left, right);
+				else
+					ComputeStereoLR(localEntity, GetHeadHeight(container.m_SoundSource), container.m_iVolume, left, right);
 			}
 			
 			if (container.m_eVonType == CVON_EVONType.RADIO)
-				container.m_fConnectionQuality = GetSignalStrength(vector.Distance(localEntity.GetOrigin(), container.m_vSenderLocation), container.m_iMaxDistance);
+			{
+				if (container.m_SoundSource)
+				{
+					container.m_fConnectionQuality = GetSignalStrength(vector.Distance(localEntity.GetOrigin(), container.m_SoundSource.GetOrigin()), container.m_iMaxDistance);
+				}
+				else
+					container.m_fConnectionQuality = GetSignalStrength(vector.Distance(localEntity.GetOrigin(), container.m_vSenderLocation), container.m_iMaxDistance);
+			}
+				
 				
 			VONSave.StartObject(container.m_iClientId.ToString());
 			VONSave.SetMaxDecimalPlaces(3);
 			VONSave.WriteValue("VONType", container.m_eVonType);
-			VONSave.WriteValue("Frequency", container.m_sFrequency);
+			VONSave.WriteValue("Frequency", frequency);
 			VONSave.WriteValue("LeftGain", left);
 			VONSave.WriteValue("RightGain", right);
-			VONSave.WriteValue("Volume", container.m_iVolume);
-			VONSave.WriteValue("Distance", container.m_fDistanceToSender);
+			VONSave.WriteValue("MuffledDecibels", loweredDecibels);
 			VONSave.WriteValue("ConnectionQuality", container.m_fConnectionQuality);
 			VONSave.WriteValue("FactionKey", container.m_sFactionKey);
 			VONSave.EndObject();
@@ -639,6 +1186,7 @@ modded class SCR_VONController
 		VONServerData.StartObject("ServerData");
 		VONServerData.WriteValue("InGame", false);
 		VONServerData.WriteValue("TSClientID", 0);
+		VONServerData.WriteValue("TSPluginVersion", 0);
 		VONServerData.WriteValue("VONChannelName", "");
 		VONServerData.WriteValue("VONChannelPassword", "");
 		VONServerData.EndObject();

@@ -8,10 +8,18 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
      m_bIsPlayable 1
      m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
       m_aGroupFrequency {
-       CVON_GroupFrequencyContainer "{663439DBA697E4BB}" {
-        m_sSRFrequency "SQUAD1"
-        m_sLRFrequency "PLT1"
-        m_sMRFrequency "JTAC"
+       CVON_GroupFrequencyContainer "{6639350E65A54431}" {
+        m_aSRFrequencies {
+         "SQUAD1" "MEDIC"
+        }
+        m_aLRFrequencies {
+         "Test1" "Test2"
+        }
+       }
+       CVON_GroupFrequencyContainer "{663935120E8F2A76}" {
+        m_aLRFrequencies {
+         "Test3" "Test4"
+        }
        }
       }
      }
@@ -36,9 +44,34 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
 SCR_SpawnPoint : "{5A2220DD0C16958B}Prefabs/MP/Spawning/SpawnPoint_US.et" {
  coords 137.887 1 171.251
 }
-GenericEntity : "{C204374F722D5229}Prefabs/Items/Equipment/Radios/Radio_ANPRC117.et" {
- coords 122.629 1 159.274
+$grp GenericEntity : "{C204374F722D5229}Prefabs/Items/Equipment/Radios/Radio_ANPRC117.et" {
+ {
+  coords 122.629 1 159.274
+ }
+ {
+  coords 127.636 1.411 134.839
+  angleY -93.81
+ }
 }
-GenericEntity : "{F8F7E82661C761DD}Prefabs/Items/Equipment/Radios/Radio_ANPRC160.et" {
- coords 126.392 1 159.786
+GenericEntity : "{E82129A6CC014808}Prefabs/Items/Equipment/Radios/Radio_ANPRC152.et" {
+ components {
+  InventoryItemComponent "{5222EB4D0C73006B}" {
+   Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
+    CustomAttributes {
+     PreviewRenderAttributes "{52D493152DA704BA}" {
+      CameraOffset 0 0.1 0
+     }
+    }
+   }
+  }
+ }
+ coords 122.949 1 159.232
+}
+$grp GenericEntity : "{F8F7E82661C761DD}Prefabs/Items/Equipment/Radios/Radio_ANPRC150.et" {
+ {
+  coords 126.392 1 159.786
+ }
+ {
+  coords 127.009 1 135.305
+ }
 }

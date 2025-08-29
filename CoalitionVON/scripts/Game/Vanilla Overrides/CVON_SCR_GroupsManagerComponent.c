@@ -4,6 +4,7 @@ modded class SCR_GroupsManagerComponent
 	//==========================================================================================================================================================================
 	override void TunePlayersFrequency(int playerId, IEntity player)
 	{
+		Print("TUNING  PLAYER");
 		GetGame().GetCallqueue().CallLater(TuneFreqDelay, 500, false, playerId, player);
 	}
 	
@@ -15,6 +16,7 @@ modded class SCR_GroupsManagerComponent
 		int playerId = GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(player);
 		if (playerId == -1)
 			return;
+		Print("TUNING AGENT");
 		GetGame().GetCallqueue().CallLater(TuneFreqDelay, 500, false, playerId, player);
 	}
 	
@@ -39,6 +41,9 @@ modded class SCR_GroupsManagerComponent
 	
 		if (playerFaction.GetCallsignInfo().m_aGroupFrequency.Count() < index + 1)
 			return;		
+		int SRIndex = 0;
+		int MRIndex = 0;
+		int LRIndex = 0;
 		CVON_GroupFrequencyContainer freqContainer = playerFaction.GetCallsignInfo().m_aGroupFrequency.Get(index);
 		for (int i = 0; i < playerController.m_aRadios.Count(); i++)
 		{
@@ -47,30 +52,47 @@ modded class SCR_GroupsManagerComponent
 			{
 				case 0: 
 				{
-					if (!radioComp.m_aChannels.Contains(freqContainer.m_sSRFrequency))
+					if (!freqContainer.m_aSRFrequencies)
 						break;
-					radioComp.UpdateFrequncyServer(freqContainer.m_sSRFrequency);
-					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sSRFrequency) + 1);
+					if (freqContainer.m_aSRFrequencies.Count() < SRIndex + 1)
+						break;
+					string freq = freqContainer.m_aSRFrequencies.Get(SRIndex);
+					if (!radioComp.m_aChannels.Contains(freq))
+						break;
+					SRIndex++;
+					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freq) + 1);
+					radioComp.UpdateFrequncyServer(freq);
 					break;
 				}
 				case 1: 
 				{
-					if (!radioComp.m_aChannels.Contains(freqContainer.m_sMRFrequency))
+					if (!freqContainer.m_aMRFrequencies)
 						break;
-					radioComp.UpdateFrequncyServer(freqContainer.m_sMRFrequency);
-					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sMRFrequency) + 1);
+					if (freqContainer.m_aMRFrequencies.Count() < SRIndex + 1)
+						break;
+					string freq = freqContainer.m_aMRFrequencies.Get(MRIndex);
+					if (!radioComp.m_aChannels.Contains(freq))
+						break;
+					MRIndex++;
+					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freq) + 1);
+					radioComp.UpdateFrequncyServer(freq);
 					break;
 				}
 				case 2: 
 				{
-					if (!radioComp.m_aChannels.Contains(freqContainer.m_sLRFrequency))
+					if (!freqContainer.m_aLRFrequencies)
 						break;
-					radioComp.UpdateFrequncyServer(freqContainer.m_sLRFrequency);
-					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freqContainer.m_sLRFrequency) + 1);
+					if (freqContainer.m_aLRFrequencies.Count() < SRIndex + 1)
+						break;
+					string freq = freqContainer.m_aLRFrequencies.Get(LRIndex);
+					if (!radioComp.m_aChannels.Contains(freq))
+						break;
+					LRIndex++;
+					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freq) + 1);
+					radioComp.UpdateFrequncyServer(freq);
 					break;
 				}
 			}
-			
 		}
 	}
 }
