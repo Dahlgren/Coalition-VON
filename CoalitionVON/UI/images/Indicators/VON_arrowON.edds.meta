@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{2D42126BA15DD771}UI/images/Mic/VON_arrowON.edds"
+ Name "{DFDD89B0F30E34C9}UI/images/Indicators/VON_arrowON.edds"
  Configurations {
   TIFFResourceClass PC : "{DC555BD399D92412}Configs/System/ResourceTypes/PC/TextureUnspecified.conf" {
   }

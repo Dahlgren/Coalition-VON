@@ -6,12 +6,12 @@ FrameWidgetClass {
     Anchor 0.5 0.5 0.5 0.5
     PositionX -105.242
     OffsetLeft -105.242
-    PositionY -30.255
-    OffsetTop -30.255
+    PositionY -32.555
+    OffsetTop -32.555
     SizeX 7.496
     OffsetRight 97.746
-    SizeY 7.84
-    OffsetBottom 22.416
+    SizeY 7.839
+    OffsetBottom 24.716
    }
    Color 0 0 0 0.2813
   }
@@ -19,14 +19,14 @@ FrameWidgetClass {
    Name "Window0"
    Slot FrameWidgetSlot "{66393553CC00232F}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -117.269
-    OffsetLeft -117.269
-    PositionY -36.131
-    OffsetTop -36.131
-    SizeX 6.84
-    OffsetRight 110.429
-    SizeY 13.847
-    OffsetBottom 22.284
+    PositionX -118.269
+    OffsetLeft -118.269
+    PositionY -38.231
+    OffsetTop -38.231
+    SizeX 7.94
+    OffsetRight 110.329
+    SizeY 13.947
+    OffsetBottom 24.284
    }
    Color 0 0 0 0.2813
   }
@@ -36,12 +36,12 @@ FrameWidgetClass {
     Anchor 0.5 0.5 0.5 0.5
     PositionX -118.179
     OffsetLeft -118.179
-    PositionY -22.069
-    OffsetTop -22.069
+    PositionY -25.096
+    OffsetTop -25.096
     SizeX 237.224
     OffsetRight -119.045
-    SizeY 81.751
-    OffsetBottom -59.682
+    SizeY 90.418
+    OffsetBottom -65.323
    }
    Color 0 0 0 0.2813
   }
@@ -86,7 +86,7 @@ FrameWidgetClass {
            Name "Radio"
            Slot LayoutSlot "{662F62B4CF86638F}" {
            }
-           Color 0.2961 0.7529 0.2159 1
+           Color 0.4185 0.723 0.2932 1
            Text "AN/PRC-152"
            "Horizontal Alignment" Center
            "Vertical Alignment" Center
@@ -102,7 +102,7 @@ FrameWidgetClass {
             HorizontalAlign 3
             VerticalAlign 3
            }
-           Color 0.2961 0.7529 0.2159 1
+           Color 0.4185 0.723 0.2932 1
            Text "55500"
            FontProperties FontProperties "{52EF3224C71893AC}" {
             Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
@@ -119,8 +119,8 @@ FrameWidgetClass {
              Slot LayoutSlot "{663B044D90047E3F}" {
               HorizontalAlign 0
              }
-             Texture "{99D73D4C8809C354}UI/images/Mic/mic_open.edds"
-             Size 28 20
+             Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
+             Size 36 35
             }
             ImageWidgetClass "{6639355259435840}" {
              Name "On/Off"
@@ -128,7 +128,7 @@ FrameWidgetClass {
               HorizontalAlign 1
               VerticalAlign 3
              }
-             Texture "{B426A5182CA182A4}UI/images/Indicators/VON_buttonon.edds"
+             Texture "{6ABE9563F867BE00}UI/images/Indicators/VON_buttonoff.edds"
              Size 50 10
             }
            }
@@ -140,7 +140,7 @@ FrameWidgetClass {
          Slot LayoutSlot "{6639353496327C80}" {
          }
          Rotation 180
-         Texture "{2D42126BA15DD771}UI/images/Indicators/VON_arrowON.edds"
+         Texture "{D29A20E07AC57BFA}UI/images/Indicators/VON_arrowOFF.edds"
          Size 60 10
         }
        }

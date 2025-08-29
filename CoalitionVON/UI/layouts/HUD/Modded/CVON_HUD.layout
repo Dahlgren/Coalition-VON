@@ -5,18 +5,17 @@ FrameWidgetClass {
    Name "Mic"
    Slot FrameWidgetSlot "{663110197BC745DA}" {
     Anchor 0 0.5 0 0.5
-    PositionX -20.713
-    OffsetLeft -20.713
-    PositionY -50
-    OffsetTop -50
-    SizeX 99.999
-    OffsetRight -79.286
-    SizeY 100
-    OffsetBottom -50
+    PositionX 0.005
+    OffsetLeft 0.005
+    PositionY -87.737
+    OffsetTop -87.737
+    SizeX 33.914
+    OffsetRight -33.92
+    SizeY 37.716
+    OffsetBottom 50.02
    }
-   "Is Visible" 0
-   Texture "{DD0F0179C8E33C44}UI/layouts/HUD/VON/microphone.edds"
-   Size 157 152
+   Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
+   Size 1024 1024
   }
   FrameWidgetClass "{6631100B5216B597}" {
    Name "VONEntry"

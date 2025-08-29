@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{B426A5182CA182A4}UI/images/Mic/VON_buttonon.edds"
+ Name "{28E4D3480AEA8C51}UI/images/Indicators/VON_buttonon.edds"
  Configurations {
   TIFFResourceClass PC : "{DC555BD399D92412}Configs/System/ResourceTypes/PC/TextureUnspecified.conf" {
   }
