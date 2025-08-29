@@ -1,51 +1,161 @@
 FrameWidgetClass {
  {
+  WindowWidgetClass "{6639359FE8E6464A}" {
+   Name "Window1"
+   Slot FrameWidgetSlot "{66393553CC00232F}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -105.242
+    OffsetLeft -105.242
+    PositionY -30.255
+    OffsetTop -30.255
+    SizeX 7.496
+    OffsetRight 97.746
+    SizeY 7.84
+    OffsetBottom 22.416
+   }
+   Color 0 0 0 0.2813
+  }
+  WindowWidgetClass "{6639359FFD9D470B}" {
+   Name "Window0"
+   Slot FrameWidgetSlot "{66393553CC00232F}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -117.269
+    OffsetLeft -117.269
+    PositionY -36.131
+    OffsetTop -36.131
+    SizeX 6.84
+    OffsetRight 110.429
+    SizeY 13.847
+    OffsetBottom 22.284
+   }
+   Color 0 0 0 0.2813
+  }
+  WindowWidgetClass "{66393553CC0022C8}" {
+   Name "Window"
+   Slot FrameWidgetSlot "{66393553CC00232F}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -118.179
+    OffsetLeft -118.179
+    PositionY -22.069
+    OffsetTop -22.069
+    SizeX 237.224
+    OffsetRight -119.045
+    SizeY 81.751
+    OffsetBottom -59.682
+   }
+   Color 0 0 0 0.2813
+  }
   SizeLayoutWidgetClass "{5CEAF8054DC82357}" {
    Prefab "{5CEAF8054DC82357}"
+   Slot FrameWidgetSlot "{5CEAF8054DC82306}" {
+    PositionX 0
+    OffsetLeft 0
+    PositionY 18.23
+    OffsetTop 18.23
+    SizeX 231.646
+    OffsetRight -231.646
+    SizeY 80
+    OffsetBottom -98.23
+   }
    {
     VerticalLayoutWidgetClass "{5CC6924FF67CE111}" {
      Prefab "{5CC6924FF67CE111}"
+     Slot AlignableSlot "{5CEAF8054DDAF15A}" {
+      HorizontalAlign 1
+      VerticalAlign 1
+     }
      {
-      TextWidgetClass "{662F62B5F59F2ACD}" {
-       Name "Radio"
-       Slot LayoutSlot "{662F62B4CF86638F}" {
+      HorizontalLayoutWidgetClass "{6637117D5F45168D}" {
+       Name "HorizontalLayout"
+       Slot LayoutSlot "{663934B097110839}" {
        }
-       Text "AN/PRC-152"
-       "Horizontal Alignment" Center
-       "Vertical Alignment" Center
+       {
+        ImageWidgetClass "{663934B0B9D459BC}" {
+         Name "Left"
+         Slot LayoutSlot "{6639353496327C41}" {
+         }
+         Texture "{2D42126BA15DD771}UI/images/Indicators/VON_arrowON.edds"
+         Size 60 10
+        }
+        VerticalLayoutWidgetClass "{6637117D7606B8EE}" {
+         Name "VerticalLayout"
+         Slot LayoutSlot "{663934B09711082D}" {
+         }
+         {
+          TextWidgetClass "{662F62B5F59F2ACD}" {
+           Name "Radio"
+           Slot LayoutSlot "{662F62B4CF86638F}" {
+           }
+           Color 0.2961 0.7529 0.2159 1
+           Text "AN/PRC-152"
+           "Horizontal Alignment" Center
+           "Vertical Alignment" Center
+           FontProperties FontProperties "{6637117D8AFD54A0}" {
+            Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+            ShadowSize 2
+           }
+          }
+          TextWidgetClass "{5CCC91E0C44B6341}" {
+           Prefab "{5CCC91E0C44B6341}"
+           Name "FrequencyText"
+           Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
+            HorizontalAlign 3
+            VerticalAlign 3
+           }
+           Color 0.2961 0.7529 0.2159 1
+           Text "55500"
+           FontProperties FontProperties "{52EF3224C71893AC}" {
+            Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+            ShadowSize 2
+           }
+          }
+          HorizontalLayoutWidgetClass "{663935209B4B4F32}" {
+           Name "Status"
+           Slot LayoutSlot "{663B044D900461C9}" {
+           }
+           {
+            ImageWidgetClass "{663935277CFDFAFD}" {
+             Name "Active"
+             Slot LayoutSlot "{663B044D90047E3F}" {
+              HorizontalAlign 0
+             }
+             Texture "{99D73D4C8809C354}UI/images/Mic/mic_open.edds"
+             Size 28 20
+            }
+            ImageWidgetClass "{6639355259435840}" {
+             Name "On/Off"
+             Slot LayoutSlot "{663B044D90047E2E}" {
+              HorizontalAlign 1
+              VerticalAlign 3
+             }
+             Texture "{B426A5182CA182A4}UI/images/Indicators/VON_buttonon.edds"
+             Size 50 10
+            }
+           }
+          }
+         }
+        }
+        ImageWidgetClass "{663934B0B9321219}" {
+         Name "Right"
+         Slot LayoutSlot "{6639353496327C80}" {
+         }
+         Rotation 180
+         Texture "{2D42126BA15DD771}UI/images/Indicators/VON_arrowON.edds"
+         Size 60 10
+        }
+       }
       }
       HorizontalLayoutWidgetClass "{5D0A86953EF7769B}" {
        Prefab "{5D0A86953EF7769B}"
-       {
-        ImageWidgetClass "{5D0A86950B6A29DD}" {
-         Prefab "{5D0A86950B6A29DD}"
-         "Is Visible" 0
-        }
-        TextWidgetClass "{5D0A869544D6DE67}" {
-         Prefab "{5D0A869544D6DE67}"
-         Slot LayoutSlot "{5D0A869544D6DE1F}" {
-          VerticalAlign 1
-         }
-         "Is Visible" 0
-        }
-        FrameWidgetClass "{5D0A869088DA3ACD}" {
-         Prefab "{5D0A869088DA3ACD}"
-         "Is Visible" 0
-        }
-       }
-      }
-      TextWidgetClass "{5D0A869549EE82A6}" {
-       Prefab "{5D0A869549EE82A6}"
-       Name "ChannelText"
        "Is Visible" 0
-       Text "CH1"
       }
       TextWidgetClass "{5CCC91E0C44B6341}" {
        Prefab "{5CCC91E0C44B6341}"
-       Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
-        HorizontalAlign 1
-       }
-       Text "55500"
+       "Is Visible" 0
+      }
+      TextWidgetClass "{5D0A869549EE82A6}" {
+       Prefab "{5D0A869549EE82A6}"
+       "Is Visible" 0
       }
      }
     }
