@@ -22,36 +22,10 @@ modded class SCR_VONEntryRadio
 		
 		BaseRadioComponent radio = m_RadioTransceiver.GetRadio();
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.GetOwner().FindComponent(CVON_RadioComponent));
+		
 		if (!radioComp)
 			return;
-		entryComp.SetTransceiverText("CH" + m_iTransceiverNumber.ToString());
-		entryComp.SetFrequencyText(radioComp.m_sFrequency);
-		entryComp.SetChannelText("CH" + radioComp.m_iCurrentChannel);
-		TextWidget.Cast(entryComp.GetRootWidget().FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
-		TextWidget.Cast(entryComp.GetRootWidget().FindAnyWidget("Radio")).SetColor(Color.DarkGreen);
-		entryComp.SetActiveIcon(m_bIsActive);
 		
-		
-		SetUsable(radio.IsPowered());	
-		entryComp.SetPowerIcon(IsUsable());
-		
-		if (m_bIsActive)
-		{
-			entryComp.SetTransceiverOpacity(1);
-			
-			if (m_bIsSelected)
-				entryComp.SetFrequencyColor(Color.FromInt(Color.WHITE));
-			else 
-				entryComp.SetFrequencyColor(Color.FromInt(Color.WHITE));
-		}
-		else 
-		{
-			entryComp.SetTransceiverOpacity(0.5);
-			
-			if (m_bIsSelected)
-				entryComp.SetFrequencyColor(Color.FromInt(Color.WHITE));
-			else 
-				entryComp.SetFrequencyColor(Color.FromInt(Color.WHITE));
-		}
+		entryComp.UpdateCVONRadioWidget(radioComp, false);
 	}
 }

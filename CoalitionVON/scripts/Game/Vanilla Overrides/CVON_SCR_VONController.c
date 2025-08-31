@@ -51,63 +51,63 @@ modded class SCR_VONController
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
 	//==========================================================================================================================================================================
-	void ActivateCRFDirect()
+	void ActivateCVONDirect()
 	{
 		if (m_bToggleBuffer)
 		{
 			m_bToggleBuffer = false;
-			DeactivateCRFVON();
+			DeactivateCVON();
 			m_VONHud.ShowDirectToggle();
 			return;
 		}
-		ActivateCRFVON(CVON_EVONTransmitType.DIRECT);
+		ActivateCVON(CVON_EVONTransmitType.DIRECT);
 	}
 	
 	//==========================================================================================================================================================================
-	void ToggleCRFDirect()
+	void ToggleCVONDirect()
 	{
 		m_bToggleBuffer = !m_bToggleBuffer;
 		m_VONHud.ShowDirectToggle();
-		ActivateCRFVON(CVON_EVONTransmitType.DIRECT);
+		ActivateCVON(CVON_EVONTransmitType.DIRECT);
 	}
 	
 	//==========================================================================================================================================================================
-	void ActivateCRFSR()
+	void ActivateCVONSR()
 	{	
 		if (m_bToggleBuffer)
 		{
 			m_bToggleBuffer = false;
-			DeactivateCRFVON();
+			DeactivateCVON();
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CVON_EVONTransmitType.SR);
+		ActivateCVON(CVON_EVONTransmitType.SR);
 	}
 	
 	//==========================================================================================================================================================================
-	void ActivateCRFLR()
+	void ActivateCVONLR()
 	{
 		if (m_bToggleBuffer)
 		{
 			m_bToggleBuffer = false;
-			DeactivateCRFVON();
+			DeactivateCVON();
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CVON_EVONTransmitType.LR);
+		ActivateCVON(CVON_EVONTransmitType.LR);
 	}
 	
 	//==========================================================================================================================================================================
-	void ActivateCRFMR()
+	void ActivateCVONMR()
 	{
 		if (m_bToggleBuffer)
 		{
 			m_bToggleBuffer = false;
-			DeactivateCRFVON();
+			DeactivateCVON();
 			m_VONHud.ShowDirectToggle();
 			m_bToggleTurnedOffByRadio = true;
 		}
-		ActivateCRFVON(CVON_EVONTransmitType.MR);
+		ActivateCVON(CVON_EVONTransmitType.MR);
 	}
 	
 	//How we rotate what radio is assigned to caps-lock, aka active.
@@ -143,16 +143,16 @@ modded class SCR_VONController
 		m_InputManager = GetGame().GetInputManager();
 		if (m_InputManager)
 		{
-			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.DOWN, ActivateCRFDirect);
-			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.UP, DeactivateCRFVON);
-			m_InputManager.AddActionListener(ACTION_DIRECT_TOGGLE, EActionTrigger.DOWN, ToggleCRFDirect);
-			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.DOWN, ActivateCRFSR);
-			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.UP, DeactivateCRFVON);
+			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.DOWN, ActivateCVONDirect);
+			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.UP, DeactivateCVON);
+			m_InputManager.AddActionListener(ACTION_DIRECT_TOGGLE, EActionTrigger.DOWN, ToggleCVONDirect);
+			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.DOWN, ActivateCVONSR);
+			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.UP, DeactivateCVON);
 			m_InputManager.AddActionListener(ACTION_TRANSCEIVER_CYCLE, EActionTrigger.DOWN, ActionVONTransceiverCycle);
-			m_InputManager.AddActionListener("VONLongRange", EActionTrigger.DOWN, ActivateCRFLR);
-			m_InputManager.AddActionListener("VONLongRange", EActionTrigger.UP, DeactivateCRFVON);
-			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.DOWN, ActivateCRFMR);
-			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.UP, DeactivateCRFVON);
+			m_InputManager.AddActionListener("VONLongRange", EActionTrigger.DOWN, ActivateCVONLR);
+			m_InputManager.AddActionListener("VONLongRange", EActionTrigger.UP, DeactivateCVON);
+			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.DOWN, ActivateCVONMR);
+			m_InputManager.AddActionListener("VONMediumRange", EActionTrigger.UP, DeactivateCVON);
 			m_InputManager.AddActionListener("VONRotateActive", EActionTrigger.DOWN, RotateActiveRadio);
 			m_InputManager.AddActionListener("VONChannelUp", EActionTrigger.DOWN, ChannelUp);
 			m_InputManager.AddActionListener("VONChannelDown", EActionTrigger.DOWN, ChannelDown);
@@ -426,7 +426,7 @@ modded class SCR_VONController
 	
 	//This builds our VON Container with all the data we need to send to other clients based on the data sent out. This starts the talking process.
 	//==========================================================================================================================================================================
-	void ActivateCRFVON(CVON_EVONTransmitType transmitType = CVON_EVONTransmitType.NONE)
+	void ActivateCVON(CVON_EVONTransmitType transmitType = CVON_EVONTransmitType.NONE)
 	{
 		#ifdef WORKBENCH
 		#else
@@ -438,7 +438,7 @@ modded class SCR_VONController
 		if (m_CharacterController.GetLifeState() != ECharacterLifeState.ALIVE)
 			return;
 		if (m_CurrentVONContainer)
-			DeactivateCRFVON();
+			DeactivateCVON();
 		CVON_VONContainer container = new CVON_VONContainer();
 		if (transmitType == CVON_EVONTransmitType.NONE)
 			return;
@@ -512,7 +512,7 @@ modded class SCR_VONController
 	
 	//Stops talking and removes our VON entry from all others players that we where broadcasting to.
 	//==========================================================================================================================================================================
-	void DeactivateCRFVON()
+	void DeactivateCVON()
 	{
 		if (m_bToggleBuffer)
 			return;
@@ -542,7 +542,7 @@ modded class SCR_VONController
 		if (m_bToggleTurnedOffByRadio)
 		{
 			m_bToggleTurnedOffByRadio = false;
-			ToggleCRFDirect();
+			ToggleCVONDirect();
 		}
 	}
 	
@@ -610,11 +610,11 @@ modded class SCR_VONController
 				{
 					Print("Deactivating toggle");
 					m_bToggleBuffer = false;
-					DeactivateCRFVON();
+					DeactivateCVON();
 					m_VONHud.DirectToggleDelay();
 				}
 				else
-					DeactivateCRFVON();
+					DeactivateCVON();
 				return;
 			}
 				

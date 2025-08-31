@@ -1,147 +1,253 @@
 FrameWidgetClass {
  {
-  WindowWidgetClass "{6639359FE8E6464A}" {
-   Name "Window1"
-   Slot FrameWidgetSlot "{66393553CC00232F}" {
-    Anchor 0.5 0.5 0.5 0.5
-    PositionX -105.242
-    OffsetLeft -105.242
-    PositionY -32.555
-    OffsetTop -32.555
-    SizeX 7.496
-    OffsetRight 97.746
-    SizeY 7.839
-    OffsetBottom 24.716
-   }
-   Color 0 0 0 0.2813
-  }
-  WindowWidgetClass "{6639359FFD9D470B}" {
-   Name "Window0"
-   Slot FrameWidgetSlot "{66393553CC00232F}" {
-    Anchor 0.5 0.5 0.5 0.5
-    PositionX -118.269
-    OffsetLeft -118.269
-    PositionY -38.231
-    OffsetTop -38.231
-    SizeX 7.94
-    OffsetRight 110.329
-    SizeY 13.947
-    OffsetBottom 24.284
-   }
-   Color 0 0 0 0.2813
-  }
   WindowWidgetClass "{66393553CC0022C8}" {
-   Name "Window"
-   Slot FrameWidgetSlot "{66393553CC00232F}" {
+   Name "Window1"
+   Slot FrameWidgetSlot "{663E80CF7C24E0BA}" {
     Anchor 0.5 0.5 0.5 0.5
-    PositionX -118.179
-    OffsetLeft -118.179
-    PositionY -25.096
-    OffsetTop -25.096
-    SizeX 237.224
-    OffsetRight -119.045
-    SizeY 90.418
-    OffsetBottom -65.323
+    PositionX -92.078
+    OffsetLeft -92.078
+    PositionY -44.365
+    OffsetTop -44.365
+    SizeX 11.948
+    OffsetRight 80.13
+    SizeY 14.079
+    OffsetBottom 30.285
+   }
+   Color 0 0 0 0.2813
+  }
+  WindowWidgetClass "{663E80CF604AA2B8}" {
+   Name "Window2"
+   Slot FrameWidgetSlot "{663E80CF7C24E0BA}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -104.253
+    OffsetLeft -104.253
+    PositionY -60.754
+    OffsetTop -60.754
+    SizeX 9.607
+    OffsetRight 94.646
+    SizeY 30
+    OffsetBottom 30.754
    }
    Color 0 0 0 0.2813
   }
   SizeLayoutWidgetClass "{5CEAF8054DC82357}" {
    Prefab "{5CEAF8054DC82357}"
    Slot FrameWidgetSlot "{5CEAF8054DC82306}" {
+    Anchor 0.5 0.5 0.5 0.5
     PositionX 0
     OffsetLeft 0
-    PositionY 18.23
-    OffsetTop 18.23
-    SizeX 231.646
-    OffsetRight -231.646
-    SizeY 80
-    OffsetBottom -98.23
+    PositionY 0
+    OffsetTop 0
+    SizeX 208.761
+    OffsetRight -208.761
+    SizeY 60.527
+    OffsetBottom -60.527
    }
    {
     VerticalLayoutWidgetClass "{5CC6924FF67CE111}" {
      Prefab "{5CC6924FF67CE111}"
      Slot AlignableSlot "{5CEAF8054DDAF15A}" {
-      HorizontalAlign 1
-      VerticalAlign 1
      }
      {
-      HorizontalLayoutWidgetClass "{6637117D5F45168D}" {
-       Name "HorizontalLayout"
-       Slot LayoutSlot "{663934B097110839}" {
+      HorizontalLayoutWidgetClass "{663E577625CCB4F6}" {
+       Name "HorizontalLayoutOutline"
+       Slot LayoutSlot "{663E57766472EC04}" {
        }
        {
-        ImageWidgetClass "{663934B0B9D459BC}" {
-         Name "Left"
-         Slot LayoutSlot "{6639353496327C41}" {
-         }
-         Texture "{2D42126BA15DD771}UI/images/Indicators/VON_arrowON.edds"
-         Size 60 10
-        }
-        VerticalLayoutWidgetClass "{6637117D7606B8EE}" {
-         Name "VerticalLayout"
-         Slot LayoutSlot "{663934B09711082D}" {
+        OverlayWidgetClass "{663E57776215E52A}" {
+         Name "Overlay"
+         Slot LayoutSlot "{663E57766472EC65}" {
+          Padding 0 0 0 0
          }
          {
-          TextWidgetClass "{662F62B5F59F2ACD}" {
-           Name "Radio"
-           Slot LayoutSlot "{662F62B4CF86638F}" {
-           }
-           Color 0.4185 0.723 0.2932 1
-           Text "AN/PRC-152"
-           "Horizontal Alignment" Center
-           "Vertical Alignment" Center
-           FontProperties FontProperties "{6637117D8AFD54A0}" {
-            Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
-            ShadowSize 2
-           }
-          }
-          TextWidgetClass "{5CCC91E0C44B6341}" {
-           Prefab "{5CCC91E0C44B6341}"
-           Name "FrequencyText"
-           Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
+          VerticalLayoutWidgetClass "{663E5776DCCFDC0F}" {
+           Name "VerticalLayoutInfo"
+           Slot OverlayWidgetSlot "{663E57766472ECA0}" {
             HorizontalAlign 3
             VerticalAlign 3
            }
-           Color 0.4185 0.723 0.2932 1
-           Text "55500"
-           FontProperties FontProperties "{52EF3224C71893AC}" {
-            Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
-            ShadowSize 2
-           }
-          }
-          HorizontalLayoutWidgetClass "{663935209B4B4F32}" {
-           Name "Status"
-           Slot LayoutSlot "{663B044D900461C9}" {
-           }
            {
-            ImageWidgetClass "{663935277CFDFAFD}" {
-             Name "Active"
-             Slot LayoutSlot "{663B044D90047E3F}" {
-              HorizontalAlign 0
-             }
-             Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
-             Size 36 35
-            }
-            ImageWidgetClass "{6639355259435840}" {
-             Name "On/Off"
-             Slot LayoutSlot "{663B044D90047E2E}" {
+            HorizontalLayoutWidgetClass "{6637117D5F45168D}" {
+             Name "HorizontalLayoutInfo"
+             Slot LayoutSlot "{663934B097110839}" {
               HorizontalAlign 1
-              VerticalAlign 3
+              VerticalAlign 1
              }
-             Texture "{6ABE9563F867BE00}UI/images/Indicators/VON_buttonoff.edds"
-             Size 50 10
+             {
+              FrameWidgetClass "{663E5774CC0A0412}" {
+               Name "FrameLeft"
+               Slot LayoutSlot "{663E57797F1ED5A5}" {
+                HorizontalAlign 3
+                VerticalAlign 1
+               }
+               {
+                ImageWidgetClass "{663934B0B9D459BC}" {
+                 Name "Left"
+                 Slot FrameWidgetSlot "{663E5774F4DB5D89}" {
+                  OffsetLeft 0
+                  OffsetTop 0
+                  SizeX 40
+                  OffsetRight -40
+                  SizeY 60
+                  OffsetBottom -60
+                 }
+                 Color 0.4564 1 0.4564 1
+                 Texture "{DFDD89B0F30E34C9}UI/images/Indicators/VON_arrowON.edds"
+                 Size 1024 1024
+                }
+               }
+              }
+              VerticalLayoutWidgetClass "{6637117D7606B8EE}" {
+               Name "RadioInfo"
+               Slot LayoutSlot "{663934B09711082D}" {
+                VerticalAlign 1
+               }
+               {
+                TextWidgetClass "{662F62B5F59F2ACD}" {
+                 Name "Radio"
+                 Slot LayoutSlot "{662F62B4CF86638F}" {
+                 }
+                 Color 0.4185 0.723 0.2932 1
+                 Text "AN/PRC-152"
+                 "Font Size" 28
+                 "Min Font Size" 16
+                 "Horizontal Alignment" Center
+                 "Vertical Alignment" Center
+                 FontProperties FontProperties "{6637117D8AFD54A0}" {
+                  Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+                  ShadowSize 2
+                 }
+                }
+                HorizontalLayoutWidgetClass "{663E577710E5E7B0}" {
+                 Name "Freq/Channel"
+                 Slot LayoutSlot "{663E57766472ED5B}" {
+                  HorizontalAlign 1
+                  VerticalAlign 1
+                 }
+                 {
+                  TextWidgetClass "{5CCC91E0C44B6341}" {
+                   Prefab "{5CCC91E0C44B6341}"
+                   Name "Channel"
+                   Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
+                    HorizontalAlign 0
+                    VerticalAlign 1
+                    Padding 0 0 8 0
+                   }
+                   Color 0.4185 0.723 0.2932 1
+                   Text "CH-1"
+                   FontProperties FontProperties "{52EF3224C71893AC}" {
+                    Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+                    ShadowSize 2
+                   }
+                  }
+                  TextWidgetClass "{663E577706BF7B09}" {
+                   Name "Frequency"
+                   Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
+                    HorizontalAlign 2
+                    VerticalAlign 1
+                   }
+                   Color 0.4185 0.723 0.2932 1
+                   Text "55500"
+                   FontProperties FontProperties "{52EF3224C71893AC}" {
+                    Font "{D3E3853DAEBA9BD6}UI/fonts/DS_DIGI.fnt"
+                    ShadowSize 2
+                   }
+                  }
+                 }
+                }
+                HorizontalLayoutWidgetClass "{663935209B4B4F32}" {
+                 Name "Status"
+                 Slot LayoutSlot "{663B044D900461C9}" {
+                  HorizontalAlign 1
+                  VerticalAlign 1
+                 }
+                 "Is Visible" 0
+                 {
+                  FrameWidgetClass "{663E577470B0AEA7}" {
+                   Name "FrameActive"
+                   Slot LayoutSlot "{663E57797F1ED277}" {
+                    Padding 0 -5 0 0
+                   }
+                   {
+                    ImageWidgetClass "{663935277CFDFAFD}" {
+                     Name "Active"
+                     Slot FrameWidgetSlot "{663E577469D45A38}" {
+                      Anchor 0 0 0 0
+                      PositionX 0
+                      OffsetLeft 0
+                      PositionY 0
+                      OffsetTop 0
+                      SizeX 40
+                      OffsetRight -40
+                      SizeY 35
+                      OffsetBottom -35
+                     }
+                     Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
+                     Size 1024 1024
+                    }
+                   }
+                  }
+                  FrameWidgetClass "{663E577471F32878}" {
+                   Name "FrameButton"
+                   Slot LayoutSlot "{663E57797F1ED254}" {
+                   }
+                   {
+                    ImageWidgetClass "{6639355259435840}" {
+                     Name "On/Off"
+                     Slot FrameWidgetSlot "{663E57746AD43D0F}" {
+                      OffsetLeft 0
+                      OffsetTop 0
+                      SizeX 60
+                      OffsetRight -60
+                      SizeY 35
+                      OffsetBottom -35
+                     }
+                     Color 0.4564 1 0.4564 1
+                     Texture "{A9118B8FE72B0F25}UI/images/Indicators/VON_buttonon.edds"
+                    }
+                   }
+                  }
+                 }
+                }
+               }
+              }
+              FrameWidgetClass "{663E57740753A22C}" {
+               Name "FrameRight"
+               Slot LayoutSlot "{663E57797F1ED2B3}" {
+                HorizontalAlign 1
+                VerticalAlign 1
+               }
+               {
+                ImageWidgetClass "{663934B0B9321219}" {
+                 Name "Right"
+                 Slot FrameWidgetSlot "{663E577408BC42BB}" {
+                  OffsetLeft 0
+                  OffsetTop 0
+                  SizeX 40
+                  OffsetRight -40
+                  SizeY 60
+                  OffsetBottom -60
+                 }
+                 Color 0.4564 1 0.4564 1
+                 Rotation 180
+                 Texture "{DFDD89B0F30E34C9}UI/images/Indicators/VON_arrowON.edds"
+                 Size 1024 1024
+                }
+               }
+              }
+             }
             }
            }
           }
+          WindowWidgetClass "{663E80CF71EC32C3}" {
+           Name "Window"
+           Slot OverlayWidgetSlot "{663E57766472EC4E}" {
+            HorizontalAlign 3
+            VerticalAlign 3
+           }
+           Color 0 0 0 0.2813
+          }
          }
-        }
-        ImageWidgetClass "{663934B0B9321219}" {
-         Name "Right"
-         Slot LayoutSlot "{6639353496327C80}" {
-         }
-         Rotation 180
-         Texture "{D29A20E07AC57BFA}UI/images/Indicators/VON_arrowOFF.edds"
-         Size 60 10
         }
        }
       }
