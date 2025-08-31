@@ -4,9 +4,9 @@
 [BaseContainerProps()]
 class CVON_GroupFrequencyContainer
 {
-	[Attribute()] string m_sSRFrequency;
-	[Attribute()] string m_sLRFrequency;
-	[Attribute()] string m_sMRFrequency;
+	[Attribute()] ref array<string> m_aSRFrequencies;
+	[Attribute()] ref array<string> m_aLRFrequencies;
+	[Attribute()] ref array<string> m_aMRFrequencies;
 }
 
 [BaseContainerProps()]

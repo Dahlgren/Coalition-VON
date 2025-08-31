@@ -23,6 +23,10 @@ class CVON_RadioComponent: ScriptComponent
 	//The Icon at the center of the VON Radial Menu
 	[Attribute("{D9F335476016F8D7}UI/layouts/Radios/ANPRC152/data/ANPRC152Icon.edds", UIWidgets.ResourcePickerThumbnail, "Icon in the center of the radial menu", params: "edds")] ResourceName m_sRadioIcon;
 	
+	[Attribute("{0470C6B83320621C}UI/layouts/Radios/ANPRC152/data/ANPRC152DialOn.edds", UIWidgets.ResourcePickerThumbnail, "Dial On", params: "edds")] ResourceName m_sDialOn;
+
+	[Attribute("{606059BCB597FCFC}UI/layouts/Radios/ANPRC152/data/ANPRC152DialOff.edds", UIWidgets.ResourcePickerThumbnail, "Dial Off", params: "edds")] ResourceName m_sDialOff;
+	
 	//The Menu we use whenever we open up this radio.
 	[Attribute(ChimeraMenuPreset.ANPRC152.ToString(), UIWidgets.ComboBox, "", "", enumType: ChimeraMenuPreset )] int m_eRadioMenu;
 	
@@ -42,6 +46,8 @@ class CVON_RadioComponent: ScriptComponent
 	[RplProp()] string m_sFactionKey = "";
 	//Used to store any channels the player makes and the base channels definied in the faction.
 	[RplProp()] ref array<string> m_aChannels = {};
+	
+	[RplProp()] bool m_bPower = true;
 	
 	//All of these are temp freqeuncies we check in case somehow a change slips through the cracks, this mostly happens when we first take over an entity.
 	int m_iTempChannel = 1;
@@ -84,6 +90,12 @@ class CVON_RadioComponent: ScriptComponent
 		Replication.BumpMe();
 	}
 	
+	void TogglePowerServer()
+	{
+		m_bPower = !m_bPower;
+		Replication.BumpMe();
+	}
+	
 	//Called on the authority, updates the TimeDeviation.
 	//==========================================================================================================================================================================
 	void UpdateTimeDeviationServer(int input)
@@ -98,6 +110,12 @@ class CVON_RadioComponent: ScriptComponent
 	{
 		m_aChannels.Insert("55500");
 		Replication.BumpMe();
+	}
+	
+	void TogglePowerClient()
+	{
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).ToggleRadioPower(GetRplId());
+		WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 	}
 	
 	//==========================================================================================================================================================================
@@ -160,18 +178,44 @@ class CVON_RadioComponent: ScriptComponent
 		ref array<string> LRFrequencies = {};
 		foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
 		{
-			if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
-				SRFrequencies.Insert(groupContainer.m_sSRFrequency);
-			if (!MRFrequencies.Contains(groupContainer.m_sMRFrequency) && groupContainer.m_sMRFrequency != "")
-				MRFrequencies.Insert(groupContainer.m_sMRFrequency);
-			if (!LRFrequencies.Contains(groupContainer.m_sLRFrequency) && groupContainer.m_sLRFrequency != "")
-				LRFrequencies.Insert(groupContainer.m_sLRFrequency);
+			if (groupContainer.m_aSRFrequencies)
+				if (groupContainer.m_aSRFrequencies.Count() > 0)
+				{
+					foreach (string freq: groupContainer.m_aSRFrequencies)
+					{
+							Print(freq);
+							if (!SRFrequencies.Contains(freq) && freq != "")
+								SRFrequencies.Insert(freq);
+					}
+				}
+			if (groupContainer.m_aMRFrequencies)
+				if (groupContainer.m_aMRFrequencies.Count() > 0)
+				{
+					foreach (string freq: groupContainer.m_aMRFrequencies)
+					{
+							if (!MRFrequencies.Contains(freq) && freq != "")
+								MRFrequencies.Insert(freq);
+					}
+				}
+			if (groupContainer.m_aLRFrequencies)
+				if (groupContainer.m_aLRFrequencies.Count() > 0)
+				{
+					foreach (string freq: groupContainer.m_aLRFrequencies)
+					{
+							if (!LRFrequencies.Contains(freq) && freq != "")
+								LRFrequencies.Insert(freq);
+					}
+			}
 		}
 		m_aChannels.InsertAll(SRFrequencies);
 		m_aChannels.InsertAll(MRFrequencies);
 		m_aChannels.InsertAll(LRFrequencies);
-		if (m_aChannels.Count() > 0)
+		if (m_aChannels.Count() == 0)
+		{
+			m_aChannels.Insert("55500");
+			m_iCurrentChannel = 1;
 			m_sFrequency = m_aChannels.Get(0);
+		}
 		Replication.BumpMe();
 		
 		if (m_iTempChannel != m_iCurrentChannel || m_sTempFrequency != m_sFrequency || m_iTempTimeDeviation != m_iTimeDeviation || m_sTempFactionKey != m_sFactionKey)
@@ -208,19 +252,45 @@ class CVON_RadioComponent: ScriptComponent
 			ref array<string> LRFrequencies = {};
 			foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
 			{
-				if (!SRFrequencies.Contains(groupContainer.m_sSRFrequency) && groupContainer.m_sSRFrequency != "")
-					SRFrequencies.Insert(groupContainer.m_sSRFrequency);
-				if (!MRFrequencies.Contains(groupContainer.m_sMRFrequency) && groupContainer.m_sMRFrequency != "")
-					MRFrequencies.Insert(groupContainer.m_sMRFrequency);
-				if (!LRFrequencies.Contains(groupContainer.m_sLRFrequency) && groupContainer.m_sLRFrequency != "")
-					LRFrequencies.Insert(groupContainer.m_sLRFrequency);
+				if (groupContainer.m_aSRFrequencies)
+					if (groupContainer.m_aSRFrequencies.Count() > 0)
+					{
+						foreach (string freq: groupContainer.m_aSRFrequencies)
+						{
+								Print(freq);
+								if (!SRFrequencies.Contains(freq) && freq != "")
+									SRFrequencies.Insert(freq);
+						}
+					}
+				if (groupContainer.m_aMRFrequencies)
+					if (groupContainer.m_aMRFrequencies.Count() > 0)
+					{
+						foreach (string freq: groupContainer.m_aMRFrequencies)
+						{
+								if (!MRFrequencies.Contains(freq) && freq != "")
+									MRFrequencies.Insert(freq);
+						}
+					}
+				if (groupContainer.m_aLRFrequencies)
+					if (groupContainer.m_aLRFrequencies.Count() > 0)
+					{
+						foreach (string freq: groupContainer.m_aLRFrequencies)
+						{
+								if (!LRFrequencies.Contains(freq) && freq != "")
+									LRFrequencies.Insert(freq);
+						}
+				}
 			}
 			m_aChannels.InsertAll(SRFrequencies);
 			m_aChannels.InsertAll(MRFrequencies);
 			m_aChannels.InsertAll(LRFrequencies);
-			//Gets all of the factions frequencies and organizes them.
-			if (m_aChannels.Count() > 0)
+			//If there are no frequencies added, just add a default channel.
+			if (m_aChannels.Count() == 0)
+			{
+				m_aChannels.Insert("55500");
+				m_iCurrentChannel = 1;
 				m_sFrequency = m_aChannels.Get(0);
+			}
 			//hehe
 			Replication.BumpMe();
 		}
@@ -262,7 +332,10 @@ class CVON_RadioComponent: ScriptComponent
 		{
 			IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radio)).GetEntity();
 			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
+			if (!radioComp.m_bPower)
+				continue;
 			VONSave.StartObject(radio.ToString());
+			VONSave.WriteValue("Power", radioComp.m_bPower);
 			VONSave.WriteValue("Freq", radioComp.m_sFrequency);
 			VONSave.WriteValue("TimeDeviation", radioComp.m_iTimeDeviation);
 			VONSave.WriteValue("Volume", radioComp.m_iVolume);

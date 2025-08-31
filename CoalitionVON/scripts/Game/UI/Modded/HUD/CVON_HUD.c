@@ -22,7 +22,13 @@ class CVON_HUD: SCR_InfoDisplay {
 		GetGame().GetInputManager().AddActionListener("VONMediumRange", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().AddActionListener("VONDirect", EActionTrigger.DOWN, ShowDirect);
 		GetGame().GetInputManager().AddActionListener("VONRotateActive", EActionTrigger.DOWN, ShowVONActive);
-		GetGame().GetInputManager().AddActionListener("VONRotateActive", EActionTrigger.DOWN, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONRotateActive", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONChannelUp", EActionTrigger.DOWN, ShowVONChange);
+		GetGame().GetInputManager().AddActionListener("VONChannelUp", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONChannelDown", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONRadioEarRight", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONRadioEarLeft", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().AddActionListener("VONRadioEarBoth", EActionTrigger.UP, HideVON);
 	}
 	
 	//------------------------------------------------------------------------------------------------
@@ -40,7 +46,13 @@ class CVON_HUD: SCR_InfoDisplay {
 		GetGame().GetInputManager().RemoveActionListener("VONDirect", EActionTrigger.DOWN, ShowDirect);
 		GetGame().GetInputManager().RemoveActionListener("VONDirect", EActionTrigger.UP, HideDirect);
 		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.DOWN, ShowVONActive);
-		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.DOWN, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONChannelUp", EActionTrigger.DOWN, ShowVONChange);
+		GetGame().GetInputManager().RemoveActionListener("VONChannelUp", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONChannelDown", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONRadioEarRight", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONRadioEarLeft", EActionTrigger.UP, HideVON);
+		GetGame().GetInputManager().RemoveActionListener("VONRadioEarBoth", EActionTrigger.UP, HideVON);
 	}
 	
 	//------------------------------------------------------------------------------------------------
@@ -66,6 +78,8 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
 			return;
 		#endif
+		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
+			return;
 		if (m_bIsToggled)
 			return;
 		m_wRoot.FindAnyWidget("Mic").SetOpacity(1);
@@ -79,6 +93,8 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
 			return;
 		#endif
+		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
+			return;
 		GetGame().GetCallqueue().CallLater(DirectToggleDelay, 200, false);
 	}
 	
@@ -104,8 +120,42 @@ class CVON_HUD: SCR_InfoDisplay {
 		AnimateWidget.Opacity(micWidget, 0, 1/0.3);
 	}
 	
+	void ShowVONChange()
+	{
+		#ifdef WORKBENCH
+		#else
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+			return;
+		#endif
+		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
+		if (playerController.m_aRadios.Count() == 0)
+			return;
+		IEntity radio = playerController.m_aRadios.Get(0);
+		if (!radio)
+			return;
+		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
+		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+		if (!radioComp)
+			return;
+		string ear = "";
+		switch (radioComp.m_eStereo)
+		{
+			case CVON_EStereo.RIGHT: {ear = "R"; break;}
+			case CVON_EStereo.LEFT: {ear = "L"; break;}
+			case CVON_EStereo.BOTH: {ear = "B"; break;}
+		}
+		TextWidget.Cast(m_wRoot.FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
+		TextWidget.Cast(m_wRoot.FindAnyWidget("Freq")).SetText("CH " + radioComp.m_iCurrentChannel + " | " + radioComp.m_sFrequency + " | " + ear);
+	}
+	
 	void ShowVONActive()
 	{
+		#ifdef WORKBENCH
+		#else
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+			return;
+		#endif
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
 		if (playerController.m_aRadios.Count() < 2)
 			return;
@@ -117,8 +167,15 @@ class CVON_HUD: SCR_InfoDisplay {
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
+		string ear = "";
+		switch (radioComp.m_eStereo)
+		{
+			case CVON_EStereo.RIGHT: {ear = "R"; break;}
+			case CVON_EStereo.LEFT: {ear = "L"; break;}
+			case CVON_EStereo.BOTH: {ear = "B"; break;}
+		}
 		TextWidget.Cast(m_wRoot.FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
-		TextWidget.Cast(m_wRoot.FindAnyWidget("Freq")).SetText("CH " + radioComp.m_iCurrentChannel + " | " + radioComp.m_sFrequency);
+		TextWidget.Cast(m_wRoot.FindAnyWidget("Freq")).SetText("CH " + radioComp.m_iCurrentChannel + " | " + radioComp.m_sFrequency + " | " + ear);
 	}
 	
 	void ShowVON()
@@ -128,6 +185,8 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
 			return;
 		#endif
+		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
+			return;
 		SCR_VONController vonController = SCR_VONController.Cast(GetGame().GetPlayerController().FindComponent(SCR_VONController));
 		if (!vonController)
 			return;
@@ -146,8 +205,15 @@ class CVON_HUD: SCR_InfoDisplay {
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 		if (!radioComp)
 			return;
+		string ear = "";
+		switch (radioComp.m_eStereo)
+		{
+			case CVON_EStereo.RIGHT: {ear = "R"; break;}
+			case CVON_EStereo.LEFT: {ear = "L"; break;}
+			case CVON_EStereo.BOTH: {ear = "B"; break;}
+		}
 		TextWidget.Cast(m_wRoot.FindAnyWidget("Radio")).SetText(radioComp.m_sRadioName);
-		TextWidget.Cast(m_wRoot.FindAnyWidget("Freq")).SetText("CH " + radioComp.m_iCurrentChannel + " | " + radioComp.m_sFrequency);
+		TextWidget.Cast(m_wRoot.FindAnyWidget("Freq")).SetText("CH " + radioComp.m_iCurrentChannel + " | " + radioComp.m_sFrequency + " | " + ear);
 	}
 	
 	void HideVON()

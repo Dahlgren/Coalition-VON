@@ -11,6 +11,8 @@ GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.
    m_sRadioName "AN/PRC-117"
    m_eRadioType LONG
    m_sRadioIcon "{FFB5DD736483D225}UI/layouts/Radios/ANPRC117/data/ANPRC117Icon.edds"
+   m_sDialOn "{52C708D6FBA2E5CA}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOn.edds"
+   m_sDialOff "{A744E80C100B0FC5}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOff.edds"
    m_eRadioMenu ANPRC117
   }
   InventoryItemComponent "{5222EB4D0C73006B}" {
@@ -19,7 +21,18 @@ GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.
      Name "AN/PRC-117"
      Description ""
     }
+    CustomAttributes {
+     PreviewRenderAttributes "{52D493152DA704BA}" {
+      CameraDistanceToItem 2.5
+      CameraOffset 0 0 0
+      ItemRenderRotation 0 0 180
+     }
+    }
+    m_bStackable 0
    }
+  }
+  MeshObject "{5A30BAE7673C63D1}" {
+   Object "{AD570D20A1C73175}assets/ANPRC117/ANPRC117.xob"
   }
  }
 }
