@@ -1,0 +1,39 @@
+GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.et" {
+ ID "508AB2013EEE1E00"
+ components {
+  BaseRadioComponent "{5A30BAE7673C63CA}" {
+   Transceivers {
+    IntercomTransceiver "{5A8E721FD75D0F5F}" {
+    }
+   }
+  }
+  CVON_RadioComponent "{662D5D04D93541AF}" {
+   m_sRadioName "R-168"
+   m_eRadioType LONG
+   m_iRadioRange 10000
+   m_sRadioIcon "{75636C3CC268DA62}UI/layouts/Radios/R168/data/R168Icon.edds"
+   m_sDialOn "{BA07FE76D57B8991}UI/layouts/Radios/R168/data/R168DialOn.edds"
+   m_sDialOff "{15519282637FD347}UI/layouts/Radios/R168/data/R168DialOff.edds"
+   m_eRadioMenu R168
+  }
+  InventoryItemComponent "{5222EB4D0C73006B}" {
+   Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
+    ItemDisplayName UIInfo "{5222EB4D07D865FA}" {
+     Name "AN/PRC-150"
+     Description ""
+    }
+    CustomAttributes {
+     PreviewRenderAttributes "{52D493152DA704BA}" {
+      CameraDistanceToItem 2.5
+      CameraOffset 0 -0.3 0
+      ItemRenderRotation 0 0 180
+      AspectRatio 1
+     }
+    }
+   }
+  }
+  MeshObject "{5A30BAE7673C63D1}" {
+   Object "{EA665B20D3F98B1D}assets/R168/R168.xob"
+  }
+ }
+}

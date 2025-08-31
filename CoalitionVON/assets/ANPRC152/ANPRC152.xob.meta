@@ -2,10 +2,11 @@ MetaFileClass {
  Name "{5BA0F088CCC0F41D}assets/ANPRC152/ANPRC152.xob"
  Configurations {
   FBXResourceClass PC {
+   Scale 0.75 0.75 0.75
    MaterialAssigns {
-    MaterialAssignClass "{663B63887A77BF3B}" {
+    MaterialAssignClass "{663D7BF2F0993C01}" {
      SourceMaterial "blinn2SG"
-     AssignedMaterial "{193145C0560034FE}assets/ANPRC152/Data/blinn2SG.emat"
+     AssignedMaterial "{193145C0560034FE}assets/ANPRC152/data/blinn2SG.emat"
     }
    }
    MeshParams {
@@ -21,27 +22,27 @@ MetaFileClass {
      Margin 0
     }
    }
-   Common TXOCommonClass "{663B63887B863A1F}" : "{0877E7C4BB2B2C9A}Configs/System/ResourceTypes/PC/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDCAF}" : "{0877E7C4BB2B2C9A}Configs/System/ResourceTypes/PC/MeshObjectCommon.conf" {
    }
   }
   FBXResourceClass XBOX_ONE : PC {
-   Common TXOCommonClass "{663B63887B863914}" : "{9D5B6207F7628CE2}Configs/System/ResourceTypes/XBOX_ONE/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDBD1}" : "{9D5B6207F7628CE2}Configs/System/ResourceTypes/XBOX_ONE/MeshObjectCommon.conf" {
    }
   }
   FBXResourceClass XBOX_SERIES : PC {
-   Common TXOCommonClass "{663B63887B86392F}" : "{DD9F02115C764647}Configs/System/ResourceTypes/XBOX_SERIES/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDBE8}" : "{DD9F02115C764647}Configs/System/ResourceTypes/XBOX_SERIES/MeshObjectCommon.conf" {
    }
   }
   FBXResourceClass PS4 : PC {
-   Common TXOCommonClass "{663B63887B86396A}" : "{53EC476BC921D99A}Configs/System/ResourceTypes/PS4/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDA3D}" : "{53EC476BC921D99A}Configs/System/ResourceTypes/PS4/MeshObjectCommon.conf" {
    }
   }
   FBXResourceClass PS5 : PC {
-   Common TXOCommonClass "{663B63887B8639B9}" : "{F62AA8E7B8EA9D26}configs/ResourceTypes/PS5/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDA4A}" : "{F62AA8E7B8EA9D26}configs/ResourceTypes/PS5/MeshObjectCommon.conf" {
    }
   }
   FBXResourceClass HEADLESS : PC {
-   Common TXOCommonClass "{663B63887B8639CB}" : "{3A5B3356978039E8}Configs/System/ResourceTypes/HEADLESS/MeshObjectCommon.conf" {
+   Common TXOCommonClass "{663D7BF2F0AEDA97}" : "{3A5B3356978039E8}Configs/System/ResourceTypes/HEADLESS/MeshObjectCommon.conf" {
    }
   }
  }

@@ -10,6 +10,7 @@ GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.
   CVON_RadioComponent "{662D5D04D93541AF}" {
    m_sRadioName "AN/PRC-150"
    m_eRadioType MEDIUM
+   m_iRadioRange 7500
    m_sRadioIcon "{80C3C4A9645E0AC7}UI/layouts/Radios/ANPRC150/data/ANPRC150Icon.edds"
    m_sDialOn "{3CA4991A4B311EBD}UI/layouts/Radios/ANPRC150/data/ANPRC150DialOn.edds"
    m_sDialOff "{8C1EBE4E094C0A73}UI/layouts/Radios/ANPRC150/data/ANPRC150DialOff.edds"

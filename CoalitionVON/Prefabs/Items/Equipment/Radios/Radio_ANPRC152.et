@@ -19,8 +19,8 @@ GenericEntity : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.
     CustomAttributes {
      PreviewRenderAttributes "{52D493152DA704BA}" {
       CameraOrbitAngles 20 180 0
-      CameraDistanceToItem 2.5
-      CameraOffset 0 0.01 0
+      CameraDistanceToItem 2
+      CameraOffset 0 0.1 0
       ItemRenderRotation 90 180 180
      }
     }

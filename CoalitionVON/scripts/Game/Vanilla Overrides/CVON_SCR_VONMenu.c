@@ -1,6 +1,37 @@
 [BaseContainerProps()]
 modded class SCR_VONMenu
 {
+	//Ignore this for now, used for handmic shit that does not work.
+	bool m_bOpeningHandMic = false;
+	void OpenMenu(array<string> freqs, int amountOfRadios, array<string> radioNames)
+	{
+		
+		m_RadialController.Control(SCR_PlayerController.GetLocalControlledEntity(), m_RadialMenu);
+		SCR_HUDManagerComponent hud = GetGame().GetHUDManager();
+		m_Display = SCR_VONRadialDisplay.Cast(hud.FindInfoDisplay(SCR_VONRadialDisplay));
+		m_RadialMenu.SetMenuDisplay(m_Display);
+		m_RadialController.SetEnableControl(true);		
+		m_RadialMenu.ClearEntries();
+		for (int i = 0; i < amountOfRadios; i++)
+		{			
+			SCR_VONEntryRadio radioEntry = new SCR_VONEntryRadio();
+			radioEntry.SetRadioFrequency(freqs.Get(i));
+			radioEntry.m_bIsNotLocal = true;
+			radioEntry.m_sRadioName = radioNames.Get(i);
+			AddRadialEntry(radioEntry);
+		}
+		
+		if (m_RadialMenu.GetEntryCount() < 8 && m_RadialMenu.GetEntryCount() % 2 != 0)
+		{
+			SCR_VONEntry dummy = new SCR_VONEntry();
+			dummy.Enable(false);
+			dummy.SetIcon("{FDD5423E69D007F8}UI/Textures/Icons/icons_wrapperUI-128.imageset", "VON_radio");
+			AddRadialEntry(dummy);
+		}
+		m_bOpeningHandMic = true;
+		m_RadialController.OnInputOpen();
+	}
+	
 	//Opens the menu of the radio we select.
 	//==========================================================================================================================================================================
 	override protected void OnEntryPerformed(SCR_SelectionMenu menu, SCR_SelectionMenuEntry entry)
@@ -22,7 +53,6 @@ modded class SCR_VONMenu
 			m_Display = SCR_VONRadialDisplay.Cast(hud.FindInfoDisplay(SCR_VONRadialDisplay));
 			m_RadialMenu.SetMenuDisplay(m_Display);
 		}*/
-		
 		if (!hasControl && !m_bIsDisabled)	
 		{
 			m_RadialController.Control(GetGame().GetPlayerController(), m_RadialMenu);
@@ -52,6 +82,12 @@ modded class SCR_VONMenu
 		if (m_VONController.GetVONEntryCount() == 0)
 		{
 			m_RadialController.SetEnableControl(false);
+			return;
+		}
+		
+		if (m_bOpeningHandMic)
+		{
+			m_bOpeningHandMic = false;
 			return;
 		}
 		

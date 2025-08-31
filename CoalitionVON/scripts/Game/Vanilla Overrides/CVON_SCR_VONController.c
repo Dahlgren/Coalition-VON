@@ -10,8 +10,8 @@ enum CVON_EVONTransmitType
 
 modded class SCR_VONController
 {
-	static const int CVON_DB_ATTEN_VEHICLE  = -12; // speaker inside vehicle
-	static const int CVON_DB_ATTEN_BUILDING = -18; // speaker inside building
+	static const int CVON_DB_ATTEN_VEHICLE  = -18; // speaker inside vehicle
+	static const int CVON_DB_ATTEN_BUILDING = -12; // speaker inside building
 	
 	//MMMM POINTER
 	SCR_PlayerController m_PlayerController;
@@ -41,12 +41,6 @@ modded class SCR_VONController
 	
 	//Used if we are warning the player their VON is not connected after initial connection
 	bool m_bShowingSecondWarning = false;
-	
-	int m_iRangeWhisper;
-	int m_iRangeQuiet;
-	int m_iRangeNormal;
-	int m_iRangeLoud;
-	int m_iRangeYelling;
 	
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
@@ -367,7 +361,6 @@ modded class SCR_VONController
 	void ChangeChannel(int input)
 	{
 		array<IEntity> radios = m_PlayerController.m_aRadios;
-		Print(m_PlayerController.m_aRadios);
 		if (radios.Count() == 0)
 			return;
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radios.Get(0).FindComponent(CVON_RadioComponent));
@@ -430,7 +423,7 @@ modded class SCR_VONController
 	{
 		#ifdef WORKBENCH
 		#else
-		if (m_PlayerController.m_iTeamSpeakClientId == 0)
+		if (m_PlayerController.m_iTeamSpeakClientId == 0 && m_VONGameModeComponent.m_bTeamspeakChecks)
 			return;
 		#endif
 		if (!SCR_PlayerController.GetLocalControlledEntity())
@@ -566,11 +559,6 @@ modded class SCR_VONController
 		if (!m_PlayerController)
 		{
 			m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
-			m_iRangeWhisper = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[0]);
-			m_iRangeQuiet = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[1]);
-			m_iRangeNormal = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[2]);
-			m_iRangeLoud = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[3]);
-			m_iRangeYelling = CalculateMaxDistance(m_PlayerController.m_aVolumeValues[4]);
 		}
 		if (!m_CharacterController)
 			if (SCR_PlayerController.GetLocalControlledEntity())
@@ -580,16 +568,7 @@ modded class SCR_VONController
 		if (!m_PlayerManager)
 			m_PlayerManager = GetGame().GetPlayerManager();
 		
-		int maxDistance = 0;
-		switch (m_PlayerController.m_eVONVolume)
-		{
-			case CVON_EVONVolume.WHISPER: {maxDistance = m_iRangeWhisper; break;}
-			case CVON_EVONVolume.QUIET: {maxDistance = m_iRangeQuiet; break;}
-			case CVON_EVONVolume.NORMAL: {maxDistance = m_iRangeNormal; break;}
-			case CVON_EVONVolume.LOUD: {maxDistance = m_iRangeLoud; break;}
-			case CVON_EVONVolume.YELLING: {maxDistance = m_iRangeYelling; break;}
-			default: {maxDistance = m_iRangeNormal; break;}
-		}
+		int maxDistance = 150;
 		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			if (!container.m_SoundSource)
@@ -608,7 +587,6 @@ modded class SCR_VONController
 			{
 				if (m_bToggleBuffer)
 				{
-					Print("Deactivating toggle");
 					m_bToggleBuffer = false;
 					DeactivateCRFVON();
 					m_VONHud.DirectToggleDelay();
@@ -699,31 +677,40 @@ modded class SCR_VONController
 	    float x2 = x * x;
 	    return (1.0 + 0.5 * x + 0.12 * x2) / (1.0 + x + 0.48 * x2);
 	}
-
-	//Distance rolloff helper
-	static float DistanceRolloffDynamic(float distance_m, float volume_m, float n = 1.4)
-	{
-	    if (volume_m <= 0.01)  volume_m  = 0.01;
-	    if (distance_m < 0.0)  distance_m = 0.0;
 	
-	    float base = volume_m / (volume_m + distance_m);   // 0..1
-	    base = Math.Clamp(base, 0.0, 1.0);
-	    return Math.Pow(base, n);                           // steeper falloff with n>1
+	// 0 dB at d=0, −45 dB at d=inaudible_m (volume_m).
+	static float AttenuationDb(float d_m, float inaudible_m, float shapeExp = 1.6)
+	{
+	    if (inaudible_m <= 0.01) inaudible_m = 0.01;
+	    if (d_m <= 0.0)          return 0.0;
+	
+	    float x = d_m / inaudible_m;        // 0..1
+	    if (x >= 1.0) return -45.0;
+	    float db = -45.0 * Math.Pow(x, shapeExp);
+	
+	    if (db >  0.0)  db = 0.0;
+	    if (db < -45.0) db = -45.0;
+	    return db;
 	}
 	
-	// --- Stereo with front/back cues + distance rolloff ---
+	static float GainFromDb(float db)
+	{
+	    return Math.Pow(10.0, db / 20.0);
+	}
+		
+	// --- Stereo with front/back cues + −45 dB distance law + LoudnessIntensity ---
 	void ComputeStereoLR(
 	    IEntity listener,
 	    vector  sourcePos,
-		float volume_m,
+	    float   volume_m,            // interpret as the inaudible distance (≈ −45 dB)
 	    out float outLeft,
 	    out float outRight,
-		out int silencedDecibels = 0,
-	    float   rearPanBoost = 0.55,
-	    float   rearShadow   = 0.12,
-	    float   elevNarrow   = 0.25,
-	    float   bleed        = 0.10,
-	    bool    normalizePeak = true,
+	    out int  silencedDecibels = 0,
+	    float   rearPanBoost   = 0.55,
+	    float   rearShadow     = 0.12,
+	    float   elevNarrow     = 0.25,
+	    float   bleed          = 0.10,
+	    bool    normalizePeak  = true
 	)
 	{
 	    // ---- Listener pose ----
@@ -745,8 +732,8 @@ modded class SCR_VONController
 	    horiz /= hlen;
 	
 	    // ---- Pan & front/back cues ----
-	    float pan    = Math.Clamp(vector.Dot(horiz, Right), -1.0, 1.0); // -1=L, +1=R
-	    float front  = Math.Clamp(vector.Dot(horiz, Fwd),   -1.0, 1.0); // +1 front, -1 back
+	    float pan    = Math.Clamp(vector.Dot(horiz, Right), -1.0, 1.0);
+	    float front  = Math.Clamp(vector.Dot(horiz, Fwd),   -1.0, 1.0);
 	    float back01 = Math.Pow(Math.Max(0.0, -front), 1.4);
 	
 	    // Boost panning behind to help "behindness"
@@ -767,7 +754,7 @@ modded class SCR_VONController
 	    L = (1.0 - bleed) * Lb + bleed * Rb;
 	    R = (1.0 - bleed) * Rb + bleed * Lb;
 	
-	    // ---- Peak-normalize AFTER bleed (so center → ~1/1 per ear) ----
+	    // ---- Peak-normalize AFTER bleed (so center ≈ 1/1 per ear) ----
 	    if (normalizePeak) {
 	        float peak = Math.Max(L, R);
 	        if (peak > 0.0001) {
@@ -777,27 +764,29 @@ modded class SCR_VONController
 	        }
 	    }
 	
-	    // ---- Rear shadow (optional muffling behind) ----
+	    // ---- Rear shadow (linear softening behind) ----
 	    float rearAtt = 1.0 - rearShadow * back01;
-		
-		// ---- Distance rolloff (0..1) ----
-		float roll = DistanceRolloffDynamic(dist, volume_m);
-		
-		// ---- Loudness boost (>1 when volume_m > normal, fades with distance) ----
-		float loud = LoudnessIntensity(volume_m, dist);
-		
-		// ---- Final per-ear gains (can exceed 1.0) ----
-		float gain = rearAtt * roll * loud;
-		outLeft  = L * gain;
-		outRight = R * gain;
-		
-		// Optional safety cap to avoid runaway values (matches plugin's 0..2 clamp):
-		if (MAX_OUT_GAIN > 0.0) 
-		{
-		    outLeft  = Math.Clamp(outLeft,  0.0, MAX_OUT_GAIN);
-		    outRight = Math.Clamp(outRight, 0.0, MAX_OUT_GAIN);
-		}
-
+	
+	    // ---- Baseline distance law (−45 dB at volume_m)
+	    float distDb   = AttenuationDb(dist, volume_m, 1.6);
+	
+	    // If you have occlusion, subtract it here in dB BEFORE converting to linear:
+	    // distDb -= silencedDecibels; // set silencedDecibels elsewhere
+	
+	    float distGain = GainFromDb(distDb);
+	
+	    // ---- Loudness push (near-field boost that fades → 1.0 with distance)
+	    float loud = LoudnessIntensity(volume_m, dist);
+	
+	    // ---- Final per-ear gains
+	    float gain = rearAtt * distGain * loud;
+	    outLeft  = L * gain;
+	    outRight = R * gain;
+	
+	    if (MAX_OUT_GAIN > 0.0) {
+	        outLeft  = Math.Clamp(outLeft,  0.0, MAX_OUT_GAIN);
+	        outRight = Math.Clamp(outRight, 0.0, MAX_OUT_GAIN);
+	    }
 	}
 	
 	// Convert attenuation in dB → linear (treats +/−dB the same)
@@ -806,74 +795,6 @@ modded class SCR_VONController
 	    float a = Math.AbsFloat(dB);
 	    return Math.Pow(10.0, -a / 20.0);
 	}
-	
-	// Effective gain = rolloff * loudness (uses your existing helpers)
-	static float EffectiveGainAt(float volume_m, float dist, float n = 1.4)
-	{
-	    return DistanceRolloffDynamic(dist, volume_m, n) * LoudnessIntensity(volume_m, dist);
-	}
-	
-	// Max distance where PER-EAR level hits your chosen dB (e.g. 26 → −26 dB ~= 0.0501).
-	// normalizePeak must match your ComputeStereoLR call.
-	// rearAttRef is a budget for rear shadow at the boundary (1.0 = front).
-	// occLin lets you include level-only occlusion (<=1), e.g. AttenDbToLin(totalOccDb).
-	static int CalculateMaxDistance(
-	    float volume_m,
-	    float cutoffDb		= 20,
-	    float n             = 1.4,
-	    bool  normalizePeak = true,
-	    float rearAttRef    = 1.0,
-	    float occLin        = 1.0
-	)
-	{
-	    if (volume_m < 0.01) volume_m = 0.01;
-	    if (n <= 0.0)        n = 1.0;
-	
-	    // Desired per-ear linear threshold
-	    float tauEar = AttenDbToLin(cutoffDb);
-	
-	    // Peak-ear factor from stereo (no ternary for Enforce)
-	    float panPeak;
-	    if (normalizePeak) {
-	        panPeak = 1.0;           // after normalize, peak ear ≈ 1.0
-	    } else {
-	        panPeak = 0.70710678;    // sqrt(0.5) at center without normalize
-	    }
-	
-	    // Total per-ear scale applied after pre-stereo scalar
-	    float earScale = panPeak * rearAttRef * occLin;
-	    if (earScale < 0.0001) earScale = 0.0001;
-	
-	    // Convert per-ear target → equivalent pre-stereo threshold
-	    float tauPre = tauEar / earScale;
-	
-	    // Fast closed form when ≤ normal talk (no extra loudness tail)
-	    if (volume_m <= SPEECH_NORMAL_M + 0.0001) {
-	        float invRoot = 1.0 / Math.Pow(tauPre, 1.0 / n);
-	        float d       = volume_m * (invRoot - 1.0);
-	        return (int)Math.Ceil(d);
-	    }
-	
-	    // Loudness-aware solve (binary search)
-	    float invRoot = 1.0 / Math.Pow(tauPre, 1.0 / n);
-	    float baseHi  = volume_m * (invRoot - 1.0);
-	    float lo = 0.0;
-	    float hi = Math.Max(1.0, baseHi + 8.0 * volume_m);  // headroom for loudness tail
-	
-	    int guard = 0;
-	    while (EffectiveGainAt(volume_m, hi, n) >= tauPre && guard++ < 24) {
-	        hi *= 2.0;  // expand until below threshold
-	    }
-	
-	    for (int i = 0; i < 24; ++i) {
-	        float mid = 0.5 * (lo + hi);
-	        if (EffectiveGainAt(volume_m, mid, n) >= tauPre) lo = mid; else hi = mid;
-	    }
-	
-	    return (int)Math.Ceil(hi);
-	}
-
-
 	
 	//Also bless ChatGPT, handles the arcade signal calulations.
 	// distance: current distance from transmitter
@@ -925,7 +846,7 @@ modded class SCR_VONController
 		
 	}
 	
-	bool IsInBuilding(IEntity senderEntity, out IEntity building = null)
+	bool IsInBuildingOrVehicle(IEntity senderEntity, out IEntity building = null)
 	{
 		
 		autoptr TraceParam p = new TraceParam;
@@ -986,14 +907,8 @@ modded class SCR_VONController
 		IEntity player = SCR_PlayerController.GetLocalControlledEntity();
 		IEntity receiverBuilding;
 		IEntity senderBuilding;
-		bool isSenderInBuilding = IsInBuilding(senderEntity, senderBuilding);
-		bool isPlayerInBuilding = IsInBuilding(player, receiverBuilding);
-		
-		if (Vehicle.Cast(senderBuilding))
-		{
-			loweredDecibles = CVON_DB_ATTEN_VEHICLE;
-			return true;
-		}
+		bool isSenderInBuilding = IsInBuildingOrVehicle(senderEntity, senderBuilding);
+		bool isPlayerInBuilding = IsInBuildingOrVehicle(player, receiverBuilding);
 		
 		if (!isSenderInBuilding && !isPlayerInBuilding)
 			return false;
@@ -1047,6 +962,8 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	void WriteJSON()
 	{
+		if (!GetGame().GetPlayerController())
+			return;
 		SCR_JsonLoadContext VONLoad = new SCR_JsonLoadContext();
 		if (!VONLoad.LoadFromFile("$profile:/VONServerData.json"))
 		{
@@ -1065,13 +982,15 @@ modded class SCR_VONController
 		{
 			string ChannelName;
 			string ChannelPassword;
+			bool InGame;
 			VONLoad.StartObject("ServerData");
+			VONLoad.ReadValue("InGame", InGame);
 			VONLoad.ReadValue("VONChannelName", ChannelName);
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
 			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
 			VONLoad.EndObject();
-			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
+			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion || InGame != true)
 			{
 				SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 				VONServerData.StartObject("ServerData");
@@ -1088,30 +1007,33 @@ modded class SCR_VONController
 		#ifdef WORKBENCH
 		#else
 		//Hijack this whole process to load the initial warning menu
-		if (m_PlayerController.m_fTeamspeakPluginVersion != 0 && m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
+		if (m_VONGameModeComponent.m_bTeamspeakChecks)
 		{
-			m_VONHud.ShowWarning();
-		}
-		if (m_PlayerController.m_iTeamSpeakClientId == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
-		{
-			m_PlayerController.m_bHasBeenGivenInitialWarning = true;
-			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
-		}
-		else if (!m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId != 0)
-		{
-			m_PlayerController.m_bHasBeenGivenInitialWarning = true;
-			m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
-		}
-		else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId == 0 && SCR_PlayerController.GetLocalControlledEntity())
-		{
-			m_VONHud.ShowWarning();
-			m_bShowingSecondWarning = true;
-
-		}
-		else if (m_bShowingSecondWarning)
-		{
-			m_VONHud.HideWarning();
-			m_bShowingSecondWarning = false;
+			if (m_PlayerController.m_fTeamspeakPluginVersion != 0 && m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
+			{
+				m_VONHud.ShowWarning();
+			}
+			if (m_PlayerController.m_iTeamSpeakClientId == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
+			{
+				m_PlayerController.m_bHasBeenGivenInitialWarning = true;
+				GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
+			}
+			else if (!m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId != 0)
+			{
+				m_PlayerController.m_bHasBeenGivenInitialWarning = true;
+				m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
+			}
+			else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId == 0 && SCR_PlayerController.GetLocalControlledEntity())
+			{
+				m_VONHud.ShowWarning();
+				m_bShowingSecondWarning = true;
+	
+			}
+			else if (m_bShowingSecondWarning)
+			{
+				m_VONHud.HideWarning();
+				m_bShowingSecondWarning = false;
+			}
 		}
 		#endif
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
@@ -1135,10 +1057,9 @@ modded class SCR_VONController
 			{
 				soundSource = RplComponent.Cast(Replication.FindItem(container.m_SenderRplId)).GetEntity();
 				container.m_SoundSource = soundSource;
-				Print(container.m_SoundSource);
 				ShouldMuffleAudio(container.m_SoundSource, loweredDecibels);
 				if (loweredDecibels < 0)
-					ComputeStereoLR(localEntity, GetHeadHeight(soundSource), container.m_iVolume/2, left, right);
+					ComputeStereoLR(localEntity, GetHeadHeight(soundSource), container.m_iVolume/1.25, left, right);
 				else
 					ComputeStereoLR(localEntity, GetHeadHeight(soundSource), container.m_iVolume, left, right);
 			}
@@ -1146,7 +1067,7 @@ modded class SCR_VONController
 			{
 				ShouldMuffleAudio(container.m_SoundSource, loweredDecibels);
 				if (loweredDecibels < 0)
-					ComputeStereoLR(localEntity, GetHeadHeight(container.m_SoundSource), container.m_iVolume/2, left, right);
+					ComputeStereoLR(localEntity, GetHeadHeight(container.m_SoundSource), container.m_iVolume/1.25, left, right);
 				else
 					ComputeStereoLR(localEntity, GetHeadHeight(container.m_SoundSource), container.m_iVolume, left, right);
 			}

@@ -1,4 +1,9 @@
 SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
+ components {
+  CVON_VONGameModeComponent "{6624E607CC6D4CC8}" {
+   m_bTeamspeakChecks 0
+  }
+ }
  coords 138.299 1 173.219
  {
   SCR_FactionManager "663308E0ACD96B6F" {
@@ -7,21 +12,21 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
     SCR_Faction "{56DEAC40D2DBC8B1}" {
      m_bIsPlayable 1
      m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
-      m_aGroupFrequency {
-       CVON_GroupFrequencyContainer "{6639350E65A54431}" {
-        m_aSRFrequencies {
-         "SQUAD1" "MEDIC"
-        }
-        m_aLRFrequencies {
-         "Test1" "Test2"
-        }
+      m_aSquadNames {
+       SCR_CallsignInfo "{55CCB792D10AD8F4}" {
+        m_sCallsign "1-1"
        }
-       CVON_GroupFrequencyContainer "{663935120E8F2A76}" {
-        m_aLRFrequencies {
-         "Test3" "Test4"
-        }
+       SCR_CallsignInfo "{55CCB792D13759D8}" {
+        m_sCallsign "1-2"
+       }
+       SCR_CallsignInfo "{55CCB792D1218E95}" {
+        m_sCallsign "1-3"
+       }
+       SCR_CallsignInfo "{55CCB792D0C8B3CE}" {
+        m_sCallsign "1-4"
        }
       }
+      m_sCallsignGroupFormat "%3"
      }
     }
    }
@@ -43,35 +48,4 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
 }
 SCR_SpawnPoint : "{5A2220DD0C16958B}Prefabs/MP/Spawning/SpawnPoint_US.et" {
  coords 137.887 1 171.251
-}
-$grp GenericEntity : "{C204374F722D5229}Prefabs/Items/Equipment/Radios/Radio_ANPRC117.et" {
- {
-  coords 122.629 1 159.274
- }
- {
-  coords 127.636 1.411 134.839
-  angleY -93.81
- }
-}
-GenericEntity : "{E82129A6CC014808}Prefabs/Items/Equipment/Radios/Radio_ANPRC152.et" {
- components {
-  InventoryItemComponent "{5222EB4D0C73006B}" {
-   Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
-    CustomAttributes {
-     PreviewRenderAttributes "{52D493152DA704BA}" {
-      CameraOffset 0 0.1 0
-     }
-    }
-   }
-  }
- }
- coords 122.949 1 159.232
-}
-$grp GenericEntity : "{F8F7E82661C761DD}Prefabs/Items/Equipment/Radios/Radio_ANPRC150.et" {
- {
-  coords 126.392 1 159.786
- }
- {
-  coords 127.009 1 135.305
- }
 }

@@ -97,6 +97,7 @@ typedef uint16_t anyID;
 #define RADIO_HP_HZ 750.0f
 #define RADIO_HP_Q 0.97f
 #define BASE_DISTORTION_LEVEL 0.43f
+#define MUFFLE_STAGES 3 /* 2nd-order LP x3 ≈ much steeper rolloff */
 
 /* Logging (optional lightweight) */
 #ifndef CRF_LOGGING
@@ -624,50 +625,75 @@ static float get_plugin_version_float(void)
     return (float)d;
 }
 
-/* Static/hiss generator */
-static void radio_make_static(RadioState* st, float* out, int n, float value, float quality01)
+/* Static/hiss generator: driven by quality only; optional SNR scaling with volume */
+static void radio_make_static(RadioState* st, float* out, int n, float volume01, float quality01)
 {
     if (n <= 0)
         return;
-    const float v = clampf(value, 0.0f, 1.0f), q = clampf(quality01, 0.0f, 1.0f);
-    const float inv_eff  = (1.25f - v) + 0.90f * (1.0f - q);
-    const float pinkAmt  = 0.35f * inv_eff * (1.0f + 1.8f * (1.0f - q));
-    const float whiteAmt = 0.001f * inv_eff * (1.0f + 8.0f * (1.0f - q));
+
+    const float q = clampf(quality01, 0.0f, 1.0f);
+
+    /* Intensity: more noise as quality drops; no dependence on volume */
+    const float inv_eff = 0.90f * (1.0f - q);
+
+    /* Spectral balance stays similar to before */
+    const float pinkAmt  = 0.25f * inv_eff;
+    const float whiteAmt = 0.0025f * inv_eff;
     const float bedWhite = 0.0045f * (1.0f - q);
+
     for (int i = 0; i < n; ++i) {
         float pn = pink_tick(&st->pink) * pinkAmt;
         float wn = white_signed(&st->pink.rng) * (whiteAmt + bedWhite);
         out[i]   = pn + wn;
     }
+
     for (int i = 0; i < n; ++i)
         out[i] = biquad_tick(&st->lp_n, out[i]);
     for (int i = 0; i < n; ++i)
         out[i] = biquad_tick(&st->hp_n, out[i]);
-    const float noiseGain = 0.28f * (1.0f - q) + 0.015f;
+
+    /* Keep SNR reasonably consistent across volume steps (optional but nice) */
+    const float snrComp = 0.45f + 0.55f * clampf(volume01, 0.0f, 1.0f);
+
+    /* Final noise gain: largely quality-driven, then SNR-compensated by volume */
+    const float noiseGain = (0.28f * (1.0f - q) + 0.015f) * snrComp;
+
     for (int i = 0; i < n; ++i) {
-        out[i] *= noiseGain;
-        if (out[i] > 1.0f)
-            out[i] = 1.0f;
-        if (out[i] < -1.0f)
-            out[i] = -1.0f;
+        float s = out[i] * noiseGain;
+        if (s > 1.0f)
+            s = 1.0f;
+        if (s < -1.0f)
+            s = -1.0f;
+        out[i] = s;
     }
 }
+
 /* Voice-only Acre coloration */
-static void radio_color_voice_only(RadioState* st, float* buf, int n, float value)
+/* Voice-only Acre coloration: FX driven by quality, not volume */
+static void radio_color_voice_only(RadioState* st, float* buf, int n, float volume01, float quality01)
 {
     if (n <= 0)
         return;
-    const float v = clampf(value, 0.0f, 1.0f);
+
+    /* Pre-FX boost like before to keep tone comparable */
     for (int i = 0; i < n; ++i)
         buf[i] *= 3.0f;
-    const float rmix = clampf((1.0f - v) * 0.6f, 0.0f, 0.6f);
+
+    /* Ring-mod amount grows as quality drops (0.18..0.50) */
+    const float q    = clampf(quality01, 0.0f, 1.0f);
+    const float rmix = clampf(0.18f + 0.32f * (1.0f - q), 0.0f, 0.6f);
     ring_mix(&st->rm, buf, n, TS_SAMPLE_RATE, RADIO_RINGMOD_HZ, rmix);
-    const float th = clampf(BASE_DISTORTION_LEVEL - 0.25f * (1.0f - v), 0.08f, 0.60f);
+
+    /* Distortion threshold lowers slightly as quality drops */
+    const float th = clampf(BASE_DISTORTION_LEVEL - 0.20f * (1.0f - q), 0.15f, 0.60f);
     foldback_buffer(buf, n, th);
+
+    /* Radio bandpass as before */
     for (int i = 0; i < n; ++i)
         buf[i] = biquad_tick(&st->lp, buf[i]);
     for (int i = 0; i < n; ++i)
         buf[i] = biquad_tick(&st->hp, buf[i]);
+
     for (int i = 0; i < n; ++i) {
         if (buf[i] > 1.0f)
             buf[i] = 1.0f;
@@ -682,8 +708,9 @@ static void radio_color_voice_only(RadioState* st, float* buf, int n, float valu
 typedef struct {
     anyID  id;
     int    have;
-    Biquad lpL, lpR; /* stereo LP for direct path */
-    Biquad lpM;      /* mono LP for 1ch buffers */
+    Biquad lpL[MUFFLE_STAGES]; /* stereo LP (left)  */
+    Biquad lpR[MUFFLE_STAGES]; /* stereo LP (right) */
+    Biquad lpM[MUFFLE_STAGES]; /* mono LP for 1ch   */
     float  lastFc;
 } DirectState;
 
@@ -715,9 +742,11 @@ static DirectState* get_direct_state(anyID id)
         memset(s, 0, sizeof(*s));
         s->id   = id;
         s->have = 1;
-        biquad_calc_lowpass(&s->lpL, TS_SAMPLE_RATE, 8000.0f, 0.9f);
-        biquad_calc_lowpass(&s->lpR, TS_SAMPLE_RATE, 8000.0f, 0.9f);
-        biquad_calc_lowpass(&s->lpM, TS_SAMPLE_RATE, 8000.0f, 0.9f);
+        for (int i = 0; i < MUFFLE_STAGES; ++i) {
+            biquad_calc_lowpass(&s->lpL[i], TS_SAMPLE_RATE, 8000.0f, 0.9f);
+            biquad_calc_lowpass(&s->lpR[i], TS_SAMPLE_RATE, 8000.0f, 0.9f);
+            biquad_calc_lowpass(&s->lpM[i], TS_SAMPLE_RATE, 8000.0f, 0.9f);
+        }
         s->lastFc = 8000.0f;
         LeaveCriticalSection(&g_directLock);
         return s;
@@ -1263,7 +1292,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.2";
+    return "1.4";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1466,10 +1495,9 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
                     outL[i] = outR[i] = 0.0f;
                 }
 
-                radio_color_voice_only(st, voice, n, vol01);
+                radio_color_voice_only(st, voice, n, vol01, q);
 
-                const float qGain     = powf(clampf(e->connQ, 0.0f, 1.0f), 1.5f);
-                const float voiceGain = clampf(vol01 * (qGain < 0.08f ? 0.08f : qGain), 0.0f, 1.0f);
+                const float voiceGain = clampf(vol01, 0.0f, 1.0f); // quality affects FX/noise, not loudness
                 for (int i = 0; i < n; ++i)
                     voice[i] *= voiceGain;
 
@@ -1540,9 +1568,12 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
                 ds = get_direct_state(clientID);
                 fc = occlusion_db_to_fc(occDb); /* ~4.5k @12dB, ~2.7k @18dB */
                 if (fabsf(fc - ds->lastFc) > 10.0f) {
-                    biquad_update_lowpass(&ds->lpL, TS_SAMPLE_RATE, fc, 0.9f);
-                    biquad_update_lowpass(&ds->lpR, TS_SAMPLE_RATE, fc, 0.9f);
-                    biquad_update_lowpass(&ds->lpM, TS_SAMPLE_RATE, fc, 0.9f);
+                    for (int i = 0; i < MUFFLE_STAGES; ++i) {
+                        biquad_update_lowpass(&ds->lpL[i], TS_SAMPLE_RATE, fc, 0.9f);
+                        biquad_update_lowpass(&ds->lpR[i], TS_SAMPLE_RATE, fc, 0.9f);
+                        biquad_update_lowpass(&ds->lpM[i], TS_SAMPLE_RATE, fc, 0.9f);
+                    }
+
                     ds->lastFc = fc;
                 }
             }
@@ -1552,8 +1583,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
                 for (int i = 0; i < sampleCount; ++i) {
                     float x = (float)samples[i] / 32768.0f;
                     x *= m;
-                    if (doMuf)
-                        x = biquad_tick(&ds->lpM, x);
+                    if (doMuf) {
+                        for (int s = 0; s < MUFFLE_STAGES; ++s)
+                            x = biquad_tick(&ds->lpM[s], x);
+                    }
                     samples[i] = clamp_i16(x * 32767.0f);
                 }
             } else {
@@ -1564,8 +1597,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
                     L *= lMul;
                     R *= rMul;
                     if (doMuf) {
-                        L = biquad_tick(&ds->lpL, L);
-                        R = biquad_tick(&ds->lpR, R);
+                        for (int s = 0; s < MUFFLE_STAGES; ++s) {
+                            L = biquad_tick(&ds->lpL[s], L);
+                            R = biquad_tick(&ds->lpR[s], R);
+                        }
                     }
                     const short Ls       = clamp_i16(L * 32767.0f);
                     const short Rs       = clamp_i16(R * 32767.0f);
@@ -1599,9 +1634,12 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
             ds = get_direct_state(clientID);
             fc = occlusion_db_to_fc(occDb);
             if (fabsf(fc - ds->lastFc) > 10.0f) {
-                biquad_update_lowpass(&ds->lpL, TS_SAMPLE_RATE, fc, 0.9f);
-                biquad_update_lowpass(&ds->lpR, TS_SAMPLE_RATE, fc, 0.9f);
-                biquad_update_lowpass(&ds->lpM, TS_SAMPLE_RATE, fc, 0.9f);
+                for (int i = 0; i < MUFFLE_STAGES; ++i) {
+                    biquad_update_lowpass(&ds->lpL[i], TS_SAMPLE_RATE, fc, 0.9f);
+                    biquad_update_lowpass(&ds->lpR[i], TS_SAMPLE_RATE, fc, 0.9f);
+                    biquad_update_lowpass(&ds->lpM[i], TS_SAMPLE_RATE, fc, 0.9f);
+                }
+
                 ds->lastFc = fc;
             }
         }
@@ -1611,8 +1649,11 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
             for (int i = 0; i < sampleCount; ++i) {
                 float x = (float)samples[i] / 32768.0f;
                 x *= m;
-                if (doMuf)
-                    x = biquad_tick(&ds->lpM, x);
+                if (doMuf) {
+                    for (int s = 0; s < MUFFLE_STAGES; ++s)
+                        x = biquad_tick(&ds->lpM[s], x);
+                }
+
                 samples[i] = clamp_i16(x * 32767.0f);
             }
         } else {
@@ -1623,8 +1664,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
                 L *= lMul;
                 R *= rMul;
                 if (doMuf) {
-                    L = biquad_tick(&ds->lpL, L);
-                    R = biquad_tick(&ds->lpR, R);
+                    for (int s = 0; s < MUFFLE_STAGES; ++s) {
+                        L = biquad_tick(&ds->lpL[s], L);
+                        R = biquad_tick(&ds->lpR[s], R);
+                    }
                 }
                 const short Ls       = clamp_i16(L * 32767.0f);
                 const short Rs       = clamp_i16(R * 32767.0f);
