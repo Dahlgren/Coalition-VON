@@ -251,7 +251,12 @@ class CVON_HUD: SCR_InfoDisplay {
 		frequency.SetText(radioComp.m_sFrequency);
 		//Channel text
 		channel.SetText(string.Format("CH-%1", radioComp.m_iCurrentChannel));
-
+		
+		
+		right.LoadImageTexture(0, CVON_HUD.m_sArrowOn);
+		right.SetColor(Color.FromRGBA(180, 255, 180, 255));
+		left.LoadImageTexture(0, CVON_HUD.m_sArrowOn);
+		left.SetColor(Color.FromRGBA(180, 255, 180, 255));
 		if (radioComp.m_eStereo != CVON_EStereo.BOTH)
 		{
 			//Right ear
