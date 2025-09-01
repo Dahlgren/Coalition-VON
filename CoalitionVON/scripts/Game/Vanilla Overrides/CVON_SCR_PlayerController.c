@@ -18,7 +18,6 @@ class CVON_RadioSettingObject
 class CVON_RadioSettings
 {
 	ref array<ref CVON_RadioSettingObject> m_aSRRadioSettings = {};
-	ref array<ref CVON_RadioSettingObject> m_aMRsRadioSettings = {};
 	ref array<ref CVON_RadioSettingObject> m_aLRRadioSettings = {};
 }
 
@@ -75,9 +74,7 @@ modded class SCR_PlayerController
 			return;
 		ref array<IEntity> shortRangeRadios = {};
 		ref array<IEntity> longRangeRadios = {};
-		ref array<IEntity> mediumRangeRadios = {};
 		int SRIndex = 0;
-		int MRIndex = 0;
 		int LRIndex = 0;
 		foreach (RplId radio: radios)
 		{
@@ -99,7 +96,9 @@ modded class SCR_PlayerController
 			array<SCR_AIGroup> groups = groupManager.GetPlayableGroupsByFaction(faction);
 			SCR_AIGroup playersGroup = groupManager.GetPlayerGroup(GetPlayerId());
 			CVON_GroupFrequencyContainer freqContainer;
-			int index = groups.Find(playersGroup);
+			int index = -1;
+			if (playersGroup)
+				index = groups.Find(playersGroup);
 			string playersGroupName;
 			if (index != -1)
 			{
@@ -111,30 +110,33 @@ modded class SCR_PlayerController
 				playersGroup.GetCallsigns(company, platoon, squad, character, format);
 				playersGroupName = string.Format(format, company, platoon, squad, character);
 			}
-			CVON_VONGameModeComponent gamemodeComp = CVON_VONGameModeComponent.GetInstance();
-			if (gamemodeComp.m_FreqConfig)
+			if (playersGroup)
 			{
-				foreach (CVON_GroupFrequencyContainer freqItem: gamemodeComp.m_FreqConfig.m_aPresetGroupFrequencyContainers)
+				CVON_VONGameModeComponent gamemodeComp = CVON_VONGameModeComponent.GetInstance();
+				if (gamemodeComp.m_FreqConfig)
 				{
-					foreach (string groupName: freqItem.m_aGroupNames)
+					foreach (CVON_GroupFrequencyContainer freqItem: gamemodeComp.m_FreqConfig.m_aPresetGroupFrequencyContainers)
+					{
+						foreach (string groupName: freqItem.m_aGroupNames)
+						{
+							if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
+								continue;
+							
+							freqContainer = freqItem;
+							break;
+						}
+					}
+				}
+				foreach (CVON_GroupFrequencyContainer container: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
+				{
+					foreach (string groupName: container.m_aGroupNames)
 					{
 						if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
 							continue;
 						
-						freqContainer = freqItem;
+						freqContainer = container;
 						break;
 					}
-				}
-			}
-			foreach (CVON_GroupFrequencyContainer container: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
-			{
-				foreach (string groupName: container.m_aGroupNames)
-				{
-					if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
-						continue;
-					
-					freqContainer = container;
-					break;
 				}
 			}
 			switch (radioComp.m_eRadioType)
@@ -175,47 +177,6 @@ modded class SCR_PlayerController
 							settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
 							m_RadioSettings.m_aSRRadioSettings.Insert(settings);
 							SRIndex++;
-						}
-					}
-						
-					break;
-				}
-				case CVON_ERadioType.MEDIUM:
-				{
-					if (!mediumRangeRadios.Contains(radioObject))
-					{
-						mediumRangeRadios.Insert(radioObject);
-						if (System.IsConsoleApp())
-							break;
-						if (!freqContainer)
-							break;
-						if (!freqContainer.m_aMRFrequencies)
-							break;
-						if (freqContainer.m_aMRFrequencies.Count() < SRIndex + 1)
-							break;
-						if (m_RadioSettings.m_aMRsRadioSettings)
-						{
-							if (m_RadioSettings.m_aMRsRadioSettings.Count() - 1 < MRIndex)
-							{
-								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-								settings.m_sFreq = freqContainer.m_aMRFrequencies.Get(MRIndex);
-								m_RadioSettings.m_aMRsRadioSettings.Insert(settings);
-								MRIndex++;
-							}
-							else
-							{
-								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aMRsRadioSettings.Get(MRIndex);
-								radioComp.m_eStereo = settings.m_Stereo;
-								radioComp.m_iVolume = settings.m_iVolume;
-								MRIndex++;
-							}
-						}
-						else
-						{
-							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-							settings.m_sFreq = freqContainer.m_aMRFrequencies.Get(MRIndex);
-							m_RadioSettings.m_aMRsRadioSettings.Insert(settings);
-							MRIndex++;
 						}
 					}
 						
@@ -268,8 +229,6 @@ modded class SCR_PlayerController
 			m_aRadios.InsertAll(shortRangeRadios);
 		if (longRangeRadios)
 			m_aRadios.InsertAll(longRangeRadios);
-		if (mediumRangeRadios)
-			m_aRadios.InsertAll(mediumRangeRadios);
 		IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radios.Get(0))).GetEntity();
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (GetGame().GetPlayerController())

@@ -433,17 +433,6 @@ class CVON_RadioMenu: MenuBase
 				}
 				break;
 			}
-			case CVON_ERadioType.MEDIUM: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
-				}
-				break;
-			}
 			case CVON_ERadioType.LONG: 
 			{
 				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
@@ -479,17 +468,6 @@ class CVON_RadioMenu: MenuBase
 						continue;
 					
 					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
-				}
-				break;
-			}
-			case CVON_ERadioType.MEDIUM: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aMRsRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
 				}
 				break;
 			}
