@@ -94,7 +94,9 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
 			return;
 		if (m_bIsToggled)
-		  ShowMic();
+			return;
+		
+	 	ShowMic();
 	}
 	
 	void ShowDirectToggle()
