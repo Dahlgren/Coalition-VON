@@ -21,22 +21,6 @@ PerceptionManager PerceptionManager1 : "{028DAEAD63E056BE}Prefabs/World/Game/Per
  coords 2678.777 77.139 1651.94
 }
 SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
- components {
-  SCR_TimeAndWeatherHandlerComponent "{6636B3EC1E216F29}" {
-   m_iStartingHours 3
-   m_iRangeHoursStart 0
-   m_iRangeHoursEnd 0
-   m_fDayTimeAcceleration 0.1
-   m_fNightTimeAcceleration 0.1
-   m_bUsePredefineStartingTimeAndWeather 1
-   m_aStartingWeatherAndTime {
-    SCR_TimeAndWeatherState "{6636B3EC0567F270}" {
-     m_sWeatherPresetName "Rainy"
-     m_iStartingHour 20
-    }
-   }
-  }
- }
  coords 2047.857 45.147 2063.009
  {
   SCR_FactionManager "6636B3D496666FF3" {
@@ -47,28 +31,49 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
      m_CallsignInfo SCR_FactionCallsignInfo "{5DA0F2A6677ADA9E}" {
       m_aGroupFrequency {
        CVON_GroupFrequencyContainer "{663308E7F3533121}" {
-        m_sLRFrequency "COY"
-        m_sMRFrequency "PLT1"
+        m_aLRFrequencies {
+         "COY"
+        }
+        m_aMRFrequencies {
+         "PLT1"
+        }
        }
        CVON_GroupFrequencyContainer "{663308E7EE9CD6C5}" {
-        m_sSRFrequency "TEAM1"
-        m_sLRFrequency "PLT1"
+        m_aSRFrequencies {
+         "TEAM1"
+        }
+        m_aLRFrequencies {
+         "PLT1"
+        }
        }
        CVON_GroupFrequencyContainer "{663308E7E8DF668E}" {
-        m_sSRFrequency "TEAM2"
-        m_sLRFrequency "PLT1"
+        m_aSRFrequencies {
+         "TEAM2"
+        }
+        m_aLRFrequencies {
+         "PLT1"
+        }
        }
        CVON_GroupFrequencyContainer "{663308E7EA5DD2B5}" {
-        m_sSRFrequency "TEAM3"
-        m_sLRFrequency "PLT1"
+        m_aSRFrequencies {
+         "TEAM3"
+        }
+        m_aLRFrequencies {
+         "PLT1"
+        }
        }
        CVON_GroupFrequencyContainer "{6636B3D4C967B1BF}" {
-        m_sSRFrequency "TEAM4"
-        m_sLRFrequency "PLT1"
+        m_aSRFrequencies {
+         "TEAM4"
+        }
+        m_aLRFrequencies {
+         "PLT1"
+        }
        }
        CVON_GroupFrequencyContainer "{6636B3D519BD3955}" {
-        m_sSRFrequency "PLT1"
-        m_sMRFrequency "MEDIC"
+        m_aSRFrequencies {
+         "PLT1" "MEDIC"
+        }
        }
       }
      }

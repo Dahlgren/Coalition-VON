@@ -58,7 +58,6 @@ class CVON_HUD: SCR_InfoDisplay {
 		GetGame().GetInputManager().RemoveActionListener("VONMediumRange", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().RemoveActionListener("VONMediumRange", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().RemoveActionListener("VONDirect", EActionTrigger.DOWN, ShowDirect);
-		GetGame().GetInputManager().RemoveActionListener("VONDirect", EActionTrigger.UP, HideDirect);
 		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.DOWN, ShowVONActive);
 		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().RemoveActionListener("VONChannelUp", EActionTrigger.DOWN, ShowVONChange);
@@ -95,8 +94,7 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
 			return;
 		if (m_bIsToggled)
-			return;
-		ShowMic();
+		  ShowMic();
 	}
 	
 	void ShowDirectToggle()
@@ -163,6 +161,7 @@ class CVON_HUD: SCR_InfoDisplay {
 		IEntity radio = playerController.m_aRadios.Get(0);
 		if (!radio)
 			return;
+		AnimateWidget.StopAllAnimations(m_wRoot.FindAnyWidget("VONEntry"));
 		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
 		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
@@ -185,6 +184,7 @@ class CVON_HUD: SCR_InfoDisplay {
 		IEntity radio = playerController.m_aRadios.Get(0);
 		if (!radio)
 			return;
+		AnimateWidget.StopAllAnimations(m_wRoot.FindAnyWidget("VONEntry"));
 		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
 		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
@@ -216,6 +216,7 @@ class CVON_HUD: SCR_InfoDisplay {
 		IEntity radio = RplComponent.Cast(Replication.FindItem(vonController.m_CurrentVONContainer.m_iRadioId)).GetEntity();
 		if (!radio)
 			return;
+		AnimateWidget.StopAllAnimations(m_wRoot.FindAnyWidget("VONEntry"));
 		m_wRoot.FindAnyWidget("VONEntry").SetOpacity(1);
 		m_wRoot.FindAnyWidget("VONEntry").SetVisible(true);
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));

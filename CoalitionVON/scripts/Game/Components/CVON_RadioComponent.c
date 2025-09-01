@@ -39,6 +39,8 @@ class CVON_RadioComponent: ScriptComponent
 	//Time Deviation, used to shift the times of the radio making it so others not on the same time cant hear you.
 	[RplProp()] int m_iTimeDeviation = 0;
 	
+	[RplProp()] RplId m_HandMicHolder = RplId.Invalid();
+	
 	//This is used in conjuction with the gamemode setting m_bIsFactionEncryptionEnabled
 	//If enabled it makes it so only factions can hear just their factions radios, this is initialized when a radio is picked up for the first time
 	//This means if you pick up a russian radio you can hear a russian broadcast.
@@ -87,9 +89,30 @@ class CVON_RadioComponent: ScriptComponent
 		if (m_aChannels.Count() >= m_iCurrentChannel)
 			m_aChannels.Set(m_iCurrentChannel - 1, freq);
 		m_sFrequency = freq;
+		bool isShared = false;
+		FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetOwner().GetRootParent().FindComponent(FactionAffiliationComponent));
+		string ownerFactionKey = factionComp.GetAffiliatedFactionKey();
+		foreach (CVON_SharedFrequencyObject sharedFreq: CVON_VONGameModeComponent.GetInstance().m_aSharedFrequencies)
+		{
+			if (sharedFreq.m_sSharedFrequency != freq)
+				continue;
+			
+			string sharedFactionKey = "";
+			if (!sharedFreq.m_aFactionIds.Contains(ownerFactionKey))
+				continue;
+			foreach (string factionKey: sharedFreq.m_aFactionIds)
+			{
+				sharedFactionKey += factionKey;
+			}
+			isShared = true;
+			m_sFactionKey = sharedFactionKey;
+		}
+		if (!isShared)
+				m_sFactionKey = ownerFactionKey;
 		Replication.BumpMe();
 	}
 	
+	//Toggles radio power from the server, hmm... who named this
 	void TogglePowerServer()
 	{
 		m_bPower = !m_bPower;
@@ -109,6 +132,25 @@ class CVON_RadioComponent: ScriptComponent
 	void AddChannelServer()
 	{
 		m_aChannels.Insert("55500");
+		Replication.BumpMe();
+	}
+	
+	void GrabHandMicClient()
+	{
+		if (m_HandMicHolder != RplId.Invalid())
+			return;
+		
+		SCR_PlayerController.Cast(GetGame().GetPlayerController()).GrabHandMicServer(SCR_PlayerController.GetLocalPlayerId(), GetRplId());
+	}
+	
+	void GrabHandMicServer(int playerId)
+	{
+		IEntity player = GetGame().GetPlayerManager().GetPlayerControlledEntity(playerId);
+		if (!player)
+			return;
+		
+		RplId playerRplId = RplComponent.Cast(player.FindComponent(RplComponent)).Id();
+		m_HandMicHolder = playerRplId;
 		Replication.BumpMe();
 	}
 	
@@ -152,6 +194,7 @@ class CVON_RadioComponent: ScriptComponent
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
+	//Handles assigning 
 	//==========================================================================================================================================================================
 	override void EOnFixedFrame(IEntity owner, float timeSlice)
 	{
@@ -159,7 +202,7 @@ class CVON_RadioComponent: ScriptComponent
 		//Have this ifdef here cause in the workshop its a listen server, I explain the code in the non workshop version.
 		#ifdef WORKBENCH
 		if (m_sFactionKey != "")
-		return;
+			return;
 	
 		if (!GetOwner().GetRootParent())
 			return;
@@ -172,41 +215,73 @@ class CVON_RadioComponent: ScriptComponent
 			return;
 		m_sFactionKey = factionComp.GetAffiliatedFactionKey();
 		SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(m_sFactionKey));
-
 		ref array<string> SRFrequencies = {};
 		ref array<string> MRFrequencies = {};
 		ref array<string> LRFrequencies = {};
-		foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+		if (CVON_VONGameModeComponent.GetInstance().m_FreqConfig)
 		{
-			if (groupContainer.m_aSRFrequencies)
-				if (groupContainer.m_aSRFrequencies.Count() > 0)
-				{
-					foreach (string freq: groupContainer.m_aSRFrequencies)
+			foreach (ref CVON_GroupFrequencyContainer groupContainer: CVON_VONGameModeComponent.GetInstance().m_FreqConfig.m_aPresetGroupFrequencyContainers)
+			{
+				if (groupContainer.m_aSRFrequencies)
+					if (groupContainer.m_aSRFrequencies.Count() > 0)
 					{
-							Print(freq);
-							if (!SRFrequencies.Contains(freq) && freq != "")
-								SRFrequencies.Insert(freq);
+						foreach (string freq: groupContainer.m_aSRFrequencies)
+						{
+								if (!SRFrequencies.Contains(freq) && freq != "")
+									SRFrequencies.Insert(freq);
+						}
 					}
+				if (groupContainer.m_aMRFrequencies)
+					if (groupContainer.m_aMRFrequencies.Count() > 0)
+					{
+						foreach (string freq: groupContainer.m_aMRFrequencies)
+						{
+								if (!MRFrequencies.Contains(freq) && freq != "")
+									MRFrequencies.Insert(freq);
+						}
+					}
+				if (groupContainer.m_aLRFrequencies)
+					if (groupContainer.m_aLRFrequencies.Count() > 0)
+					{
+						foreach (string freq: groupContainer.m_aLRFrequencies)
+						{
+								if (!LRFrequencies.Contains(freq) && freq != "")
+									LRFrequencies.Insert(freq);
+						}
 				}
-			if (groupContainer.m_aMRFrequencies)
-				if (groupContainer.m_aMRFrequencies.Count() > 0)
-				{
-					foreach (string freq: groupContainer.m_aMRFrequencies)
+			}
+			foreach (CVON_GroupFrequencyContainer overrideContainer: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
+			{
+				if (overrideContainer.m_aSRFrequencies)
+					if (overrideContainer.m_aSRFrequencies.Count() > 0)
 					{
-							if (!MRFrequencies.Contains(freq) && freq != "")
-								MRFrequencies.Insert(freq);
+						foreach (string freq: overrideContainer.m_aSRFrequencies)
+						{
+								if (!SRFrequencies.Contains(freq) && freq != "")
+									SRFrequencies.Insert(freq);
+						}
 					}
+				if (overrideContainer.m_aMRFrequencies)
+					if (overrideContainer.m_aMRFrequencies.Count() > 0)
+					{
+						foreach (string freq: overrideContainer.m_aMRFrequencies)
+						{
+								if (!MRFrequencies.Contains(freq) && freq != "")
+									MRFrequencies.Insert(freq);
+						}
+					}
+				if (overrideContainer.m_aLRFrequencies)
+					if (overrideContainer.m_aLRFrequencies.Count() > 0)
+					{
+						foreach (string freq: overrideContainer.m_aLRFrequencies)
+						{
+								if (!LRFrequencies.Contains(freq) && freq != "")
+									LRFrequencies.Insert(freq);
+						}
 				}
-			if (groupContainer.m_aLRFrequencies)
-				if (groupContainer.m_aLRFrequencies.Count() > 0)
-				{
-					foreach (string freq: groupContainer.m_aLRFrequencies)
-					{
-							if (!LRFrequencies.Contains(freq) && freq != "")
-								LRFrequencies.Insert(freq);
-					}
 			}
 		}
+		
 		m_aChannels.InsertAll(SRFrequencies);
 		m_aChannels.InsertAll(MRFrequencies);
 		m_aChannels.InsertAll(LRFrequencies);
@@ -250,35 +325,67 @@ class CVON_RadioComponent: ScriptComponent
 			ref array<string> SRFrequencies = {};
 			ref array<string> MRFrequencies = {};
 			ref array<string> LRFrequencies = {};
-			foreach (ref CVON_GroupFrequencyContainer groupContainer: faction.GetCallsignInfo().m_aGroupFrequency)
+			if (CVON_VONGameModeComponent.GetInstance().m_FreqConfig)
 			{
-				if (groupContainer.m_aSRFrequencies)
-					if (groupContainer.m_aSRFrequencies.Count() > 0)
-					{
-						foreach (string freq: groupContainer.m_aSRFrequencies)
+				foreach (ref CVON_GroupFrequencyContainer groupContainer: CVON_VONGameModeComponent.GetInstance().m_FreqConfig.m_aPresetGroupFrequencyContainers)
+				{
+					if (groupContainer.m_aSRFrequencies)
+						if (groupContainer.m_aSRFrequencies.Count() > 0)
 						{
-								Print(freq);
-								if (!SRFrequencies.Contains(freq) && freq != "")
-									SRFrequencies.Insert(freq);
+							foreach (string freq: groupContainer.m_aSRFrequencies)
+							{
+									if (!SRFrequencies.Contains(freq) && freq != "")
+										SRFrequencies.Insert(freq);
+							}
 						}
+					if (groupContainer.m_aMRFrequencies)
+						if (groupContainer.m_aMRFrequencies.Count() > 0)
+						{
+							foreach (string freq: groupContainer.m_aMRFrequencies)
+							{
+									if (!MRFrequencies.Contains(freq) && freq != "")
+										MRFrequencies.Insert(freq);
+							}
+						}
+					if (groupContainer.m_aLRFrequencies)
+						if (groupContainer.m_aLRFrequencies.Count() > 0)
+						{
+							foreach (string freq: groupContainer.m_aLRFrequencies)
+							{
+									if (!LRFrequencies.Contains(freq) && freq != "")
+										LRFrequencies.Insert(freq);
+							}
 					}
-				if (groupContainer.m_aMRFrequencies)
-					if (groupContainer.m_aMRFrequencies.Count() > 0)
-					{
-						foreach (string freq: groupContainer.m_aMRFrequencies)
+				}
+				foreach (CVON_GroupFrequencyContainer overrideContainer: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
+				{
+					if (overrideContainer.m_aSRFrequencies)
+						if (overrideContainer.m_aSRFrequencies.Count() > 0)
 						{
-								if (!MRFrequencies.Contains(freq) && freq != "")
-									MRFrequencies.Insert(freq);
+							foreach (string freq: overrideContainer.m_aSRFrequencies)
+							{
+									if (!SRFrequencies.Contains(freq) && freq != "")
+										SRFrequencies.Insert(freq);
+							}
 						}
+					if (overrideContainer.m_aMRFrequencies)
+						if (overrideContainer.m_aMRFrequencies.Count() > 0)
+						{
+							foreach (string freq: overrideContainer.m_aMRFrequencies)
+							{
+									if (!MRFrequencies.Contains(freq) && freq != "")
+										MRFrequencies.Insert(freq);
+							}
+						}
+					if (overrideContainer.m_aLRFrequencies)
+						if (overrideContainer.m_aLRFrequencies.Count() > 0)
+						{
+							foreach (string freq: overrideContainer.m_aLRFrequencies)
+							{
+									if (!LRFrequencies.Contains(freq) && freq != "")
+										LRFrequencies.Insert(freq);
+							}
 					}
-				if (groupContainer.m_aLRFrequencies)
-					if (groupContainer.m_aLRFrequencies.Count() > 0)
-					{
-						foreach (string freq: groupContainer.m_aLRFrequencies)
-						{
-								if (!LRFrequencies.Contains(freq) && freq != "")
-									LRFrequencies.Insert(freq);
-						}
 				}
 			}
 			m_aChannels.InsertAll(SRFrequencies);
@@ -324,6 +431,8 @@ class CVON_RadioComponent: ScriptComponent
 	//==========================================================================================================================================================================
 	void WriteJSON(IEntity entity)
 	{
+		if (!GetGame().GetPlayerController())
+			return;
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		ref array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(entity);
 		if (!radios)
@@ -335,7 +444,6 @@ class CVON_RadioComponent: ScriptComponent
 			if (!radioComp.m_bPower)
 				continue;
 			VONSave.StartObject(radio.ToString());
-			VONSave.WriteValue("Power", radioComp.m_bPower);
 			VONSave.WriteValue("Freq", radioComp.m_sFrequency);
 			VONSave.WriteValue("TimeDeviation", radioComp.m_iTimeDeviation);
 			VONSave.WriteValue("Volume", radioComp.m_iVolume);

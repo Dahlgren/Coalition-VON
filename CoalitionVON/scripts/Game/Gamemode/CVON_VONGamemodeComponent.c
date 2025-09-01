@@ -4,6 +4,13 @@ enum CVON_EVONType
 	RADIO
 }
 
+[BaseContainerProps()]
+class CVON_SharedFrequencyObject
+{
+	[Attribute()] ref array<string> m_aFactionIds;
+	[Attribute()] string m_sSharedFrequency;
+}
+
 class CVON_VONGameModeComponentClass: SCR_BaseGameModeComponentClass
 {
 }
@@ -13,13 +20,25 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 	//These are stored from server settings on the server so clients can know what ChannelName and whats the password to join that VOIP channel.
 	[RplProp()] string m_sTeamSpeakChannelName = "";
 	[RplProp()] string m_sTeamSpeakChannelPassword = "";
-	float m_fTeamSpeakPluginVersion = 1.3;
+	float m_fTeamSpeakPluginVersion = 1.4;
 	
 	//If disabled everyone shares the same frequencies.
 	[Attribute("1")] bool m_bUseFactionEcncryption;
 	
+	//Mostly used so i don't lose my fucking MIND testing the mod in dedicated.
+	[Attribute("1")] bool m_bTeamspeakChecks;
+	
+	[Attribute()] ref array<ref CVON_SharedFrequencyObject> m_aSharedFrequencies;
+	
 	//Wow a pointer, so performant
 	static CVON_VONGameModeComponent m_Instance;
+	
+	//Preset Frequency Config resource
+	[Attribute("", UIWidgets.ResourceNamePicker, desc: "", "conf class=CVON_FreqConfig")]
+	ResourceName m_sFreqConfig;
+	
+	//The actual Frequency Config Resource loaded OnPostInit
+	ref CVON_FreqConfig m_FreqConfig;
 	
 	//When the gamemode is created on the server we need to create a server setting file.
 	//If already created lets populate that data into the gamemode for clients to us.
@@ -32,6 +51,13 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 			return;
 		
 		GetGame().GetCallqueue().CallLater(InitializeChannelId, 500, false);
+	}
+	
+	override void OnPostInit(IEntity owner)
+	{
+		super.OnPostInit(owner);
+		if (m_sFreqConfig != "")
+			m_FreqConfig = CVON_FreqConfig.Cast(BaseContainerTools.CreateInstanceFromContainer(BaseContainerTools.LoadContainer(m_sFreqConfig).GetResource().ToBaseContainer()));
 	}
 	
 	//Explained above
@@ -50,7 +76,6 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 		}
 		else
 		{
-			int channelId;
 			JSONLoad.StartObject("Server Settings");
 			JSONLoad.ReadValue("VONChannelName", m_sTeamSpeakChannelName);
 			JSONLoad.ReadValue("VONChannelPassword", m_sTeamSpeakChannelPassword);
@@ -91,6 +116,8 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 		
 		foreach (int playerId: playerIds)
 		{
+			if (!GetGame().GetPlayerManager().GetPlayerController(playerId))
+				continue;
 			SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId)).AddLocalVONBroadcast(VONContainer, playerIdToAdd, GetGame().GetPlayerManager().GetPlayerControlledEntity(playerIdToAdd).GetOrigin(), maxDist);
 		}
 	}
@@ -100,6 +127,9 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 	//==========================================================================================================================================================================
 	void RemoveLocalVONBroadcasts(int playerId, int playerIdToRemove)
 	{
+		if (!GetGame().GetPlayerManager().GetPlayerController(playerId))
+			return;
+		
 		SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId)).RemoveLocalVONBroadcast(playerIdToRemove);
 	}
 	
@@ -122,5 +152,39 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 			radios.Insert(RplComponent.Cast(item.FindComponent(RplComponent)).Id());
 		}
 		return radios;
+	}
+	
+	void OpenHandMicServer(int playerId, RplId handMicEntityId)
+	{
+		if (!Replication.FindItem(handMicEntityId))
+			return;
+		
+		IEntity entity = RplComponent.Cast(Replication.FindItem(handMicEntityId)).GetEntity();
+		if (!entity)
+			return;
+		
+		int amountOfRadios = 0;
+		ref array<string> freqs = {};
+		ref array<string> radioNames = {};
+		
+		SCR_GadgetManagerComponent gadgetManager = SCR_GadgetManagerComponent.GetGadgetManager(entity);
+		ref array<SCR_GadgetComponent> gadgets = gadgetManager.GetGadgetsByType(EGadgetType.RADIO);
+		if (!gadgets)
+			return;
+		foreach (SCR_GadgetComponent gadget: gadgets)
+		{
+			if (!gadget.GetOwner().FindComponent(CVON_RadioComponent))
+				continue;
+			
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(gadget.GetOwner().FindComponent(CVON_RadioComponent));
+			freqs.Insert(radioComp.m_sFrequency);
+			radioNames.Insert(radioComp.m_sRadioName);
+			amountOfRadios++;
+		}
+		
+		if (amountOfRadios == 0)
+			return;
+		
+		SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId)).OpenHandMicOwner(freqs, amountOfRadios, radioNames);
 	}
 }

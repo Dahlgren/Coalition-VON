@@ -52,6 +52,8 @@ modded class SCR_PlayerController
 	//Used so we can keep Stereo and Volume values
 	ref CVON_RadioSettings m_RadioSettings = new CVON_RadioSettings();
 	
+	
+	
 	//Used to initials the m_aRadio array
 	//Delay is needed as it can take a sec for the entity to initialized for a client on the server.
 	override void OnControlledEntityChanged(IEntity from, IEntity to)
@@ -60,6 +62,9 @@ modded class SCR_PlayerController
 		GetGame().GetCallqueue().CallLater(InitializeRadios, 500, false, to);
 	}
 	
+	//Handles initializing the m_aRadios array for both this client and the server so both are on the same page
+	//Also used to load any settings the radios may have had on respawn.
+	//Loading settings only works if the radios where pe configured with the CVON_FreqConfig.
 	void InitializeRadios(IEntity to)
 	{
 		m_aRadios.Clear();
@@ -95,15 +100,49 @@ modded class SCR_PlayerController
 			SCR_AIGroup playersGroup = groupManager.GetPlayerGroup(GetPlayerId());
 			CVON_GroupFrequencyContainer freqContainer;
 			int index = groups.Find(playersGroup);
+			string playersGroupName;
 			if (index != -1)
-				freqContainer = faction.GetCallsignInfo().m_aGroupFrequency.Get(index);
+			{
+				string company;
+				string platoon;
+				string squad;
+				string character;
+				string format;
+				playersGroup.GetCallsigns(company, platoon, squad, character, format);
+				playersGroupName = string.Format(format, company, platoon, squad, character);
+			}
+			CVON_VONGameModeComponent gamemodeComp = CVON_VONGameModeComponent.GetInstance();
+			if (gamemodeComp.m_FreqConfig)
+			{
+				foreach (CVON_GroupFrequencyContainer freqItem: gamemodeComp.m_FreqConfig.m_aPresetGroupFrequencyContainers)
+				{
+					foreach (string groupName: freqItem.m_aGroupNames)
+					{
+						if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
+							continue;
+						
+						freqContainer = freqItem;
+						break;
+					}
+				}
+			}
+			foreach (CVON_GroupFrequencyContainer container: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
+			{
+				foreach (string groupName: container.m_aGroupNames)
+				{
+					if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
+						continue;
+					
+					freqContainer = container;
+					break;
+				}
+			}
 			switch (radioComp.m_eRadioType)
 			{
 				case CVON_ERadioType.SHORT:
 				{
 					if (!shortRangeRadios.Contains(radioObject))
 					{
-						Print("Inserting sr");
 						shortRangeRadios.Insert(radioObject);
 						if (System.IsConsoleApp())
 							break;
@@ -124,7 +163,6 @@ modded class SCR_PlayerController
 							}
 							else
 							{
-								Print("Creating setting");
 								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aSRRadioSettings.Get(SRIndex);
 								radioComp.m_eStereo = settings.m_Stereo;
 								radioComp.m_iVolume = settings.m_iVolume;
@@ -133,7 +171,6 @@ modded class SCR_PlayerController
 						}
 						else
 						{
-							Print("Creating setting");
 							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
 							settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
 							m_RadioSettings.m_aSRRadioSettings.Insert(settings);
@@ -227,14 +264,12 @@ modded class SCR_PlayerController
 				}
 			}
 		}
-		Print(m_RadioSettings.m_aSRRadioSettings);
 		if (shortRangeRadios)
 			m_aRadios.InsertAll(shortRangeRadios);
 		if (longRangeRadios)
 			m_aRadios.InsertAll(longRangeRadios);
 		if (mediumRangeRadios)
 			m_aRadios.InsertAll(mediumRangeRadios);
-		Print(m_aRadios);
 		IEntity radioEntity = RplComponent.Cast(Replication.FindItem(radios.Get(0))).GetEntity();
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioEntity.FindComponent(CVON_RadioComponent));
 		if (GetGame().GetPlayerController())
@@ -272,6 +307,29 @@ modded class SCR_PlayerController
 			case 3: {m_iLocalVolume = m_aVolumeValues[3]; break;}
 			case 4: {m_iLocalVolume = m_aVolumeValues[4]; break;}
 		}
+	}
+	
+	void OpenHandMicMenuClient(int playerId, RplId handMicEntityId)
+	{
+		Rpc(RpcAsk_OpenHandMicClient, playerId, handMicEntityId);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Server)] 
+	void RpcAsk_OpenHandMicClient(int playerId, RplId handMicEntityId)
+	{
+		CVON_VONGameModeComponent.GetInstance().OpenHandMicServer(playerId, handMicEntityId);
+	}
+	
+	void OpenHandMicOwner(array<string> freqs, int amountOfRadios, array<string> radioNames)
+	{
+		Rpc(RpcDo_OpenHandMicOwner, freqs, amountOfRadios, radioNames);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
+	void RpcDo_OpenHandMicOwner(array<string> freqs, int amountOfRadios, array<string> radioNames)
+	{
+		SCR_VONController vonController = SCR_VONController.Cast(GetGame().GetPlayerController().FindComponent(SCR_VONController));
+		vonController.GetVONMenu().OpenMenu(freqs, amountOfRadios, radioNames);
 	}
 	
 	//This is how we send our VONEntry to other clients so they can write it in their VONData.json
@@ -473,5 +531,24 @@ modded class SCR_PlayerController
 		IEntity radioEntity = playerController.m_aRadios.Get(playerController.m_aRadios.Count() - 1);
 		playerController.m_aRadios.RemoveOrdered(playerController.m_aRadios.Count() - 1);
 		playerController.m_aRadios.InsertAt(radioEntity, 0);
+	}
+	
+	void GrabHandMicServer(int playerId, RplId radioId)
+	{
+		Rpc(RpcAsk_GrabHandMicServer, playerId, radioId);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
+	void RpcAsk_GrabHandMicServer(int playerId, RplId radioId)
+	{
+		if (!Replication.FindItem(radioId))
+			return;
+		
+		IEntity radio = RplComponent.Cast(Replication.FindItem(radioId)).GetEntity();
+		if (!radio)
+			return;
+		
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+		radioComp.GrabHandMicServer(playerId);
 	}
 }

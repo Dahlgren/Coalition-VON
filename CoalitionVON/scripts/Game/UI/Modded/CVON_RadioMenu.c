@@ -3,7 +3,9 @@ modded enum ChimeraMenuPreset
 {
 	ANPRC152,
 	ANPRC150,
-	ANPRC117
+	ANPRC117,
+	R168,
+	R187
 }
 
 //The different menus we can see on the screen.

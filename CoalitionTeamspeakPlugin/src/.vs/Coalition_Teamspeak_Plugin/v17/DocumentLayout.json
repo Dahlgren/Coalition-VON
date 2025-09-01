@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\",
+  "WorkspaceRootPath": "C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|solutionrelative:plugin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|solutionrelative:plugin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -24,9 +24,9 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "plugin.h",
-              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.h",
+              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.h",
               "RelativeDocumentMoniker": "plugin.h",
-              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.h",
+              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.h",
               "RelativeToolTip": "plugin.h",
               "ViewState": "AgIAABEAAAAAAAAAAAAAABEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
@@ -36,11 +36,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "plugin.c",
-              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.c",
+              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.c",
               "RelativeDocumentMoniker": "plugin.c",
-              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\CoalitionTeamspeakPlugin\\src\\plugin.c",
+              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.c",
               "RelativeToolTip": "plugin.c",
-              "ViewState": "AgIAAEcGAAAAAAAAAAAowHUGAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAPIEAAAAAAAAAAAswAwFAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2025-08-19T21:23:50.631Z",
               "EditorCaption": ""
