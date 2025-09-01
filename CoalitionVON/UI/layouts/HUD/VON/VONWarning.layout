@@ -130,6 +130,22 @@ FrameWidgetClass {
        Texture "{9C5EEC72FF985CE3}UI/Textures/DeployMenu/warning-icon-200px.edds"
        Size 100 100
       }
+      TextWidgetClass "{663E577B6D56B98C}" : "{6F198A46CBC549CE}UI/layouts/WidgetLibrary/TextWidgets/Text_Heading1.layout" {
+       Name "Restart"
+       Slot OverlayWidgetSlot "{59AACB43FCDD60C1}" {
+        VerticalAlign 2
+        Padding 0 50 0 5
+       }
+       Color 0.8388 0.0513 0.0513 1
+       Text "Please Ensure You Restart Teamspeak After Installing!"
+       "Font Size" 22
+       "Min Font Size" 22
+       "Horizontal Alignment" Center
+       "Vertical Alignment" Center
+       FontProperties FontProperties "{546AF489DFD25402}" {
+        Font "{3E7733BAC8C831F6}UI/Fonts/RobotoCondensed/RobotoCondensed_Regular.fnt"
+       }
+      }
       TextWidgetClass "{6637037B579889B5}" : "{6F198A46CBC549CE}UI/layouts/WidgetLibrary/TextWidgets/Text_Heading1.layout" {
        Name "Explanation"
        Slot OverlayWidgetSlot "{59AACB43FCDD60C1}" {
@@ -158,7 +174,7 @@ FrameWidgetClass {
          Name "Image0"
          Slot ButtonWidgetSlot "{66370378917F7DB2}" {
          }
-         Texture "{FFBA31A5D6034B08}UI/layouts/HUD/VON/Clipboard_Icon.edds"
+         Texture "{FFBA31A5D6034B08}UI/images/Clipboard_Icon.edds"
          Size 32 32
         }
        }

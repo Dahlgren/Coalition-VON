@@ -5,80 +5,46 @@ FrameWidgetClass {
    Name "Mic"
    Slot FrameWidgetSlot "{663110197BC745DA}" {
     Anchor 0 0.5 0 0.5
-    PositionX -20.713
-    OffsetLeft -20.713
-    PositionY -50
-    OffsetTop -50
-    SizeX 99.999
-    OffsetRight -79.286
-    SizeY 100
-    OffsetBottom -50
+    PositionX 0.005
+    OffsetLeft 0.005
+    PositionY -87.737
+    OffsetTop -87.737
+    SizeX 33.914
+    OffsetRight -33.92
+    SizeY 37.716
+    OffsetBottom 50.02
    }
    "Is Visible" 0
-   Texture "{DD0F0179C8E33C44}UI/layouts/HUD/VON/microphone.edds"
-   Size 157 152
+   Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
+   Size 1024 1024
   }
-  FrameWidgetClass "{6631100B5216B597}" {
+  FrameWidgetClass "{663E80C94D1D8F41}" {
    Name "VONEntry"
-   Slot FrameWidgetSlot "{6631100B5216B58E}" {
+   Slot FrameWidgetSlot "{663E80C94D1D8FAE}" {
     Anchor 0 0.5 0 0.5
-    PositionX 0
-    OffsetLeft 0
-    PositionY -50
-    OffsetTop -50
-    SizeX 300
-    OffsetRight -300
-    SizeY 100
-    OffsetBottom -50
+    PositionX -223.978
+    OffsetLeft -223.978
+    PositionY -622.917
+    OffsetTop -622.917
+    SizeX 619.297
+    OffsetRight -395.319
+    SizeY 1080.27
+    OffsetBottom -457.355
+    SizeToContent 1
    }
    "Is Visible" 0
    {
-    TextWidgetClass "{6631100B12B276C4}" {
-     Name "Radio"
-     Slot FrameWidgetSlot "{6631100B12B276EF}" {
-      Anchor 0 0.5 0 0.5
-      PositionX 13.65
-      OffsetLeft 13.65
-      PositionY -28.182
-      OffsetTop -28.182
-      SizeX 269.26
-      OffsetRight -282.91
-      SizeY 31.689
-      OffsetBottom -3.507
-     }
-     Text "Radio"
-     "Font Size" 15
-     "Min Font Size" 15
-     "Vertical Alignment" Center
-     FontProperties FontProperties "{663110032F734A0A}" {
-      Font "{EABA4FE9D014CCEF}UI/Fonts/RobotoCondensed/RobotoCondensed_Bold.fnt"
-      ShadowSize 10
-      ShadowColor 0 0 0 0.7
-      ShadowOffset 0 0
-     }
-    }
-    TextWidgetClass "{6631100B6EC7C0D2}" {
-     Name "Freq"
-     Slot FrameWidgetSlot "{6631100B12B276EF}" {
-      Anchor 0 0.5 0 0.5
-      PositionX 13.65
-      OffsetLeft 13.65
-      PositionY -8.363
-      OffsetTop -8.363
-      SizeX 269.26
-      OffsetRight -282.91
-      SizeY 31.69
-      OffsetBottom -23.327
-     }
-     Text "Freq"
-     "Font Size" 15
-     "Min Font Size" 15
-     "Vertical Alignment" Center
-     FontProperties FontProperties "{6631100325DF3712}" {
-      Font "{EABA4FE9D014CCEF}UI/Fonts/RobotoCondensed/RobotoCondensed_Bold.fnt"
-      ShadowSize 10
-      ShadowColor 0 0 0 0.7
-      ShadowOffset 0 0
+    FrameWidgetClass "{663E80DDC0A51FCB}" : "{033302D7C8158EF8}UI/layouts/HUD/VON/VONEntry.layout" {
+     Name "0"
+     Slot FrameWidgetSlot "{5CC692416D077269}" {
+      PositionX 330.048
+      OffsetLeft 330.048
+      PositionY 635.482
+      OffsetTop 635.482
+      SizeX 293.698
+      OffsetRight -623.746
+      SizeY 200.781
+      OffsetBottom -836.263
      }
     }
    }
