@@ -35,6 +35,9 @@ class CVON_VONContainer
 	//The max distance we can send a radio signal
 	int m_iMaxDistance;
 	
+	//PlayerId
+	int m_iPlayerId;
+	
 	
 	
 	// Values processed by the client itself
@@ -58,6 +61,7 @@ class CVON_VONContainer
 		snapshot.SerializeInt(instance.m_iVolume);
 		snapshot.SerializeInt(instance.m_iClientId);
 		snapshot.SerializeString(instance.m_sFactionKey);
+		snapshot.SerializeInt(instance.m_iPlayerId);
 		
 		return true;
 	}
@@ -70,6 +74,7 @@ class CVON_VONContainer
 		snapshot.SerializeInt(instance.m_iVolume);
 		snapshot.SerializeInt(instance.m_iClientId);
 		snapshot.SerializeString(instance.m_sFactionKey);
+		snapshot.SerializeInt(instance.m_iPlayerId);
 		
 		return true;
 	}
@@ -82,6 +87,7 @@ class CVON_VONContainer
 		snapshot.EncodeInt(packet);
 		snapshot.EncodeInt(packet);
 		snapshot.EncodeString(packet);
+		snapshot.EncodeInt(packet);
 	}
 	
 	static bool Decode(ScriptBitSerializer packet, ScriptCtx ctx, SSnapSerializerBase snapshot)
@@ -92,6 +98,7 @@ class CVON_VONContainer
 		snapshot.DecodeInt(packet);
 		snapshot.DecodeInt(packet);
 		snapshot.DecodeString(packet);
+		snapshot.DecodeInt(packet);
 		
 		return true;
 	}
@@ -103,7 +110,8 @@ class CVON_VONContainer
 		&& lhs.CompareStringSnapshots(rhs) 
 		&& lhs.CompareSnapshots(rhs, 4)
 		&& lhs.CompareSnapshots(rhs, 4)
-		&& lhs.CompareStringSnapshots(rhs);
+		&& lhs.CompareStringSnapshots(rhs)
+		&& lhs.CompareSnapshots(rhs, 4);
 	}
 	
 	static bool PropCompare(CVON_VONContainer instance, SSnapSerializerBase snapshot, ScriptCtx ctx)
@@ -113,6 +121,7 @@ class CVON_VONContainer
 		&& snapshot.CompareString(instance.m_sFrequency)
 		&& snapshot.CompareInt(instance.m_iVolume)
 		&& snapshot.CompareInt(instance.m_iClientId)
-		&& snapshot.CompareString(instance.m_sFactionKey);
+		&& snapshot.CompareString(instance.m_sFactionKey)
+		&& snapshot.CompareInt(instance.m_iPlayerId);
 	}
 }

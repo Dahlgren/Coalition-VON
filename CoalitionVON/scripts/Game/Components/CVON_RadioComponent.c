@@ -5,7 +5,6 @@ class CVON_RadioComponentClass: ScriptComponentClass
 enum CVON_ERadioType
 {
 	SHORT,
-	MEDIUM,
 	LONG
 }
 
@@ -194,6 +193,11 @@ class CVON_RadioComponent: ScriptComponent
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
+	bool IsAlreadyAChannel(string freq, array<string> LRFreqs, array<string> SRFreqs)
+	{
+		return LRFreqs.Contains(freq) || SRFreqs.Contains(freq);
+	}
+	
 	//Handles assigning 
 	//==========================================================================================================================================================================
 	override void EOnFixedFrame(IEntity owner, float timeSlice)
@@ -216,7 +220,6 @@ class CVON_RadioComponent: ScriptComponent
 		m_sFactionKey = factionComp.GetAffiliatedFactionKey();
 		SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(m_sFactionKey));
 		ref array<string> SRFrequencies = {};
-		ref array<string> MRFrequencies = {};
 		ref array<string> LRFrequencies = {};
 		if (CVON_VONGameModeComponent.GetInstance().m_FreqConfig)
 		{
@@ -227,17 +230,8 @@ class CVON_RadioComponent: ScriptComponent
 					{
 						foreach (string freq: groupContainer.m_aSRFrequencies)
 						{
-								if (!SRFrequencies.Contains(freq) && freq != "")
+								if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 									SRFrequencies.Insert(freq);
-						}
-					}
-				if (groupContainer.m_aMRFrequencies)
-					if (groupContainer.m_aMRFrequencies.Count() > 0)
-					{
-						foreach (string freq: groupContainer.m_aMRFrequencies)
-						{
-								if (!MRFrequencies.Contains(freq) && freq != "")
-									MRFrequencies.Insert(freq);
 						}
 					}
 				if (groupContainer.m_aLRFrequencies)
@@ -245,7 +239,7 @@ class CVON_RadioComponent: ScriptComponent
 					{
 						foreach (string freq: groupContainer.m_aLRFrequencies)
 						{
-								if (!LRFrequencies.Contains(freq) && freq != "")
+								if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 									LRFrequencies.Insert(freq);
 						}
 				}
@@ -257,17 +251,8 @@ class CVON_RadioComponent: ScriptComponent
 					{
 						foreach (string freq: overrideContainer.m_aSRFrequencies)
 						{
-								if (!SRFrequencies.Contains(freq) && freq != "")
+								if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 									SRFrequencies.Insert(freq);
-						}
-					}
-				if (overrideContainer.m_aMRFrequencies)
-					if (overrideContainer.m_aMRFrequencies.Count() > 0)
-					{
-						foreach (string freq: overrideContainer.m_aMRFrequencies)
-						{
-								if (!MRFrequencies.Contains(freq) && freq != "")
-									MRFrequencies.Insert(freq);
 						}
 					}
 				if (overrideContainer.m_aLRFrequencies)
@@ -275,15 +260,14 @@ class CVON_RadioComponent: ScriptComponent
 					{
 						foreach (string freq: overrideContainer.m_aLRFrequencies)
 						{
-								if (!LRFrequencies.Contains(freq) && freq != "")
+								if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 									LRFrequencies.Insert(freq);
 						}
-				}
+					}
 			}
 		}
 		
 		m_aChannels.InsertAll(SRFrequencies);
-		m_aChannels.InsertAll(MRFrequencies);
 		m_aChannels.InsertAll(LRFrequencies);
 		if (m_aChannels.Count() == 0)
 		{
@@ -323,7 +307,6 @@ class CVON_RadioComponent: ScriptComponent
 			SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(m_sFactionKey));
 	
 			ref array<string> SRFrequencies = {};
-			ref array<string> MRFrequencies = {};
 			ref array<string> LRFrequencies = {};
 			if (CVON_VONGameModeComponent.GetInstance().m_FreqConfig)
 			{
@@ -334,17 +317,8 @@ class CVON_RadioComponent: ScriptComponent
 						{
 							foreach (string freq: groupContainer.m_aSRFrequencies)
 							{
-									if (!SRFrequencies.Contains(freq) && freq != "")
+									if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 										SRFrequencies.Insert(freq);
-							}
-						}
-					if (groupContainer.m_aMRFrequencies)
-						if (groupContainer.m_aMRFrequencies.Count() > 0)
-						{
-							foreach (string freq: groupContainer.m_aMRFrequencies)
-							{
-									if (!MRFrequencies.Contains(freq) && freq != "")
-										MRFrequencies.Insert(freq);
 							}
 						}
 					if (groupContainer.m_aLRFrequencies)
@@ -352,7 +326,7 @@ class CVON_RadioComponent: ScriptComponent
 						{
 							foreach (string freq: groupContainer.m_aLRFrequencies)
 							{
-									if (!LRFrequencies.Contains(freq) && freq != "")
+									if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 										LRFrequencies.Insert(freq);
 							}
 					}
@@ -364,17 +338,8 @@ class CVON_RadioComponent: ScriptComponent
 						{
 							foreach (string freq: overrideContainer.m_aSRFrequencies)
 							{
-									if (!SRFrequencies.Contains(freq) && freq != "")
+									if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 										SRFrequencies.Insert(freq);
-							}
-						}
-					if (overrideContainer.m_aMRFrequencies)
-						if (overrideContainer.m_aMRFrequencies.Count() > 0)
-						{
-							foreach (string freq: overrideContainer.m_aMRFrequencies)
-							{
-									if (!MRFrequencies.Contains(freq) && freq != "")
-										MRFrequencies.Insert(freq);
 							}
 						}
 					if (overrideContainer.m_aLRFrequencies)
@@ -382,14 +347,13 @@ class CVON_RadioComponent: ScriptComponent
 						{
 							foreach (string freq: overrideContainer.m_aLRFrequencies)
 							{
-									if (!LRFrequencies.Contains(freq) && freq != "")
+									if (!IsAlreadyAChannel(freq, LRFrequencies, SRFrequencies) && freq != "")
 										LRFrequencies.Insert(freq);
 							}
-					}
+						}
 				}
 			}
 			m_aChannels.InsertAll(SRFrequencies);
-			m_aChannels.InsertAll(MRFrequencies);
 			m_aChannels.InsertAll(LRFrequencies);
 			//If there are no frequencies added, just add a default channel.
 			if (m_aChannels.Count() == 0)

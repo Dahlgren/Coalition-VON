@@ -92,7 +92,6 @@ modded class SCR_GroupsManagerComponent
 			}
 		}
 		int SRIndex = 0;
-		int MRIndex = 0;
 		int LRIndex = 0;
 		for (int i = 0; i < playerController.m_aRadios.Count(); i++)
 		{
@@ -109,7 +108,7 @@ modded class SCR_GroupsManagerComponent
 			}
 			switch (radioComp.m_eRadioType)
 			{
-				case 0: 
+				case CVON_ERadioType.SHORT: 
 				{
 					if (!freqContainer.m_aSRFrequencies)
 						break;
@@ -124,22 +123,7 @@ modded class SCR_GroupsManagerComponent
 					m_bFrequencyFound = true;
 					break;
 				}
-				case 1: 
-				{
-					if (!freqContainer.m_aMRFrequencies)
-						break;
-					if (freqContainer.m_aMRFrequencies.Count() < MRIndex + 1)
-						break;
-					string freq = freqContainer.m_aMRFrequencies.Get(MRIndex);
-					if (!radioComp.m_aChannels.Contains(freq))
-						break;
-					MRIndex++;
-					radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(freq) + 1);
-					radioComp.UpdateFrequncyServer(freq);
-					m_bFrequencyFound = true;
-					break;
-				}
-				case 2: 
+				case CVON_ERadioType.LONG: 
 				{
 					if (!freqContainer.m_aLRFrequencies)
 						break;
@@ -193,12 +177,6 @@ modded class SCR_GroupsManagerComponent
 				{
 					radioComp.UpdateChannelServer(1);
 					radioComp.UpdateFrequncyServer(playersGroup.GetRadioFrequency().ToString());
-					break;
-				}
-				case CVON_ERadioType.MEDIUM:
-				{
-					radioComp.UpdateChannelServer(1);
-					radioComp.UpdateFrequncyServer(playerFaction.GetFactionRadioFrequency().ToString());
 					break;
 				}
 				case CVON_ERadioType.LONG:
