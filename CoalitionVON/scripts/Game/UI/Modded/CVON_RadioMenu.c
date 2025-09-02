@@ -420,31 +420,6 @@ class CVON_RadioMenu: MenuBase
 	{
 		m_wLine1.SetText("Volume");
 		m_wLine2.SetText(m_RadioComponent.m_iVolume.ToString());
-		switch (m_RadioComponent.m_eRadioType)
-		{
-			case CVON_ERadioType.SHORT: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
-				}
-				break;
-			}
-			case CVON_ERadioType.LONG: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_iVolume = m_RadioComponent.m_iVolume; 
-				}
-				break;
-			}
-		}
 		m_wLine3.SetVisible(false);
 	}
 	
@@ -457,31 +432,6 @@ class CVON_RadioMenu: MenuBase
 			case CVON_EStereo.BOTH: {m_wLine2.SetText("Both"); break;}
 			case CVON_EStereo.RIGHT: {m_wLine2.SetText("Right"); break;}
 			case CVON_EStereo.LEFT: {m_wLine2.SetText("Left"); break;}
-		}
-		switch (m_RadioComponent.m_eRadioType)
-		{
-			case CVON_ERadioType.SHORT: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
-				}
-				break;
-			}
-			case CVON_ERadioType.LONG: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != m_RadioComponent.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = m_RadioComponent.m_eStereo; 
-				}
-				break;
-			}
 		}
 		m_wLine3.SetVisible(false);
 		

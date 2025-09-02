@@ -197,31 +197,6 @@ modded class SCR_VONController
 		
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.RIGHT;
-		switch (radioComp.m_eRadioType)
-		{
-			case CVON_ERadioType.SHORT: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-			case CVON_ERadioType.LONG: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-		}
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 		m_VONHud.ShowVONChange();
 	}
@@ -235,31 +210,6 @@ modded class SCR_VONController
 		
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.LEFT;
-		switch (radioComp.m_eRadioType)
-		{
-			case CVON_ERadioType.SHORT: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-			case CVON_ERadioType.LONG: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-		}
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 		m_VONHud.ShowVONChange();
 	}
@@ -273,31 +223,6 @@ modded class SCR_VONController
 		
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.BOTH;
-		switch (radioComp.m_eRadioType)
-		{
-			case CVON_ERadioType.SHORT: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aSRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-			case CVON_ERadioType.LONG: 
-			{
-				for (int i = 0; i < m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Count(); i++)
-				{
-					if (m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_sFreq != radioComp.m_sFrequency)
-						continue;
-					
-					m_PlayerController.m_RadioSettings.m_aLRRadioSettings.Get(i).m_Stereo = radioComp.m_eStereo; 
-				}
-				break;
-			}
-		}
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
 		m_VONHud.ShowVONChange();
 	}

@@ -48,6 +48,25 @@ modded class SCR_GroupsManagerComponent
 		if (!playerController)
 			return;
 		
+		if (playerController.m_aRadioSettings.Count() > 0)
+		{
+			foreach (IEntity radio: playerController.m_aRadios)
+			{
+				CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+				CVON_RadioSettingObject radioSetting = playerController.m_aRadioSettings.Get(playerController.m_aRadios.Find(radio));
+				
+				if (radioComp.m_aChannels.Contains(radioSetting.m_sFreq))
+						radioComp.UpdateChannelServer(radioComp.m_aChannels.Find(radioSetting.m_sFreq) + 1);
+					else
+						radioComp.UpdateChannelServer(radioComp.m_aChannels.Count() + 1);
+				
+				radioComp.UpdateFrequncyServer(radioSetting.m_sFreq);
+				playerController.SetVolumeFromServer(radioSetting.m_iVolume, playerController.m_aRadios.Find(radio));
+				playerController.SetStereoFromServer(radioSetting.m_Stereo, playerController.m_aRadios.Find(radio));
+			}
+			return;
+		}
+		
 		SCR_Faction playerFaction = SCR_Faction.Cast(SCR_FactionManager.Cast(GetGame().GetFactionManager()).GetPlayerFaction(playerId));
 		
 		array<SCR_AIGroup> groups = GetPlayableGroupsByFaction(playerFaction);
@@ -158,6 +177,20 @@ modded class SCR_GroupsManagerComponent
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId));
 		if (!playerController)
 			return;
+		
+		if (playerController.m_aRadioSettings.Count() > 0)
+		{
+			foreach (IEntity radio: playerController.m_aRadios)
+			{
+				CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+				CVON_RadioSettingObject radioSetting = playerController.m_aRadioSettings.Get(playerController.m_aRadios.Find(radio));
+				radioComp.UpdateChannelServer(1);
+				radioComp.UpdateFrequncyServer(radioSetting.m_sFreq);
+				playerController.SetVolumeFromServer(radioSetting.m_iVolume, playerController.m_aRadios.Find(radio));
+				playerController.SetStereoFromServer(radioSetting.m_Stereo, playerController.m_aRadios.Find(radio));
+			}
+			return;
+		}
 		
 		SCR_Faction playerFaction = SCR_Faction.Cast(SCR_FactionManager.Cast(GetGame().GetFactionManager()).GetPlayerFaction(playerId));
 		SCR_AIGroup playersGroup = GetPlayerGroup(playerId);

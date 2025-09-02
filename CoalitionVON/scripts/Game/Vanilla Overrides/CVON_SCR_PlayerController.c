@@ -15,12 +15,6 @@ class CVON_RadioSettingObject
 	int m_iVolume = 9;
 }
 
-class CVON_RadioSettings
-{
-	ref array<ref CVON_RadioSettingObject> m_aSRRadioSettings = {};
-	ref array<ref CVON_RadioSettingObject> m_aLRRadioSettings = {};
-}
-
 modded class SCR_PlayerController
 {
 	//This is how we store who is talking to us and how, we use this in the VONController to populate the JSON.
@@ -49,7 +43,7 @@ modded class SCR_PlayerController
 	bool m_bHasConnectedToTeamspeakForFirstTime = false;
 	
 	//Used so we can keep Stereo and Volume values
-	ref CVON_RadioSettings m_RadioSettings = new CVON_RadioSettings();
+	ref array<ref CVON_RadioSettingObject> m_aRadioSettings = {};
 	
 	
 	
@@ -59,6 +53,30 @@ modded class SCR_PlayerController
 	{
 		super.OnControlledEntityChanged(from, to);
 		GetGame().GetCallqueue().CallLater(InitializeRadios, 500, false, to);
+	}
+	
+	override void OnDestroyed(notnull Instigator killer)
+	{
+		super.OnDestroyed(killer);
+		#ifdef WORKBENCH
+		#else
+		if (!System.IsConsoleApp())
+			return;
+		#endif		
+		m_aRadioSettings.Clear();
+		
+		foreach (IEntity radio: m_aRadios)
+		{
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+			SCR_FactionManager factionMan = SCR_FactionManager.Cast(GetGame().GetFactionManager());
+			if (radioComp.m_sFactionKey != "" && radioComp.m_sFactionKey != factionMan.GetPlayerFaction(GetPlayerId()).GetFactionKey())
+				return;
+			ref CVON_RadioSettingObject setting = new CVON_RadioSettingObject();
+			setting.m_sFreq = radioComp.m_sFrequency;
+			setting.m_Stereo = radioComp.m_eStereo;
+			setting.m_iVolume = radioComp.m_iVolume;
+			m_aRadioSettings.Insert(setting);
+		}
 	}
 	
 	//Handles initializing the m_aRadios array for both this client and the server so both are on the same page
@@ -74,8 +92,6 @@ modded class SCR_PlayerController
 			return;
 		ref array<IEntity> shortRangeRadios = {};
 		ref array<IEntity> longRangeRadios = {};
-		int SRIndex = 0;
-		int LRIndex = 0;
 		foreach (RplId radio: radios)
 		{
 			if (!Replication.FindItem(radio))
@@ -86,143 +102,22 @@ modded class SCR_PlayerController
 				continue;
 			
 			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radioObject.FindComponent(CVON_RadioComponent));
-			FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetControlledEntity().FindComponent(FactionAffiliationComponent));
-			if (!factionComp)
-				return;
-			string factionKey = factionComp.GetAffiliatedFactionKey();
-			//Used so we can assing settings to frequencies.
-			SCR_Faction faction = SCR_Faction.Cast(GetGame().GetFactionManager().GetFactionByKey(factionKey));
-			SCR_GroupsManagerComponent groupManager = SCR_GroupsManagerComponent.GetInstance();
-			array<SCR_AIGroup> groups = groupManager.GetPlayableGroupsByFaction(faction);
-			SCR_AIGroup playersGroup = groupManager.GetPlayerGroup(GetPlayerId());
-			CVON_GroupFrequencyContainer freqContainer;
-			int index = -1;
-			if (playersGroup)
-				index = groups.Find(playersGroup);
-			string playersGroupName;
-			if (index != -1)
-			{
-				string company;
-				string platoon;
-				string squad;
-				string character;
-				string format;
-				playersGroup.GetCallsigns(company, platoon, squad, character, format);
-				playersGroupName = string.Format(format, company, platoon, squad, character);
-			}
-			if (playersGroup)
-			{
-				CVON_VONGameModeComponent gamemodeComp = CVON_VONGameModeComponent.GetInstance();
-				if (gamemodeComp.m_FreqConfig)
-				{
-					foreach (CVON_GroupFrequencyContainer freqItem: gamemodeComp.m_FreqConfig.m_aPresetGroupFrequencyContainers)
-					{
-						foreach (string groupName: freqItem.m_aGroupNames)
-						{
-							if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
-								continue;
-							
-							freqContainer = freqItem;
-							break;
-						}
-					}
-				}
-				foreach (CVON_GroupFrequencyContainer container: faction.GetCallsignInfo().m_aGroupFrequencyOverrides)
-				{
-					foreach (string groupName: container.m_aGroupNames)
-					{
-						if (groupName != playersGroupName && groupName != playersGroup.GetCustomNameServer())
-							continue;
-						
-						freqContainer = container;
-						break;
-					}
-				}
-			}
+			
+			
 			switch (radioComp.m_eRadioType)
 			{
 				case CVON_ERadioType.SHORT:
 				{
 					if (!shortRangeRadios.Contains(radioObject))
-					{
 						shortRangeRadios.Insert(radioObject);
-						if (System.IsConsoleApp())
-							break;
-						if (!freqContainer)
-							break;
-						if (!freqContainer.m_aSRFrequencies)
-							break;
-						if (freqContainer.m_aSRFrequencies.Count() < SRIndex + 1)
-							break;
-						if (m_RadioSettings.m_aSRRadioSettings)
-						{
-							if (m_RadioSettings.m_aSRRadioSettings.Count() - 1 < SRIndex)
-							{
-								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-								settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
-								m_RadioSettings.m_aSRRadioSettings.Insert(settings);
-								SRIndex++;
-							}
-							else
-							{
-								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aSRRadioSettings.Get(SRIndex);
-								radioComp.m_eStereo = settings.m_Stereo;
-								radioComp.m_iVolume = settings.m_iVolume;
-								SRIndex++;
-							}
-						}
-						else
-						{
-							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-							settings.m_sFreq = freqContainer.m_aSRFrequencies.Get(SRIndex);
-							m_RadioSettings.m_aSRRadioSettings.Insert(settings);
-							SRIndex++;
-						}
-					}
-						
 					break;
 				}
 				case CVON_ERadioType.LONG:
 				{
 					if (!longRangeRadios.Contains(radioObject))
-					{
 						longRangeRadios.Insert(radioObject);
-						if (System.IsConsoleApp())
-							break;
-						if (!freqContainer)
-							break;
-						if (!freqContainer.m_aLRFrequencies)
-							break;
-						if (freqContainer.m_aLRFrequencies.Count() < SRIndex + 1)
-							break;
-						if (m_RadioSettings.m_aLRRadioSettings)
-						{
-							if (m_RadioSettings.m_aLRRadioSettings.Count() - 1 < LRIndex)
-							{
-								ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-								settings.m_sFreq = freqContainer.m_aLRFrequencies.Get(LRIndex);
-								m_RadioSettings.m_aLRRadioSettings.Insert(settings);
-								LRIndex++;
-							}
-							else
-							{
-								ref CVON_RadioSettingObject settings = m_RadioSettings.m_aLRRadioSettings.Get(LRIndex);
-								radioComp.m_eStereo = settings.m_Stereo;
-								radioComp.m_iVolume = settings.m_iVolume;
-								LRIndex++;
-							}
-						}
-						else
-						{
-							ref CVON_RadioSettingObject settings = new CVON_RadioSettingObject();
-							settings.m_sFreq = freqContainer.m_aLRFrequencies.Get(LRIndex);
-							m_RadioSettings.m_aLRRadioSettings.Insert(settings);
-							LRIndex++;
-						}
-					}
-						
 					break;
-				}
+				}	
 			}
 		}
 		if (shortRangeRadios)
@@ -509,5 +404,31 @@ modded class SCR_PlayerController
 		
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
 		radioComp.GrabHandMicServer(playerId);
+	}
+	
+	void SetVolumeFromServer(int volume, int radioIndex)
+	{
+		Rpc(RpcDo_SetVolumeFromServer, volume, radioIndex);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
+	void RpcDo_SetVolumeFromServer(int volume, int radioIndex)
+	{
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_aRadios.Get(radioIndex).FindComponent(CVON_RadioComponent));
+		radioComp.m_iVolume = volume;
+		radioComp.WriteJSON(GetLocalControlledEntity());
+	}
+	
+	void SetStereoFromServer(CVON_EStereo stereo, int radioIndex)
+	{
+		Rpc(RpcDo_SetStereoFromServer, stereo, radioIndex);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
+	void RpcDo_SetStereoFromServer(CVON_EStereo stereo, int radioIndex)
+	{
+		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_aRadios.Get(radioIndex).FindComponent(CVON_RadioComponent));
+		radioComp.m_eStereo = stereo;
+		radioComp.WriteJSON(GetLocalControlledEntity());
 	}
 }
