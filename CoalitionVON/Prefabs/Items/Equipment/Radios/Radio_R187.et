@@ -2,6 +2,8 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
  ID "508AB2013EEE1E00"
  components {
   BaseRadioComponent "{5A30BAE7673C63CA}" {
+   "Encryption key" "OPFOR"
+   "Turned on" 1
    Transceivers {
     BaseTransceiver "{5A8E721FD75D0F5F}" {
      ChannelFrequency 38000
@@ -24,6 +26,27 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
      Name "R187"
      Description ""
     }
+    ItemPhysAttributes ItemPhysicalAttributes PhysicalAttributes {
+     Weight 1.3
+     SizeSetupStrategy Manual
+     ItemDimensions 10 10 10
+     ItemVolume 300
+     DimensionScaler 1
+     RestingUP Forward
+     RestingAdditiveRotationLS 0 0 0
+     RestingAdditiveOffsetLS 0 0 0.15
+    }
+    ItemAnimationAttributes ItemAnimationAttributes "{6646A077E306AF3D}" {
+     AnimationInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
+     AnimationAttachments {
+      AnimationAttachmentInfo "{5A6C68D9E9C72006}" {
+       AnimGraph "{402BB5FA2891D687}Assets/Items/Equipment/workspaces/Radio_ANPRC68.agr"
+       AnimInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
+       BindingName "Gadget"
+      }
+     }
+     AllowInspection 1
+    }
     CustomAttributes {
      PreviewRenderAttributes "{52D493152DA704BA}" {
       CameraOrbitAngles 20 180 0
@@ -32,11 +55,21 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
       ItemRenderRotation 90 180 180
       AspectRatio 1
      }
+     SCR_VONPreviewAttributes "{6646A077D8A34C83}" {
+      CameraOrbitAngles -30 180 45
+      CameraDistanceToItem 0.6
+      FOV 40
+      AspectRatio 1
+     }
     }
+    m_bStackable 0
    }
   }
   MeshObject "{5A30BAE7673C63D1}" {
    Object "{5A6B5278D00A75F0}assets/R187/R187.xob"
+  }
+  SCR_RadioComponent "{5A30BAE7673C63D4}" {
+   m_eAnimVariable ANPRC68
   }
  }
 }

@@ -1,6 +1,7 @@
 SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
  components {
   CVON_VONGameModeComponent "{6624E607CC6D4CC8}" {
+   Enabled 0
    m_bTeamspeakChecks 0
   }
  }

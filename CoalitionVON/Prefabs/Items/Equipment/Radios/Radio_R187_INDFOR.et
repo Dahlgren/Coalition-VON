@@ -2,35 +2,28 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
  ID "508AB2013EEE1E00"
  components {
   BaseRadioComponent "{5A30BAE7673C63CA}" {
-   "Encryption key" "BLUFOR"
+   "Encryption key" "INDFOR"
    "Turned on" 1
    Transceivers {
-    RadioTransceiver "{5A8E721FD75D0F5F}" {
+    BaseTransceiver "{6646A07715127438}" {
      ChannelFrequency 38000
-     "Transmitting Range" 5000
-     "Min tunable frequency" 38000
-     "Max tunable frequency" 54000
-    }
-    RadioTransceiver "{66469CC6A1295FA7}" {
      "Transmitting Range" 5000
      "Min tunable frequency" 38000
      "Max tunable frequency" 54000
     }
    }
   }
-  CVON_RadioComponent "{662D5D04D93541AF}" {
-   m_sRadioName "AN/PRC-117"
-   m_eRadioType LONG
-   m_iRadioRange 10000
-   m_sRadioIcon "{FFB5DD736483D225}UI/layouts/Radios/ANPRC117/data/ANPRC117Icon.edds"
-   m_sDialOn "{52C708D6FBA2E5CA}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOn.edds"
-   m_sDialOff "{A744E80C100B0FC5}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOff.edds"
-   m_eRadioMenu ANPRC117
+  CVON_RadioComponent "{6646A0771512742E}" {
+   m_sRadioName "R-187"
+   m_sRadioIcon "{FDFFA09A55032686}UI/layouts/Radios/R187/data/R187Icon.edds"
+   m_sDialOn "{B13AF59E40FD3E34}UI/layouts/Radios/R187/data/R187On.edds"
+   m_sDialOff "{7D2D94A10373F44C}UI/layouts/Radios/R187/data/R187Off.edds"
+   m_eRadioMenu R187
   }
   InventoryItemComponent "{5222EB4D0C73006B}" {
    Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
     ItemDisplayName UIInfo "{5222EB4D07D865FA}" {
-     Name "AN/PRC-117"
+     Name "R187"
      Description ""
     }
     ItemPhysAttributes ItemPhysicalAttributes PhysicalAttributes {
@@ -43,10 +36,10 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
      RestingAdditiveRotationLS 0 0 0
      RestingAdditiveOffsetLS 0 0 0.15
     }
-    ItemAnimationAttributes ItemAnimationAttributes "{6646A0766DEE4D0C}" {
+    ItemAnimationAttributes ItemAnimationAttributes "{6646A07715127459}" {
      AnimationInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
      AnimationAttachments {
-      AnimationAttachmentInfo "{5A6C68D9E9C72006}" {
+      AnimationAttachmentInfo "{6646A0771512745D}" {
        AnimGraph "{402BB5FA2891D687}Assets/Items/Equipment/workspaces/Radio_ANPRC68.agr"
        AnimInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
        BindingName "Gadget"
@@ -55,12 +48,14 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
      AllowInspection 1
     }
     CustomAttributes {
-     PreviewRenderAttributes "{52D493152DA704BA}" {
-      CameraDistanceToItem 2.5
+     PreviewRenderAttributes "{6646A07715127444}" {
+      CameraOrbitAngles 20 180 0
+      CameraDistanceToItem 2
       CameraOffset 0 0 0
-      ItemRenderRotation 0 0 180
+      ItemRenderRotation 90 180 180
+      AspectRatio 1
      }
-     SCR_VONPreviewAttributes "{6646A0766F6D12BB}" {
+     SCR_VONPreviewAttributes "{6646A07715127449}" {
       CameraOrbitAngles -30 180 45
       CameraDistanceToItem 0.6
       FOV 40
@@ -71,7 +66,7 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
    }
   }
   MeshObject "{5A30BAE7673C63D1}" {
-   Object "{AD570D20A1C73175}assets/ANPRC117/ANPRC117.xob"
+   Object "{5A6B5278D00A75F0}assets/R187/R187.xob"
   }
   SCR_RadioComponent "{5A30BAE7673C63D4}" {
    m_eAnimVariable ANPRC68

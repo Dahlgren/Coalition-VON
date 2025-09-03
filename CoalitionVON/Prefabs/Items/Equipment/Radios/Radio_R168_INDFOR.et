@@ -2,35 +2,35 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
  ID "508AB2013EEE1E00"
  components {
   BaseRadioComponent "{5A30BAE7673C63CA}" {
-   "Encryption key" "BLUFOR"
+   "Encryption key" "INDFOR"
    "Turned on" 1
    Transceivers {
-    RadioTransceiver "{5A8E721FD75D0F5F}" {
+    RadioTransceiver "{6646A0771876B410}" {
      ChannelFrequency 38000
      "Transmitting Range" 5000
      "Min tunable frequency" 38000
      "Max tunable frequency" 54000
     }
-    RadioTransceiver "{66469CC6A1295FA7}" {
+    RadioTransceiver "{6646A0771876B403}" {
      "Transmitting Range" 5000
      "Min tunable frequency" 38000
      "Max tunable frequency" 54000
     }
    }
   }
-  CVON_RadioComponent "{662D5D04D93541AF}" {
-   m_sRadioName "AN/PRC-117"
+  CVON_RadioComponent "{6646A0771876B406}" {
+   m_sRadioName "R-168"
    m_eRadioType LONG
    m_iRadioRange 10000
-   m_sRadioIcon "{FFB5DD736483D225}UI/layouts/Radios/ANPRC117/data/ANPRC117Icon.edds"
-   m_sDialOn "{52C708D6FBA2E5CA}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOn.edds"
-   m_sDialOff "{A744E80C100B0FC5}UI/layouts/Radios/ANPRC117/data/ANPRC117DialOff.edds"
-   m_eRadioMenu ANPRC117
+   m_sRadioIcon "{75636C3CC268DA62}UI/layouts/Radios/R168/data/R168Icon.edds"
+   m_sDialOn "{BA07FE76D57B8991}UI/layouts/Radios/R168/data/R168DialOn.edds"
+   m_sDialOff "{15519282637FD347}UI/layouts/Radios/R168/data/R168DialOff.edds"
+   m_eRadioMenu R168
   }
   InventoryItemComponent "{5222EB4D0C73006B}" {
    Attributes SCR_ItemAttributeCollection "{5222EB4D0A2B466B}" {
     ItemDisplayName UIInfo "{5222EB4D07D865FA}" {
-     Name "AN/PRC-117"
+     Name "AN/PRC-150"
      Description ""
     }
     ItemPhysAttributes ItemPhysicalAttributes PhysicalAttributes {
@@ -43,10 +43,10 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
      RestingAdditiveRotationLS 0 0 0
      RestingAdditiveOffsetLS 0 0 0.15
     }
-    ItemAnimationAttributes ItemAnimationAttributes "{6646A0766DEE4D0C}" {
+    ItemAnimationAttributes ItemAnimationAttributes "{6646A0771876B40C}" {
      AnimationInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
      AnimationAttachments {
-      AnimationAttachmentInfo "{5A6C68D9E9C72006}" {
+      AnimationAttachmentInfo "{6646A0771876B432}" {
        AnimGraph "{402BB5FA2891D687}Assets/Items/Equipment/workspaces/Radio_ANPRC68.agr"
        AnimInstance "{332D4A7512E78419}Assets/Items/Equipment/workspaces/Radio_ANPRC68_player.asi"
        BindingName "Gadget"
@@ -55,12 +55,13 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
      AllowInspection 1
     }
     CustomAttributes {
-     PreviewRenderAttributes "{52D493152DA704BA}" {
+     PreviewRenderAttributes "{6646A0771876B436}" {
       CameraDistanceToItem 2.5
-      CameraOffset 0 0 0
+      CameraOffset 0 -0.3 0
       ItemRenderRotation 0 0 180
+      AspectRatio 1
      }
-     SCR_VONPreviewAttributes "{6646A0766F6D12BB}" {
+     SCR_VONPreviewAttributes "{6646A0771876B43B}" {
       CameraOrbitAngles -30 180 45
       CameraDistanceToItem 0.6
       FOV 40
@@ -71,7 +72,7 @@ GenericEntity : "{5879D8E9C56E358D}Prefabs/Items/Core/Radio_base.et" {
    }
   }
   MeshObject "{5A30BAE7673C63D1}" {
-   Object "{AD570D20A1C73175}assets/ANPRC117/ANPRC117.xob"
+   Object "{EA665B20D3F98B1D}assets/R168/R168.xob"
   }
   SCR_RadioComponent "{5A30BAE7673C63D4}" {
    m_eAnimVariable ANPRC68
