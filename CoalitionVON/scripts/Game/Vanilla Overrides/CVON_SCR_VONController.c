@@ -889,7 +889,7 @@ modded class SCR_VONController
 		{
 			SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 			VONServerData.StartObject("ServerData");
-			VONServerData.SetMaxDecimalPlaces(3);
+			VONServerData.SetMaxDecimalPlaces(1);
 			VONServerData.WriteValue("InGame", true);
 			VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
 			VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
@@ -914,7 +914,7 @@ modded class SCR_VONController
 			{
 				SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 				VONServerData.StartObject("ServerData");
-				VONServerData.SetMaxDecimalPlaces(3);
+				VONServerData.SetMaxDecimalPlaces(1);
 				VONServerData.WriteValue("InGame", true);
 				VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
 				VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
