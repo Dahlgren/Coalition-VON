@@ -5,7 +5,7 @@ modded enum ChimeraMenuPreset
 
 class CVON_WarningMenu: ChimeraMenuBase
 {
-	const string LINK_TO_COPY = "https://discord.gg/the-coalition";
+	const string LINK_TO_COPY = "https://files.coalitiongroup.net/CVONTS31.5.zip";
 	SCR_ButtonTextComponent m_wCopyButton;
 	Widget m_wRoot;
 	SCR_PlayerController m_PlayerController;
