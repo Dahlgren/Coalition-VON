@@ -28,11 +28,11 @@ class CVON_WarningMenu: ChimeraMenuBase
 		{
 			m_wExplanation.SetText("Teamspeak Plugin Not Detected!");
 		}
-		else if (m_PlayerController.m_fTeamspeakPluginVersion != m_VONGamemode.m_fTeamSpeakPluginVersion)
+		else if (m_PlayerController.m_sTeamspeakPluginVersion != m_VONGamemode.m_sTeamspeakPluginVersion)
 		{
 			m_wExplanation.SetText("Teamspeak Plugin Version Mismatch!");
 		}
-		if (m_PlayerController.m_iTeamSpeakClientId != 0 && m_PlayerController.m_fTeamspeakPluginVersion == m_VONGamemode.m_fTeamSpeakPluginVersion)
+		if (m_PlayerController.m_iTeamSpeakClientId != 0 && m_PlayerController.m_sTeamspeakPluginVersion == m_VONGamemode.m_sTeamspeakPluginVersion)
 		{
 			m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
 			Close();

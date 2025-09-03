@@ -892,7 +892,7 @@ modded class SCR_VONController
 			VONServerData.SetMaxDecimalPlaces(1);
 			VONServerData.WriteValue("InGame", true);
 			VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
-			VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
+			VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 			VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
 			VONServerData.EndObject();
@@ -907,17 +907,17 @@ modded class SCR_VONController
 			VONLoad.ReadValue("InGame", InGame);
 			VONLoad.ReadValue("VONChannelName", ChannelName);
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
-			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
+			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
 			VONLoad.EndObject();
-			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion || InGame != true)
+			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion || InGame != true)
 			{
 				SCR_JsonSaveContext VONServerData = new SCR_JsonSaveContext();
 				VONServerData.StartObject("ServerData");
 				VONServerData.SetMaxDecimalPlaces(1);
 				VONServerData.WriteValue("InGame", true);
 				VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
-				VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_fTeamspeakPluginVersion);
+				VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 				VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 				VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
 				VONServerData.EndObject();
@@ -929,7 +929,7 @@ modded class SCR_VONController
 		//Hijack this whole process to load the initial warning menu
 		if (m_VONGameModeComponent.m_bTeamspeakChecks)
 		{
-			if (m_PlayerController.m_fTeamspeakPluginVersion != 0 && m_PlayerController.m_fTeamspeakPluginVersion != m_VONGameModeComponent.m_fTeamSpeakPluginVersion)
+			if (m_PlayerController.m_sTeamspeakPluginVersion != "0" && m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion)
 			{
 				m_VONHud.ShowWarning();
 			}

@@ -20,7 +20,7 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 	//These are stored from server settings on the server so clients can know what ChannelName and whats the password to join that VOIP channel.
 	[RplProp()] string m_sTeamSpeakChannelName = "";
 	[RplProp()] string m_sTeamSpeakChannelPassword = "";
-	float m_fTeamSpeakPluginVersion = 1.4;
+	string m_sTeamspeakPluginVersion = "1.5";
 	
 	//If disabled everyone shares the same frequencies.
 	[Attribute("1")] bool m_bUseFactionEcncryption;

@@ -29,7 +29,7 @@ modded class SCR_PlayerController
 	//Used to store the Id from the JSON that teamspeak rights to, this is so we can track teamspeak clientIds in game.
 	int m_iTeamSpeakClientId = 0;
 	
-	float m_fTeamspeakPluginVersion = 0;
+	string m_sTeamspeakPluginVersion = "0";
 	
 	//How we link what level the enum below should be at.
 	int m_iLocalVolume = 15;

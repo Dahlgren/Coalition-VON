@@ -412,11 +412,11 @@ static DWORD g_serverWatchSuppressUntil = 0;
 static struct {
     unsigned tsClientID;
     int      inGame;
-    float    pluginVersion;
+    char     pluginVersionStr[64]; // now stored as string
     char     chanName[512];
     char     chanPass[512];
     int      valid;
-} g_lastServerWritten = {0, 0, -1.0f, {0}, {0}, 0};
+} g_lastServerWritten = {0, 0, {0}, {0}, {0}, 0};
 
 /* Paths + watchers */
 static char             g_RadioPath[PATH_BUFSIZE] = {0};
@@ -611,18 +611,6 @@ static RadioState* get_radio_state(anyID id)
     }
     LeaveCriticalSection(&g_radioLock);
     return &g_radioStates[0];
-}
-
-static float get_plugin_version_float(void)
-{
-    const char* v = ts3plugin_version(); // e.g. "1.2" or "1.2.3"
-    if (!v || !*v)
-        return 0.0f;
-    char*  end = NULL;
-    double d   = strtod(v, &end); // stops at 2nd dot; fine for a float
-    if (d < 0.0 || d > 1000.0)
-        d = 0.0; // sanity clamp
-    return (float)d;
 }
 
 /* Static/hiss generator: driven by quality only; optional SNR scaling with volume */
@@ -1064,7 +1052,7 @@ static void write_serverdata_if_changed(uint64 sch)
     if (ts3Functions.getClientID(sch, &myID) != ERROR_ok)
         myID = 0;
 
-    const float pv = get_plugin_version_float();
+    const char* pvStr = ts3plugin_version();
 
     /* Only write if something differs from our last write snapshot */
     int needWrite = 0;
@@ -1074,7 +1062,7 @@ static void write_serverdata_if_changed(uint64 sch)
         needWrite = 1;
     else if (g_lastServerWritten.inGame != g_SD_inGame)
         needWrite = 1;
-    else if (fabsf(g_lastServerWritten.pluginVersion - pv) > 0.0001f)
+    else if (strcmp(g_lastServerWritten.pluginVersionStr, pvStr) != 0)
         needWrite = 1;
     else if (strcmp(g_lastServerWritten.chanName, g_SD_chanName) != 0)
         needWrite = 1;
@@ -1099,20 +1087,21 @@ static void write_serverdata_if_changed(uint64 sch)
             "  \"ServerData\": {\n"
             "    \"InGame\": %s,\n"
             "    \"TSClientID\": %u,\n"
-            "    \"TSPluginVersion\": %.3f,\n"
+            "    \"TSPluginVersion\": \"%s\",\n" // now string
             "    \"VONChannelName\": \"%s\",\n"
             "    \"VONChannelPassword\": \"%s\"\n"
             "  }\n"
             "}\n",
-            (g_SD_inGame ? "true" : "false"), (unsigned)myID, pv, chanEsc, passEsc);
+            (g_SD_inGame ? "true" : "false"), (unsigned)myID, pvStr, chanEsc, passEsc);
     fclose(wf);
 
-    g_lastServerWritten.tsClientID    = (unsigned)myID;
-    g_lastServerWritten.inGame        = g_SD_inGame;
-    g_lastServerWritten.pluginVersion = pv;
+    g_lastServerWritten.tsClientID = (unsigned)myID;
+    g_lastServerWritten.inGame     = g_SD_inGame;
+    strncpy(g_lastServerWritten.pluginVersionStr, pvStr, sizeof(g_lastServerWritten.pluginVersionStr) - 1);
     strncpy(g_lastServerWritten.chanName, g_SD_chanName, sizeof(g_lastServerWritten.chanName) - 1);
     strncpy(g_lastServerWritten.chanPass, g_SD_chanPass, sizeof(g_lastServerWritten.chanPass) - 1);
     g_lastServerWritten.valid = 1;
+
 
     g_serverWatchSuppressUntil = GetTickCount() + SERVER_WRITE_SUPPRESS_MS;
     logf("[CRF] Wrote VONServerData.json (suppressed watch for %u ms)\n", (unsigned)SERVER_WRITE_SUPPRESS_MS);
@@ -1292,7 +1281,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.4";
+    return "1.5";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
