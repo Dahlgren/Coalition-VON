@@ -9,7 +9,12 @@ modded class SCR_VONEntryRadio
 	}
 	override void InitEntry()
 	{
-		SetCustomLayout("{033302D7C8158EF8}UI/layouts/HUD/VON/VONEntry.layout");
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.InitEntry();
+			return;
+		}
+		SetCustomLayout("{249E688354EAF457}UI/layouts/HUD/VON/CVONEntry.layout");
 		if (m_bIsNotLocal)
 		{
 			SetUsable(true);
@@ -27,8 +32,12 @@ modded class SCR_VONEntryRadio
 	//==========================================================================================================================================================================
 	override void Update()
 	{
-		super.Update();
-				
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.Update();
+			return;
+		}
+		
 		SCR_VONEntryComponent entryComp = SCR_VONEntryComponent.Cast(m_EntryComponent);			
 		if (!entryComp)	// first update procs when this is not fetchable yet
 			return;

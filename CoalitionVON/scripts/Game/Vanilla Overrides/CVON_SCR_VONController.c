@@ -128,6 +128,11 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	override protected void Init(IEntity owner)
 	{	
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.Init(owner);
+			return;
+		}
 		if (s_bIsInit || System.IsConsoleApp())	// hosted server will have multiple controllers, init just the first one // dont init on dedicated server
 		{
 			Deactivate(owner);
@@ -310,6 +315,10 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	override protected bool ActivateVON(notnull SCR_VONEntry entry, EVONTransmitType transmitType = EVONTransmitType.NONE)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			return super.ActivateVON(entry, transmitType);
+		}
 		return false;
 	}
 	
@@ -397,6 +406,11 @@ modded class SCR_VONController
 	//==========================================================================================================================================================================
 	override protected void DeactivateVON(EVONTransmitType transmitType = EVONTransmitType.NONE)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.DeactivateVON(transmitType);
+			return;
+		}
 		return;
 	}
 	
@@ -440,6 +454,8 @@ modded class SCR_VONController
 	override void OnPostInit(IEntity owner)
 	{
 		super.OnPostInit(owner);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		if (System.IsConsoleApp())
 			return;
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
@@ -453,6 +469,9 @@ modded class SCR_VONController
 	override void EOnFixedFrame(IEntity owner, float timeSlice)
 	{
 		super.EOnFixedFrame(owner, timeSlice);
+		//Just in case....
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		if (!m_PlayerController)
 		{
 			m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());

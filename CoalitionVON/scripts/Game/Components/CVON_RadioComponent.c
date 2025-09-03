@@ -190,6 +190,8 @@ class CVON_RadioComponent: ScriptComponent
 	//==========================================================================================================================================================================
 	override void OnPostInit(IEntity owner)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	

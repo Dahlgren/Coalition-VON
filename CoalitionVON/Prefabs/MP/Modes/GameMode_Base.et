@@ -2,6 +2,7 @@ SCR_BaseGameMode {
  ID "56B2B479C6B96951"
  components {
   CVON_VONGameModeComponent "{6624E607CC6D4CC8}" {
+   Enabled 0
   }
  }
 }

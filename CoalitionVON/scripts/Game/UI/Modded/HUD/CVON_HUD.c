@@ -28,6 +28,8 @@ class CVON_HUD: SCR_InfoDisplay {
 	override event void OnStartDraw(IEntity owner)
 	{
 		super.OnStartDraw(owner);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
 		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
 		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
@@ -49,6 +51,8 @@ class CVON_HUD: SCR_InfoDisplay {
 	override event void OnStopDraw(IEntity owner)
 	{
 		super.OnStopDraw(owner);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		GetGame().GetInputManager().RemoveActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
 		GetGame().GetInputManager().RemoveActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
 		GetGame().GetInputManager().RemoveActionListener("VONChannel", EActionTrigger.DOWN, ShowVON);

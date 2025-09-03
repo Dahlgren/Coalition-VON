@@ -2,7 +2,6 @@ SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/E
  components {
   CVON_VONGameModeComponent "{6624E607CC6D4CC8}" {
    m_bTeamspeakChecks 0
-   m_sFreqConfig "{6E5382392F5A7528}Configs/FreqConfigs/Example.conf"
   }
  }
  coords 138.299 1 173.219

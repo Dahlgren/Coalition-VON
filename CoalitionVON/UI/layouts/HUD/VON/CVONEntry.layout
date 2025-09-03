@@ -1,21 +1,11 @@
 FrameWidgetClass {
- {
-  WindowWidgetClass "{66393553CC0022C8}" {
-   Name "Window1"
-   Slot FrameWidgetSlot "{663E80CF7C24E0BA}" {
-    Anchor 0.5 0.5 0.5 0.5
-    PositionX -92.078
-    OffsetLeft -92.078
-    PositionY -44.365
-    OffsetTop -44.365
-    SizeX 11.948
-    OffsetRight 80.13
-    SizeY 14.079
-    OffsetBottom 30.285
-   }
-   Color 0 0 0 0.2813
+ Name "rootFrame"
+ components {
+  SCR_VONEntryComponent "{6646703A5CC72794}" {
   }
-  WindowWidgetClass "{663E80CF604AA2B8}" {
+ }
+ {
+  WindowWidgetClass "{66466B0B3D5F6C65}" {
    Name "Window2"
    Slot FrameWidgetSlot "{663E80CF7C24E0BA}" {
     Anchor 0.5 0.5 0.5 0.5
@@ -28,10 +18,27 @@ FrameWidgetClass {
     SizeY 30
     OffsetBottom 30.754
    }
+   "Is Visible" 0
    Color 0 0 0 0.2813
   }
-  SizeLayoutWidgetClass "{5CEAF8054DC82357}" {
-   Prefab "{5CEAF8054DC82357}"
+  WindowWidgetClass "{66466B0BDA7626BD}" {
+   Name "Window1"
+   Slot FrameWidgetSlot "{663E80CF7C24E0BA}" {
+    Anchor 0.5 0.5 0.5 0.5
+    PositionX -92.078
+    OffsetLeft -92.078
+    PositionY -44.365
+    OffsetTop -44.365
+    SizeX 11.948
+    OffsetRight 80.13
+    SizeY 14.079
+    OffsetBottom 30.285
+   }
+   "Is Visible" 0
+   Color 0 0 0 0.2813
+  }
+  SizeLayoutWidgetClass "{66466B0B87A96F22}" {
+   Name "SizeLayout0"
    Slot FrameWidgetSlot "{5CEAF8054DC82306}" {
     Anchor 0.5 0.5 0.5 0.5
     PositionX 0
@@ -42,46 +49,48 @@ FrameWidgetClass {
     OffsetRight -208.761
     SizeY 60.527
     OffsetBottom -60.527
+    Alignment 0.5 0.5
    }
    {
-    VerticalLayoutWidgetClass "{5CC6924FF67CE111}" {
+    VerticalLayoutWidgetClass "{66466B0B87A96F24}" {
      Prefab "{5CC6924FF67CE111}"
+     Name "VerticalLayout0"
      Slot AlignableSlot "{5CEAF8054DDAF15A}" {
      }
      {
-      HorizontalLayoutWidgetClass "{663E577625CCB4F6}" {
+      HorizontalLayoutWidgetClass "{66466B0B87A96F27}" {
        Name "HorizontalLayoutOutline"
        Slot LayoutSlot "{663E57766472EC04}" {
        }
        {
-        OverlayWidgetClass "{663E57776215E52A}" {
+        OverlayWidgetClass "{66466B0B87A96F26}" {
          Name "Overlay"
          Slot LayoutSlot "{663E57766472EC65}" {
           Padding 0 0 0 0
          }
          {
-          VerticalLayoutWidgetClass "{663E5776DCCFDC0F}" {
+          VerticalLayoutWidgetClass "{66466B0B87A901EB}" {
            Name "VerticalLayoutInfo"
            Slot OverlayWidgetSlot "{663E57766472ECA0}" {
             HorizontalAlign 3
             VerticalAlign 3
            }
            {
-            HorizontalLayoutWidgetClass "{6637117D5F45168D}" {
+            HorizontalLayoutWidgetClass "{66466B0B87A901E5}" {
              Name "HorizontalLayoutInfo"
              Slot LayoutSlot "{663934B097110839}" {
               HorizontalAlign 1
               VerticalAlign 1
              }
              {
-              FrameWidgetClass "{663E5774CC0A0412}" {
+              FrameWidgetClass "{66466B0B87A901E6}" {
                Name "FrameLeft"
                Slot LayoutSlot "{663E57797F1ED5A5}" {
                 HorizontalAlign 3
                 VerticalAlign 1
                }
                {
-                ImageWidgetClass "{663934B0B9D459BC}" {
+                ImageWidgetClass "{66466B0B87AAAFF3}" {
                  Name "Left"
                  Slot FrameWidgetSlot "{663E5774F4DB5D89}" {
                   OffsetLeft 0
@@ -97,13 +106,13 @@ FrameWidgetClass {
                 }
                }
               }
-              VerticalLayoutWidgetClass "{6637117D7606B8EE}" {
+              VerticalLayoutWidgetClass "{66466B0B87AAAFF2}" {
                Name "RadioInfo"
                Slot LayoutSlot "{663934B09711082D}" {
                 VerticalAlign 1
                }
                {
-                TextWidgetClass "{662F62B5F59F2ACD}" {
+                TextWidgetClass "{66466B0B87AAAFF5}" {
                  Name "Radio"
                  Slot LayoutSlot "{662F62B4CF86638F}" {
                  }
@@ -118,14 +127,14 @@ FrameWidgetClass {
                   ShadowSize 2
                  }
                 }
-                HorizontalLayoutWidgetClass "{663E577710E5E7B0}" {
+                HorizontalLayoutWidgetClass "{66466B0B87AAAFF4}" {
                  Name "Freq/Channel"
                  Slot LayoutSlot "{663E57766472ED5B}" {
                   HorizontalAlign 1
                   VerticalAlign 1
                  }
                  {
-                  TextWidgetClass "{5CCC91E0C44B6341}" {
+                  TextWidgetClass "{66466B0B87AAAFF7}" {
                    Prefab "{5CCC91E0C44B6341}"
                    Name "Channel"
                    Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
@@ -140,7 +149,7 @@ FrameWidgetClass {
                     ShadowSize 2
                    }
                   }
-                  TextWidgetClass "{663E577706BF7B09}" {
+                  TextWidgetClass "{66466B0B87AA91F5}" {
                    Name "Frequency"
                    Slot LayoutSlot "{5D0AEE0CE85C65B2}" {
                     HorizontalAlign 2
@@ -155,7 +164,7 @@ FrameWidgetClass {
                   }
                  }
                 }
-                HorizontalLayoutWidgetClass "{663935209B4B4F32}" {
+                HorizontalLayoutWidgetClass "{66466B0B87AA91F4}" {
                  Name "Status"
                  Slot LayoutSlot "{663B044D900461C9}" {
                   HorizontalAlign 1
@@ -163,13 +172,13 @@ FrameWidgetClass {
                  }
                  "Is Visible" 0
                  {
-                  FrameWidgetClass "{663E577470B0AEA7}" {
+                  FrameWidgetClass "{66466B0B87AA64AD}" {
                    Name "FrameActive"
                    Slot LayoutSlot "{663E57797F1ED277}" {
                     Padding 0 -5 0 0
                    }
                    {
-                    ImageWidgetClass "{663935277CFDFAFD}" {
+                    ImageWidgetClass "{66466B0B87AA6352}" {
                      Name "Active"
                      Slot FrameWidgetSlot "{663E577469D45A38}" {
                       Anchor 0 0 0 0
@@ -187,12 +196,12 @@ FrameWidgetClass {
                     }
                    }
                   }
-                  FrameWidgetClass "{663E577471F32878}" {
+                  FrameWidgetClass "{66466B0B87AA6353}" {
                    Name "FrameButton"
                    Slot LayoutSlot "{663E57797F1ED254}" {
                    }
                    {
-                    ImageWidgetClass "{6639355259435840}" {
+                    ImageWidgetClass "{66466B0B87ABEBF0}" {
                      Name "On/Off"
                      Slot FrameWidgetSlot "{663E57746AD43D0F}" {
                       OffsetLeft 0
@@ -211,14 +220,14 @@ FrameWidgetClass {
                 }
                }
               }
-              FrameWidgetClass "{663E57740753A22C}" {
+              FrameWidgetClass "{66466B0B87ABEBF3}" {
                Name "FrameRight"
                Slot LayoutSlot "{663E57797F1ED2B3}" {
                 HorizontalAlign 1
                 VerticalAlign 1
                }
                {
-                ImageWidgetClass "{663934B0B9321219}" {
+                ImageWidgetClass "{66466B0B87ABEBF2}" {
                  Name "Right"
                  Slot FrameWidgetSlot "{663E577408BC42BB}" {
                   OffsetLeft 0
@@ -239,7 +248,7 @@ FrameWidgetClass {
             }
            }
           }
-          WindowWidgetClass "{663E80CF71EC32C3}" {
+          WindowWidgetClass "{66466B0B87AB6C07}" {
            Name "Window"
            Slot OverlayWidgetSlot "{663E57766472EC4E}" {
             HorizontalAlign 3
@@ -251,16 +260,19 @@ FrameWidgetClass {
         }
        }
       }
-      HorizontalLayoutWidgetClass "{5D0A86953EF7769B}" {
+      HorizontalLayoutWidgetClass "{66466B0B87AB6C00}" {
        Prefab "{5D0A86953EF7769B}"
+       Name "HorizontalLayout0"
        "Is Visible" 0
       }
-      TextWidgetClass "{5CCC91E0C44B6341}" {
+      TextWidgetClass "{66466B0B87AB6C01}" {
        Prefab "{5CCC91E0C44B6341}"
+       Name "Text0"
        "Is Visible" 0
       }
-      TextWidgetClass "{5D0A869549EE82A6}" {
+      TextWidgetClass "{66466B0B87AB5A73}" {
        Prefab "{5D0A869549EE82A6}"
+       Name "Text1"
        "Is Visible" 0
       }
      }

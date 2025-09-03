@@ -36,6 +36,11 @@ modded class SCR_VONMenu
 	//==========================================================================================================================================================================
 	override protected void OnEntryPerformed(SCR_SelectionMenu menu, SCR_SelectionMenuEntry entry)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.OnEntryPerformed(menu, entry);
+			return;
+		}
 		SCR_VONEntryRadio entryRadioVON = SCR_VONEntryRadio.Cast(entry);
 		IEntity radio = entryRadioVON.GetTransceiver().GetRadio().GetOwner();
 		CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent)).OpenMenu();
@@ -47,6 +52,11 @@ modded class SCR_VONMenu
 	//==========================================================================================================================================================================
 	override protected void OnInputOpenMenu(SCR_RadialMenuController controller, bool hasControl)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.OnInputOpenMenu(controller, hasControl);
+			return;
+		}
 		/*if (!m_RadialMenu.HasDisplay())	// TODO currently has to be called after control, sequencing needs adjusting
 		{
 			SCR_HUDManagerComponent hud = GetGame().GetHUDManager();

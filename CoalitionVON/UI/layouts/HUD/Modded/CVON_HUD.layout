@@ -1,5 +1,17 @@
 FrameWidgetClass {
  Name "rootFrame"
+ Slot FrameWidgetSlot "{6646703A9E4ACF3C}" {
+  Anchor 0 0.5 0 0.5
+  PositionX -223.978
+  OffsetLeft -223.978
+  PositionY -622.917
+  OffsetTop -622.917
+  SizeX 619.297
+  OffsetRight -395.319
+  SizeY 1080.27
+  OffsetBottom -457.355
+  SizeToContent 1
+ }
  {
   ImageWidgetClass "{663110197BC745B7}" {
    Name "Mic"
@@ -18,36 +30,20 @@ FrameWidgetClass {
    Texture "{E022D4ED821EC0D0}UI/images/Mic/mic_vol2.edds"
    Size 1024 1024
   }
-  FrameWidgetClass "{663E80C94D1D8F41}" {
+  FrameWidgetClass "{6646703AB24E131D}" : "{249E688354EAF457}UI/layouts/HUD/VON/CVONEntry.layout" {
    Name "VONEntry"
-   Slot FrameWidgetSlot "{663E80C94D1D8FAE}" {
+   Slot FrameWidgetSlot "{6646703AB24E1335}" {
     Anchor 0 0.5 0 0.5
-    PositionX -223.978
-    OffsetLeft -223.978
-    PositionY -622.917
-    OffsetTop -622.917
-    SizeX 619.297
-    OffsetRight -395.319
-    SizeY 1080.27
-    OffsetBottom -457.355
-    SizeToContent 1
+    PositionX -204.194
+    OffsetLeft -204.194
+    PositionY -659.017
+    OffsetTop -659.017
+    SizeX 619.3
+    OffsetRight -415.106
+    SizeY 1080.3
+    OffsetBottom -421.283
    }
    "Is Visible" 0
-   {
-    FrameWidgetClass "{663E80DDC0A51FCB}" : "{033302D7C8158EF8}UI/layouts/HUD/VON/VONEntry.layout" {
-     Name "0"
-     Slot FrameWidgetSlot "{5CC692416D077269}" {
-      PositionX 330.048
-      OffsetLeft 330.048
-      PositionY 635.482
-      OffsetTop 635.482
-      SizeX 293.698
-      OffsetRight -623.746
-      SizeY 200.781
-      OffsetBottom -836.263
-     }
-    }
-   }
   }
   TextWidgetClass "{616B027994139975}" {
    Name "VoiceRangeText"

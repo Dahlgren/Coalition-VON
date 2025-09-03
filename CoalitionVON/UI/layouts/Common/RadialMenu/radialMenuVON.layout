@@ -1,6 +1,6 @@
 FrameWidgetClass : "{8DE7D0C6EB809121}UI/layouts/Common/RadialMenu/radialMenu.layout" {
  {
-  ImageWidgetClass "{6634B3D794B65C68}" {
+  ImageWidgetClass "{66466B09B9722E4E}" {
    Name "RadioIcon"
    Slot FrameWidgetSlot "{6634B3D794B65CAC}" {
     Anchor 0.5 0.5 0.5 0.5

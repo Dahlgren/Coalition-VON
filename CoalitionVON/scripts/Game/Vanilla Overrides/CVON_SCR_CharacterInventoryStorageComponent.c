@@ -6,6 +6,8 @@ modded class SCR_CharacterInventoryStorageComponent
 	override void HandleOnItemAddedToInventory( IEntity item, BaseInventoryStorageComponent storageOwner )
 	{
 		super.HandleOnItemAddedToInventory(item, storageOwner);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		
 		if (!item)
 			return;
@@ -26,6 +28,8 @@ modded class SCR_CharacterInventoryStorageComponent
 	override void HandleOnItemRemovedFromInventory( IEntity item, BaseInventoryStorageComponent storageOwner )
 	{
 		super.HandleOnItemRemovedFromInventory(item, storageOwner);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		
 		if (!item)
 			return;

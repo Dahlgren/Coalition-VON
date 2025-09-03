@@ -5,6 +5,11 @@ modded class SCR_VONRadialDisplay : SCR_RadialMenuDisplay
 	//==========================================================================================================================================================================
 	override void FadeItemPreview(bool state = true)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.FadeItemPreview(state);
+			return;
+		}
 		if (state)
 		{
 			Widget radioIcon = GetRootWidget().FindAnyWidget("RadioIcon");
@@ -15,6 +20,11 @@ modded class SCR_VONRadialDisplay : SCR_RadialMenuDisplay
 	
 	override void SetPreviewItem(IEntity item)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.SetPreviewItem(item);
+			return;
+		}
 		if (!item)
 			return;
 		

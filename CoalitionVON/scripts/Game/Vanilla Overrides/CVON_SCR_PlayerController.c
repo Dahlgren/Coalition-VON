@@ -52,12 +52,16 @@ modded class SCR_PlayerController
 	override void OnControlledEntityChanged(IEntity from, IEntity to)
 	{
 		super.OnControlledEntityChanged(from, to);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		GetGame().GetCallqueue().CallLater(InitializeRadios, 500, false, to);
 	}
 	
 	override void OnDestroyed(notnull Instigator killer)
 	{
 		super.OnDestroyed(killer);
+		if (!CVON_VONGameModeComponent.GetInstance())
+			return;
 		#ifdef WORKBENCH
 		#else
 		if (!System.IsConsoleApp())

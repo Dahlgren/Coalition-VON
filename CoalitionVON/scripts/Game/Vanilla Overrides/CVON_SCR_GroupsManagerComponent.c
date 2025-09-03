@@ -4,6 +4,11 @@ modded class SCR_GroupsManagerComponent
 	//==========================================================================================================================================================================
 	override void TunePlayersFrequency(int playerId, IEntity player)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.TunePlayersFrequency(playerId, player);
+			return;
+		}
 		GetGame().GetCallqueue().CallLater(TuneFreqDelayWithPresets, 500, false, playerId, player);
 	}
 	
@@ -23,6 +28,11 @@ modded class SCR_GroupsManagerComponent
 	//==========================================================================================================================================================================
 	override private void TuneAgentsRadio(AIAgent agentEntity)
 	{
+		if (!CVON_VONGameModeComponent.GetInstance())
+		{
+			super.TuneAgentsRadio(agentEntity);
+			return;
+		}
 		IEntity player = agentEntity.GetControlledEntity();
 		int playerId = GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(player);
 		if (playerId == -1)
