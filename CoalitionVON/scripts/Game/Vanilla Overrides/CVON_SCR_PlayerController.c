@@ -1,13 +1,3 @@
-//The five volume levels of your voice, tracked here so its at a per player basis.
-enum CVON_EVONVolume
-{
-	WHISPER,
-	QUIET,
-	NORMAL,
-	LOUD,
-	YELLING
-}
-
 class CVON_RadioSettingObject
 {
 	string m_sFreq = "";
@@ -20,21 +10,18 @@ modded class SCR_PlayerController
 	//This is how we store who is talking to us and how, we use this in the VONController to populate the JSON.
 	ref array<ref CVON_VONContainer> m_aLocalActiveVONEntries = {};
 	
+	CVON_VONGameModeComponent m_VONGamemode;
+	
 	//Used so we can find the entry by playerId
 	ref array<int> m_aLocalActiveVONEntriesIds = {};
 	
 	//Local client and Server track this array. Used to determine radios priority, 0 = SR, 1 = LR, 2 = MR. Keybinds line up like that.
 	ref array<IEntity> m_aRadios = {};
 	
-	//Used to store the Id from the JSON that teamspeak rights to, this is so we can track teamspeak clientIds in game.
-	int m_iTeamSpeakClientId = 0;
-	
 	string m_sTeamspeakPluginVersion = "0";
 	
 	//How we link what level the enum below should be at.
-	int m_iLocalVolume = 15;
-	CVON_EVONVolume m_eVONVolume = CVON_EVONVolume.NORMAL;
-	int m_aVolumeValues[5] = {3, 10, 15, 25, 40};
+	static ref array<int> m_aVolumeValues = {5, 15, 25, 40, 60};
 	
 	//Used so we don't spam the player with initial warnings if their TS crashes, just when they first connect.
 	bool m_bHasBeenGivenInitialWarning = false;
@@ -45,6 +32,38 @@ modded class SCR_PlayerController
 	//Used so we can keep Stereo and Volume values
 	ref array<ref CVON_RadioSettingObject> m_aRadioSettings = {};
 	
+	override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
+		m_VONGamemode = CVON_VONGameModeComponent.GetInstance();
+	}
+	
+	void SetTeamspeakClientId(int input)
+	{
+		Rpc(RpcAsk_SetTeamspeakClientId, GetPlayerId(), input);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
+	void RpcAsk_SetTeamspeakClientId(int playerId, int input)
+	{
+		CVON_VONGameModeComponent.GetInstance().UpdateClientId(playerId, input);
+	}
+	
+	int GetTeamspeakClientId()
+	{
+		if (!m_VONGamemode.m_aPlayerIds.Contains(GetPlayerId()))
+			return 0;
+		int index = m_VONGamemode.m_aPlayerIds.Find(GetPlayerId());
+		return m_VONGamemode.m_aPlayerClientIds.Get(index);
+	}
+	
+	int GetPlayersTeamspeakClientId(int playerId)
+	{
+		if (!m_VONGamemode.m_aPlayerIds.Contains(playerId))
+			return 0;
+		int index = m_VONGamemode.m_aPlayerIds.Find(playerId);
+		return m_VONGamemode.m_aPlayerClientIds.Get(index);
+	}
 	
 	
 	//Used to initials the m_aRadio array
@@ -141,30 +160,27 @@ modded class SCR_PlayerController
 	
 	//mmmmgetter
 	//==========================================================================================================================================================================
-	CVON_EVONVolume ReturnLocalVoiceRange()
+	int ReturnLocalVoiceRange()
 	{
-		return m_eVONVolume;
+		return m_aVolumeValues.Find(m_VONGamemode.GetPlayerVolume(GetLocalPlayerId()));
+	}
+	
+	int ReturnLocalVoiceVolume()
+	{
+		return m_VONGamemode.GetPlayerVolume(GetLocalPlayerId());
 	}
 
 	//Links an actual volume I can give to teamspeak to the enum in game.
 	//==========================================================================================================================================================================
 	void ChangeVoiceRange(int input)
 	{
-		if (m_eVONVolume == 0 && input == -1)
-			return;
-		
-		if (m_eVONVolume == 4 && input == 1)
-			return;
-		
-		m_eVONVolume += input;
-		switch(m_eVONVolume)
-		{
-			case 0: {m_iLocalVolume = m_aVolumeValues[0];  break;}
-			case 1: {m_iLocalVolume = m_aVolumeValues[1]; break;}
-			case 2: {m_iLocalVolume = m_aVolumeValues[2]; break;}
-			case 3: {m_iLocalVolume = m_aVolumeValues[3]; break;}
-			case 4: {m_iLocalVolume = m_aVolumeValues[4]; break;}
-		}
+		Rpc(RpcDo_ChangeVoiceRange, SCR_PlayerController.GetLocalPlayerId(), input);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
+	void RpcDo_ChangeVoiceRange(int playerId, int input)
+	{
+		CVON_VONGameModeComponent.GetInstance().UpdateVolume(playerId, input);
 	}
 	
 	void OpenHandMicMenuClient(int playerId, RplId handMicEntityId)
@@ -216,6 +232,17 @@ modded class SCR_PlayerController
 	[RplRpc(RplChannel.Reliable, RplRcver.Owner)] 
 	void RpcAsk_AddLocalVONBroadcast(CVON_VONContainer VONContainer, int playerId, vector senderOrigin, float maxDistance)
 	{
+		if (m_aLocalActiveVONEntriesIds.Contains(playerId))
+		{
+			CVON_VONContainer vonContainerLocal = m_aLocalActiveVONEntries.Get(m_aLocalActiveVONEntriesIds.Find(playerId));
+			vonContainerLocal.m_eVonType = CVON_EVONType.RADIO;
+			vonContainerLocal.m_sFrequency = VONContainer.m_sFrequency;
+			vonContainerLocal.m_iRadioId = VONContainer.m_iRadioId;
+			vonContainerLocal.m_sFactionKey = VONContainer.m_sFactionKey;
+			vonContainerLocal.m_iMaxDistance = maxDistance;
+			vonContainerLocal.m_vSenderLocation = senderOrigin;
+			return;	
+		}
 		VONContainer.m_iMaxDistance = maxDistance;
 		VONContainer.m_vSenderLocation = senderOrigin;
 		m_aLocalActiveVONEntries.Insert(VONContainer);

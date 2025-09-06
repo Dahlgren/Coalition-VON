@@ -24,7 +24,7 @@ class CVON_WarningMenu: ChimeraMenuBase
 	
 	override void OnMenuUpdate(float tDelta)
 	{
-		if (m_PlayerController.m_iTeamSpeakClientId == 0)
+		if (m_PlayerController.GetTeamspeakClientId() == 0)
 		{
 			m_wExplanation.SetText("Teamspeak Plugin Not Detected!");
 		}
@@ -32,7 +32,7 @@ class CVON_WarningMenu: ChimeraMenuBase
 		{
 			m_wExplanation.SetText("Teamspeak Plugin Version Mismatch!");
 		}
-		if (m_PlayerController.m_iTeamSpeakClientId != 0 && m_PlayerController.m_sTeamspeakPluginVersion == m_VONGamemode.m_sTeamspeakPluginVersion)
+		if (m_PlayerController.GetTeamspeakClientId() != 0 && m_PlayerController.m_sTeamspeakPluginVersion == m_VONGamemode.m_sTeamspeakPluginVersion)
 		{
 			m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
 			Close();

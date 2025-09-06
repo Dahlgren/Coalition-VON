@@ -1,6 +1,7 @@
 class CVON_HUD: SCR_InfoDisplay {
 	
 	protected SCR_PlayerController m_PlayerController;
+	protected CVON_VONGameModeComponent m_VONGamemode;
 	protected ProgressBarWidget m_wVoiceRangeSlider;
 	protected TextWidget m_wVoiceRangeText;
 	protected InputManager m_InputManager;
@@ -31,12 +32,12 @@ class CVON_HUD: SCR_InfoDisplay {
 		if (!CVON_VONGameModeComponent.GetInstance())
 			return;
 		m_PlayerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
+		m_VONGamemode = CVON_VONGameModeComponent.GetInstance();
 		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.PRESSED, ShowVoiceRangeSlider);
 		GetGame().GetInputManager().AddActionListener("CVON_ShowVoiceRangeSlider", EActionTrigger.UP, HideVoiceRangeSlider);
 		GetGame().GetInputManager().AddActionListener("VONChannel", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().AddActionListener("VONLongRange", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().AddActionListener("VONMediumRange", EActionTrigger.DOWN, ShowVON);
-		GetGame().GetInputManager().AddActionListener("VONDirect", EActionTrigger.DOWN, ShowDirect);
 		GetGame().GetInputManager().AddActionListener("VONRotateActive", EActionTrigger.DOWN, ShowVONActive);
 		GetGame().GetInputManager().AddActionListener("VONRotateActive", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().AddActionListener("VONChannelUp", EActionTrigger.DOWN, ShowVONChange);
@@ -61,7 +62,6 @@ class CVON_HUD: SCR_InfoDisplay {
 		GetGame().GetInputManager().RemoveActionListener("VONLongRange", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().RemoveActionListener("VONMediumRange", EActionTrigger.DOWN, ShowVON);
 		GetGame().GetInputManager().RemoveActionListener("VONMediumRange", EActionTrigger.UP, HideVON);
-		GetGame().GetInputManager().RemoveActionListener("VONDirect", EActionTrigger.DOWN, ShowDirect);
 		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.DOWN, ShowVONActive);
 		GetGame().GetInputManager().RemoveActionListener("VONRotateActive", EActionTrigger.UP, HideVON);
 		GetGame().GetInputManager().RemoveActionListener("VONChannelUp", EActionTrigger.DOWN, ShowVONChange);
@@ -92,7 +92,7 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		#ifdef WORKBENCH
 		#else
-		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).GetTeamspeakClientId() == 0)
 			return;
 		#endif
 		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
@@ -107,7 +107,7 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		#ifdef WORKBENCH
 		#else
-		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).GetTeamspeakClientId() == 0)
 			return;
 		#endif
 		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
@@ -131,13 +131,13 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		ImageWidget mic = ImageWidget.Cast(m_wRoot.FindAnyWidget("Mic"));
 		
-		switch (m_PlayerController.ReturnLocalVoiceRange())
+		switch (m_PlayerController.m_aVolumeValues.Find(m_VONGamemode.GetPlayerVolume(SCR_PlayerController.GetLocalPlayerId())))
 		{
-			case CVON_EVONVolume.WHISPER 	: {mic.LoadImageTexture(0, m_sMicVol1); break;}
-			case CVON_EVONVolume.QUIET 		: {mic.LoadImageTexture(0, m_sMicVol2); break;}
-			case CVON_EVONVolume.NORMAL 	: {mic.LoadImageTexture(0, m_sMicVol3); break;}
-			case CVON_EVONVolume.LOUD   	: {mic.LoadImageTexture(0, m_sMicVol4); break;}
-			case CVON_EVONVolume.YELLING 	: {mic.LoadImageTexture(0, m_sMicVol5); break;}
+			case 0: {mic.LoadImageTexture(0, m_sMicVol1); break;}
+			case 1: {mic.LoadImageTexture(0, m_sMicVol2); break;}
+			case 2: {mic.LoadImageTexture(0, m_sMicVol3); break;}
+			case 3: {mic.LoadImageTexture(0, m_sMicVol4); break;}
+			case 4: {mic.LoadImageTexture(0, m_sMicVol5); break;}
 		}
 		
 		mic.SetOpacity(1);
@@ -158,7 +158,7 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		#ifdef WORKBENCH
 		#else
-		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).GetTeamspeakClientId() == 0)
 			return;
 		#endif
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
@@ -181,7 +181,7 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		#ifdef WORKBENCH
 		#else
-		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).GetTeamspeakClientId() == 0)
 			return;
 		#endif
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
@@ -204,7 +204,7 @@ class CVON_HUD: SCR_InfoDisplay {
 	{
 		#ifdef WORKBENCH
 		#else
-		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).m_iTeamSpeakClientId == 0)
+		if (SCR_PlayerController.Cast(GetGame().GetPlayerController()).GetTeamspeakClientId() == 0)
 			return;
 		#endif
 		if (SCR_CharacterControllerComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(SCR_CharacterControllerComponent)).GetLifeState() != ECharacterLifeState.ALIVE)
@@ -320,7 +320,7 @@ class CVON_HUD: SCR_InfoDisplay {
 		// Color
 		switch (m_PlayerController.ReturnLocalVoiceRange())
 		{
-			case CVON_EVONVolume.WHISPER: 
+			case 0: 
 			{ 
 				m_wVoiceRangeSlider.SetColor(Color.SpringGreen);
 				m_wVoiceRangeText.SetText("Whisper"); 
@@ -328,7 +328,7 @@ class CVON_HUD: SCR_InfoDisplay {
 				mic.LoadImageTexture(0, m_sMicVol1);
 				break; 
 			};
-			case CVON_EVONVolume.QUIET:
+			case 1:
 			{
 				m_wVoiceRangeSlider.SetColor(Color.Green); 
 				m_wVoiceRangeText.SetText("Close Contact"); 
@@ -336,7 +336,7 @@ class CVON_HUD: SCR_InfoDisplay {
 				mic.LoadImageTexture(0, m_sMicVol2);
 				break; 
 			};
-			case CVON_EVONVolume.NORMAL:
+			case 2:
 			{
 				m_wVoiceRangeSlider.SetColor(Color.Yellow); 
 				m_wVoiceRangeText.SetText("Normal"); 
@@ -344,7 +344,7 @@ class CVON_HUD: SCR_InfoDisplay {
 				mic.LoadImageTexture(0, m_sMicVol3);
 				break; 
 			};
-			case CVON_EVONVolume.LOUD:
+			case 3:
 			{
 				m_wVoiceRangeSlider.SetColor(Color.Red); 
 				m_wVoiceRangeText.SetText("Yelling"); 
@@ -352,7 +352,7 @@ class CVON_HUD: SCR_InfoDisplay {
 				mic.LoadImageTexture(0, m_sMicVol4);
 				break; 
 			};
-			case CVON_EVONVolume.YELLING:
+			case 4:
 			{
 				m_wVoiceRangeSlider.SetColor(Color.DarkRed);
 				m_wVoiceRangeText.SetText("May I Speak To Your Manager");  

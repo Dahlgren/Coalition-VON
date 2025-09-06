@@ -123,11 +123,59 @@ static void logf(const char* fmt, ...)
 /* Fixed-size processing chunk for radio path */
 #define RADIO_PROCESS_CHUNK 1024
 
-static struct TS3Functions ts3Functions;
+/* ----------------- Add near other Config constants ----------------- */
+#define DIRECT_GAIN_DB 5.0f
+#define DIRECT_GAIN_MUL 1.77827941f /* 10^(5/20) */
+#define RADIO_GAIN_DB 3.0f
+#define RADIO_GAIN_MUL 1.41253754f /* 10^(3/20) */
 
+
+static struct TS3Functions ts3Functions;
+static uint64              g_prevChannelId     = 0; /* user’s last non-game channel (this conn) */
+static uint64              g_gameChannelId     = 0; /* cached ID of the VONChannelName */
+static DWORD               g_nextReturnTryTick = 0;
+static DWORD               g_returnBackoffMs   = MOVE_BACKOFF_MIN_MS;
 /* ---------------------------------------------------------------------------
    Helpers
 --------------------------------------------------------------------------- */
+/* Find channel by exact (or case-insensitive) name */
+static uint64 find_channel_by_name(uint64 sch, const char* name)
+{
+    if (!name || !name[0])
+        return 0;
+    uint64* chList = NULL;
+    if (ts3Functions.getChannelList(sch, &chList) != ERROR_ok || !chList)
+        return 0;
+
+    uint64 found = 0;
+    for (size_t i = 0; chList[i]; ++i) {
+        char* nm = NULL;
+        if (ts3Functions.getChannelVariableAsString(sch, chList[i], CHANNEL_NAME, &nm) == ERROR_ok && nm) {
+            int eq = (strcmp(nm, name) == 0) || (_stricmp ? _stricmp(nm, name) == 0 : 0);
+            ts3Functions.freeMemory(nm);
+            if (eq) {
+                found = chList[i];
+                break;
+            }
+        }
+    }
+    ts3Functions.freeMemory(chList);
+    return found;
+}
+
+/* Verify a channel ID still exists */
+static int channel_exists(uint64 sch, uint64 chId)
+{
+    if (!chId)
+        return 0;
+    char*        nm  = NULL;
+    unsigned int err = ts3Functions.getChannelVariableAsString(sch, chId, CHANNEL_NAME, &nm);
+    if (err == ERROR_ok && nm) {
+        ts3Functions.freeMemory(nm);
+        return 1;
+    }
+    return 0;
+}
 static inline float clampf(float x, float lo, float hi)
 {
     return (x < lo) ? lo : (x > hi ? hi : x);
@@ -1155,8 +1203,16 @@ static void try_ensure_move(uint64 sch)
     }
 
     if (target) {
+        g_gameChannelId = target; /* cache actual game channel ID */
+
         int hasPw = 0;
         ts3Functions.getChannelVariableAsInt(sch, target, CHANNEL_FLAG_PASSWORD, &hasPw);
+
+        /* Remember where the user was (if not already the game channel) */
+        if (myCh && myCh != target) {
+            g_prevChannelId = myCh;
+        }
+
         const char*  pw  = (hasPw && g_SD_chanPass[0]) ? g_SD_chanPass : "";
         unsigned int err = ts3Functions.requestClientMove(sch, myID, target, pw, NULL);
         if (err == ERROR_ok) {
@@ -1174,6 +1230,68 @@ static void try_ensure_move(uint64 sch)
     ts3Functions.freeMemory(chList);
     g_nextMoveTryTick = now + g_moveBackoffMs;
 }
+
+static void try_return_to_previous(uint64 sch)
+{
+    if (!sch)
+        return;
+    if (!g_prevChannelId)
+        return;
+    if (g_SD_inGame)
+        return; /* only when OUT of game */
+
+    DWORD now = GetTickCount();
+    if (now < g_nextReturnTryTick)
+        return;
+
+    anyID myID = 0;
+    if (ts3Functions.getClientID(sch, &myID) != ERROR_ok || myID == 0)
+        return;
+
+    uint64 curCh = 0;
+    if (ts3Functions.getChannelOfClient(sch, myID, &curCh) != ERROR_ok || !curCh)
+        return;
+
+    /* Are we still in the game channel? */
+    int inGameChannel = 0;
+    if (g_gameChannelId) {
+        inGameChannel = (curCh == g_gameChannelId);
+    } else if (g_SD_chanName[0]) {
+        char* nm = NULL;
+        if (ts3Functions.getChannelVariableAsString(sch, curCh, CHANNEL_NAME, &nm) == ERROR_ok && nm) {
+            inGameChannel = (strcmp(nm, g_SD_chanName) == 0) || (_stricmp ? _stricmp(nm, g_SD_chanName) == 0 : 0);
+            ts3Functions.freeMemory(nm);
+        }
+    }
+
+    if (!inGameChannel) {
+        /* User already moved elsewhere; forget stored channel */
+        g_prevChannelId     = 0;
+        g_returnBackoffMs   = MOVE_BACKOFF_MIN_MS;
+        g_nextReturnTryTick = now + g_returnBackoffMs;
+        return;
+    }
+
+    if (!channel_exists(sch, g_prevChannelId)) {
+        g_prevChannelId     = 0;
+        g_returnBackoffMs   = MOVE_BACKOFF_MIN_MS;
+        g_nextReturnTryTick = now + g_returnBackoffMs;
+        return;
+    }
+
+    unsigned int err = ts3Functions.requestClientMove(sch, myID, g_prevChannelId, "", NULL);
+    if (err == ERROR_ok) {
+        logf("[CRF] Returned to previous channel\n");
+        g_prevChannelId     = 0;
+        g_returnBackoffMs   = MOVE_BACKOFF_MIN_MS;
+        g_nextReturnTryTick = now + g_returnBackoffMs;
+    } else {
+        g_returnBackoffMs   = (g_returnBackoffMs < MOVE_BACKOFF_MAX_MS) ? (g_returnBackoffMs * 2) : MOVE_BACKOFF_MAX_MS;
+        g_nextReturnTryTick = now + g_returnBackoffMs;
+        logf("[CRF] Return move failed err=%u, backoff=%u ms\n", err, (unsigned)g_returnBackoffMs);
+    }
+}
+
 
 /* ---------------------------------------------------------------------------
    Worker thread: file reloads + moves + mic state
@@ -1211,9 +1329,13 @@ static DWORD WINAPI worker_main(LPVOID param)
         /* Attempt move with backoff */
         try_ensure_move(sch);
 
+        /* If out of game, try returning the user to their previous channel */
+        try_return_to_previous(sch);
+
         /* Mic toggle */
         if (sch)
             apply_mic_state(sch);
+
 
         /* VONData */
         if (now >= g_nextVonReloadTick) {
@@ -1281,7 +1403,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.5";
+    return "1.6";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1381,6 +1503,13 @@ PL_EXPORT void ts3plugin_onConnectStatusChangeEvent(uint64 sch, int newStatus, u
         g_nextServerReloadTick = 0;
         g_nextMoveTryTick      = 0;
         g_moveBackoffMs        = MOVE_BACKOFF_MIN_MS;
+
+        /* reset return-to-previous state */
+        g_prevChannelId     = 0;
+        g_gameChannelId     = 0;
+        g_nextReturnTryTick = 0;
+        g_returnBackoffMs   = MOVE_BACKOFF_MIN_MS;
+
         logf("[CRF] Connection established\n");
     }
 }
@@ -1420,9 +1549,6 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
 
     const VonEntry* e = find_entry(clientID);
     if (!e) {
-        const int n = sampleCount * channels;
-        for (int i = 0; i < n; ++i)
-            samples[i] = 0;
         return;
     }
 
@@ -1494,14 +1620,18 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
 
                 if (channels <= 1) {
                     for (int i = 0; i < n; ++i) {
-                        const float s = clampf(voice[i] + hiss[i], -1.0f, 1.0f);
-                        outL[i]       = s;
-                        outR[i]       = s;
+                        float s = clampf(voice[i] + hiss[i], -1.0f, 1.0f);
+                        s *= RADIO_GAIN_MUL;
+
+                        outL[i] = s;
+                        outR[i] = s;
                     }
                 } else {
                     for (int i = 0; i < n; ++i) {
-                        const float s  = clampf(voice[i] + hiss[i], -1.0f, 1.0f);
-                        float       Ls = s, Rs = s;
+                        float s = clampf(voice[i] + hiss[i], -1.0f, 1.0f);
+                        s *= RADIO_GAIN_MUL;
+
+                        float Ls = s, Rs = s;
                         if (stereo == 1) {
                             Ls = 0.0f;
                             Rs = s;
@@ -1543,10 +1673,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
             const float lG        = clampf(e->leftGain, 0.0f, 2.0f);
             const float rG        = clampf(e->rightGain, 0.0f, 2.0f);
             float       avg       = 0.5f * (lG + rG);
-            float       yellBoost = (avg > 1.0f) ? clampf(1.0f + 0.25f * (avg - 1.0f), 1.0f, 1.5f) : 1.0f;
+            float       yellBoost = (avg > 1.0f) ? clampf(1.0f + 0.15f * (avg - 1.0f), 1.0f, 1.5f) : 1.0f;
 
-            const float lMul = clampf(lG * yellBoost, 0.0f, 2.0f);
-            const float rMul = clampf(rG * yellBoost, 0.0f, 2.0f);
+            const float lMul = clampf(lG * yellBoost * DIRECT_GAIN_MUL, 0.0f, 2.0f);
+            const float rMul = clampf(rG * yellBoost * DIRECT_GAIN_MUL, 0.0f, 2.0f);
 
             const float occDb = (e->muffledDb < 0.0f) ? -e->muffledDb : 0.0f;
             const int   doMuf = (occDb > 0.1f) ? 1 : 0;
@@ -1609,10 +1739,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
         const float lG        = clampf(e->leftGain, 0.0f, 2.0f);
         const float rG        = clampf(e->rightGain, 0.0f, 2.0f);
         float       avg       = 0.5f * (lG + rG);
-        float       yellBoost = (avg > 1.0f) ? clampf(1.0f + 0.25f * (avg - 1.0f), 1.0f, 1.5f) : 1.0f;
+        float       yellBoost = (avg > 1.0f) ? clampf(1.0f + 0.15f * (avg - 1.0f), 1.0f, 1.5f) : 1.0f;
 
-        const float lMul = clampf(lG * yellBoost, 0.0f, 2.0f);
-        const float rMul = clampf(rG * yellBoost, 0.0f, 2.0f);
+        const float lMul = clampf(lG * yellBoost * DIRECT_GAIN_MUL, 0.0f, 2.0f);
+        const float rMul = clampf(rG * yellBoost * DIRECT_GAIN_MUL, 0.0f, 2.0f);
 
         const float occDb = (e->muffledDb < 0.0f) ? -e->muffledDb : 0.0f;
         const int   doMuf = (occDb > 0.1f) ? 1 : 0;

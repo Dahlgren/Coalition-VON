@@ -47,27 +47,6 @@ modded class SCR_VONController
 	
 	//All these below are just how we assign keybinds to activate certain VON Transmissions
 	//==========================================================================================================================================================================
-	void ActivateCVONDirect()
-	{
-		if (m_bToggleBuffer)
-		{
-			m_bToggleBuffer = false;
-			DeactivateCVON();
-			m_VONHud.ShowDirectToggle();
-			return;
-		}
-		ActivateCVON(CVON_EVONTransmitType.DIRECT);
-	}
-	
-	//==========================================================================================================================================================================
-	void ToggleCVONDirect()
-	{
-		m_bToggleBuffer = !m_bToggleBuffer;
-		m_VONHud.ShowDirectToggle();
-		ActivateCVON(CVON_EVONTransmitType.DIRECT);
-	}
-	
-	//==========================================================================================================================================================================
 	void ActivateCVONSR()
 	{	
 		if (m_bToggleBuffer)
@@ -144,9 +123,6 @@ modded class SCR_VONController
 		m_InputManager = GetGame().GetInputManager();
 		if (m_InputManager)
 		{
-			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.DOWN, ActivateCVONDirect);
-			m_InputManager.AddActionListener(ACTION_DIRECT, EActionTrigger.UP, DeactivateCVON);
-			m_InputManager.AddActionListener(ACTION_DIRECT_TOGGLE, EActionTrigger.DOWN, ToggleCVONDirect);
 			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.DOWN, ActivateCVONSR);
 			m_InputManager.AddActionListener(ACTION_CHANNEL, EActionTrigger.UP, DeactivateCVON);
 			m_InputManager.AddActionListener(ACTION_TRANSCEIVER_CYCLE, EActionTrigger.DOWN, ActionVONTransceiverCycle);
@@ -271,27 +247,22 @@ modded class SCR_VONController
 
 		if (radioComp.m_iCurrentChannel == 1 && input == -1)
 		{
-			radioComp.m_iCurrentChannel = radioComp.m_aChannels.Count();
 			radioComp.UpdateChannelClient(radioComp.m_aChannels.Count());
 		}
 		else if (radioComp.m_iCurrentChannel == 99 && input == 1)
 		{
-			radioComp.m_iCurrentChannel = 1;
 			radioComp.UpdateChannelClient(1);
 		}
 		else
 		{
-			radioComp.m_iCurrentChannel += input;
 			radioComp.UpdateChannelClient(radioComp.m_iCurrentChannel);
 		}
 		
 		if (radioComp.m_iCurrentChannel > channelCount)
 		{
-			radioComp.m_iCurrentChannel = 1;
 			radioComp.UpdateChannelClient(1);
 		}
 		string freq = radioComp.m_aChannels.Get(radioComp.m_iCurrentChannel - 1);
-		radioComp.m_sFrequency = freq;
 		radioComp.UpdateFrequencyClient(freq);
 		m_VONHud.ShowVONChange();
 	}
@@ -328,7 +299,7 @@ modded class SCR_VONController
 	{
 		#ifdef WORKBENCH
 		#else
-		if (m_PlayerController.m_iTeamSpeakClientId == 0 && m_VONGameModeComponent.m_bTeamspeakChecks)
+		if (m_PlayerController.GetTeamspeakClientId() == 0 && m_VONGameModeComponent.m_bTeamspeakChecks)
 			return;
 		#endif
 		if (!SCR_PlayerController.GetLocalControlledEntity())
@@ -345,9 +316,9 @@ modded class SCR_VONController
 		else if (transmitType == CVON_EVONTransmitType.SR || transmitType == CVON_EVONTransmitType.LR || transmitType == CVON_EVONTransmitType.LR2)
 			container.m_eVonType = CVON_EVONType.RADIO;
 		
-		container.m_iVolume = m_PlayerController.m_iLocalVolume;
+		container.m_iVolume = m_PlayerController.ReturnLocalVoiceVolume();
 		container.m_SenderRplId = RplComponent.Cast(SCR_PlayerController.GetLocalControlledEntity().FindComponent(RplComponent)).Id();
-		container.m_iClientId = m_PlayerController.m_iTeamSpeakClientId;
+		container.m_iClientId = m_PlayerController.GetTeamspeakClientId();
 		container.m_iPlayerId = m_PlayerController.GetLocalPlayerId();
 		if (container.m_eVonType == CVON_EVONType.RADIO)
 		{
@@ -365,6 +336,12 @@ modded class SCR_VONController
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
+					switch (radioComp.m_eStereo)
+					{
+						case CVON_EStereo.BOTH:  {AudioSystem.PlaySound("{E3B4231783ABA914}UI/sounds/beepstart.wav"); break;}
+						case CVON_EStereo.LEFT:  {AudioSystem.PlaySound("{3B2D6B4BBEA1CE72}UI/sounds/beepstartleft.wav"); break;}
+						case CVON_EStereo.RIGHT: {AudioSystem.PlaySound("{18F289DB8B5F38D1}UI/sounds/beepstartright.wav"); break;}
+					}
 					break;
 				}
 				case CVON_EVONTransmitType.LR:
@@ -379,6 +356,12 @@ modded class SCR_VONController
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
+					switch (radioComp.m_eStereo)
+					{
+						case CVON_EStereo.BOTH:  {AudioSystem.PlaySound("{E3B4231783ABA914}UI/sounds/beepstart.wav"); break;}
+						case CVON_EStereo.LEFT:  {AudioSystem.PlaySound("{3B2D6B4BBEA1CE72}UI/sounds/beepstartleft.wav"); break;}
+						case CVON_EStereo.RIGHT: {AudioSystem.PlaySound("{18F289DB8B5F38D1}UI/sounds/beepstartright.wav"); break;}
+					}
 					break;
 				}
 				case CVON_EVONTransmitType.LR2:
@@ -393,10 +376,15 @@ modded class SCR_VONController
 					container.m_sFrequency = radioComp.m_sFrequency;
 					container.m_iRadioId = RplComponent.Cast(radio.FindComponent(RplComponent)).Id();
 					container.m_sFactionKey = radioComp.m_sFactionKey;
+					switch (radioComp.m_eStereo)
+					{
+						case CVON_EStereo.BOTH:  {AudioSystem.PlaySound("{E3B4231783ABA914}UI/sounds/beepstart.wav"); break;}
+						case CVON_EStereo.LEFT:  {AudioSystem.PlaySound("{3B2D6B4BBEA1CE72}UI/sounds/beepstartleft.wav"); break;}
+						case CVON_EStereo.RIGHT: {AudioSystem.PlaySound("{18F289DB8B5F38D1}UI/sounds/beepstartright.wav"); break;}
+					}
 					break;
 				}
 			}
-			AudioSystem.PlaySound("{E3B4231783ABA914}UI/sounds/beepstart.wav");
 		}
 		m_CurrentVONContainer = container;
 		m_bIsBroadcasting = true;
@@ -426,7 +414,15 @@ modded class SCR_VONController
 			return;
 		if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.RADIO)
 		{
-			AudioSystem.PlaySound("{B826EAACD5F6B6BB}UI/sounds/beepend.wav");
+			IEntity radio = RplComponent.Cast(Replication.FindItem(m_CurrentVONContainer.m_iRadioId)).GetEntity();
+			CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(radio.FindComponent(CVON_RadioComponent));
+			switch (radioComp.m_eStereo)
+			{
+				case CVON_EStereo.BOTH:  {AudioSystem.PlaySound("{B826EAACD5F6B6BB}UI/sounds/beepend.wav"); break;}
+				case CVON_EStereo.LEFT:  {AudioSystem.PlaySound("{ABDEAEC2D5718124}UI/sounds/beependleft.wav"); break;}
+				case CVON_EStereo.RIGHT: {AudioSystem.PlaySound("{7BF09D8FB6C39FF3}UI/sounds/beependright.wav"); break;}
+			}
+			
 			m_VONHud.HideVON();
 		}
 		else
@@ -441,12 +437,6 @@ modded class SCR_VONController
 				m_PlayerController.BroadcastRemoveLocalVONToServer(playerId, SCR_PlayerController.GetLocalPlayerId());
 			}
 			m_aPlayerIdsBroadcastedTo.Clear();
-		}
-		
-		if (m_bToggleTurnedOffByRadio)
-		{
-			m_bToggleTurnedOffByRadio = false;
-			ToggleCVONDirect();
 		}
 	}
 	
@@ -484,12 +474,63 @@ modded class SCR_VONController
 		if (!m_PlayerManager)
 			m_PlayerManager = GetGame().GetPlayerManager();
 		
-		int maxDistance = 150;
+		ref array<int> playerIds = {};
+		m_PlayerManager.GetPlayers(playerIds);
+		int maxDistance = m_PlayerController.m_aVolumeValues.Get(4);
+		foreach (int playerId: playerIds)
+		{
+			if (!SCR_PlayerController.GetLocalControlledEntity())
+				continue;
+			
+			if (playerId == SCR_PlayerController.GetLocalPlayerId())
+				continue;
+			
+			IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
+			if (!player)
+				continue;;
+			
+			float distance = vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
+			if (distance > maxDistance)
+			{
+				if (m_PlayerController.m_aLocalActiveVONEntriesIds.Contains(playerId))
+				{
+					//If this VON Transmission is radio, don't do shit
+					if (m_PlayerController.m_aLocalActiveVONEntries.Get(m_PlayerController.m_aLocalActiveVONEntriesIds.Find(playerId)).m_eVonType == CVON_EVONType.RADIO)
+						continue;
+					int index = m_PlayerController.m_aLocalActiveVONEntriesIds.Find(playerId);
+					m_PlayerController.m_aLocalActiveVONEntriesIds.RemoveOrdered(index);
+					m_PlayerController.m_aLocalActiveVONEntries.RemoveOrdered(index);
+					continue;
+				}
+				else
+					continue;
+			}
+			else
+			{
+				if (m_PlayerController.m_aLocalActiveVONEntriesIds.Contains(playerId))
+					continue;
+				else
+				{
+					CVON_VONContainer container = new CVON_VONContainer();
+					container.m_eVonType = CVON_EVONType.DIRECT;
+					container.m_iVolume = m_VONGameModeComponent.GetPlayerVolume(playerId);
+					container.m_SenderRplId = RplComponent.Cast(player.FindComponent(RplComponent)).Id();
+					container.m_iClientId = m_PlayerController.GetPlayersTeamspeakClientId(playerId);
+					container.m_iPlayerId = playerId;
+					m_PlayerController.m_aLocalActiveVONEntries.Insert(container);
+					m_PlayerController.m_aLocalActiveVONEntriesIds.Insert(playerId);
+				}
+				
+			}
+		}
+		
 		//Local processing of data being sent to us
 		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			if (!container.m_SoundSource)
 				continue;
+			
+			container.m_iVolume = m_VONGameModeComponent.GetPlayerVolume(container.m_iPlayerId);
 			
 			float distance = vector.Distance(container.m_SoundSource.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
 			if (distance < maxDistance)
@@ -514,8 +555,7 @@ modded class SCR_VONController
 					DeactivateCVON();
 				return;
 			}
-				
-			ref array<int> playerIds = {};
+
 			ref array<int> broadcastToPlayerIds = {};
 			m_PlayerManager.GetPlayers(playerIds);
 			foreach (int playerId: playerIds)
@@ -526,22 +566,22 @@ modded class SCR_VONController
 					continue;
 				#endif
 				
-				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
-				{
-					IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
-					if (!player)
-						continue;
-
-					if (vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin()) > maxDistance)
-					{
-						if (m_aPlayerIdsBroadcastedTo.Contains(playerId))
-						{
-							m_aPlayerIdsBroadcastedTo.RemoveItem(playerId);
-							m_PlayerController.BroadcastRemoveLocalVONToServer(playerId, SCR_PlayerController.GetLocalPlayerId());
-						}
-						continue;
-					}
-				}
+//				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
+//				{
+//					IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
+//					if (!player)
+//						continue;
+//
+//					if (vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin()) > maxDistance)
+//					{
+//						if (m_aPlayerIdsBroadcastedTo.Contains(playerId))
+//						{
+//							m_aPlayerIdsBroadcastedTo.RemoveItem(playerId);
+//							m_PlayerController.BroadcastRemoveLocalVONToServer(playerId, SCR_PlayerController.GetLocalPlayerId());
+//						}
+//						continue;
+//					}
+//				}
 				
 				if (m_aPlayerIdsBroadcastedTo.Contains(playerId))
 					continue;
@@ -551,10 +591,10 @@ modded class SCR_VONController
 			}
 			if (broadcastToPlayerIds.Count() > 0)
 			{
-				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
-					m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), RplId.Invalid());
-				else
-					m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), m_CurrentVONContainer.m_iRadioId);
+//				if (m_CurrentVONContainer.m_eVonType == CVON_EVONType.DIRECT)
+//					m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), RplId.Invalid());
+//				else
+				m_PlayerController.BroadcastLocalVONToServer(m_CurrentVONContainer, broadcastToPlayerIds, SCR_PlayerController.GetLocalPlayerId(), m_CurrentVONContainer.m_iRadioId);
 			}
 				
 		}
@@ -567,9 +607,9 @@ modded class SCR_VONController
 	// Geometry only: pan + rear shadow + elevation + bleed.
 	// Multiply the returned L/R by your own plugin volume afterward.
 	//==========================================================================================================================================================================
-	static const float SPEECH_NORMAL_M       = 15.0;   // "normal talk" meters
+	static const float SPEECH_NORMAL_M       = 25.0;   // "normal talk" meters
 	static const float INTENSITY_FADE_FACTOR = 0.6;    // how quickly yelling falls off
-	static const float MAX_OUT_GAIN          = 2.0;    // safety cap; raise or set -1 for no cap
+	static const float MAX_OUT_GAIN          = 1.3;    // safety cap; raise or set -1 for no cap
 	
 	static float LoudnessIntensity(float volume_m, float distance_m)
 	{
@@ -766,21 +806,53 @@ modded class SCR_VONController
 		
 	}
 	
-	bool IsInBuildingOrVehicle(IEntity senderEntity, out IEntity building = null)
+	bool IsInBuildingOrVehicle(IEntity senderEntity, out IEntity building = null, out bool isVehicle = false)
 	{
+		bool found = false;
+		ref array<IEntity> excludeEntities = {};
+		IEntity foundEnitity;
+		excludeEntities.Insert(senderEntity);
+		while (!found)
+		{
+			autoptr TraceParam p = new TraceParam;
+			vector end = GetHeadHeight(senderEntity);
+			end[1] = end[1] + 10;
+			p.ExcludeArray = excludeEntities;
+			p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+			p.LayerMask = EPhysicsLayerDefs.Projectile;
+			p.Start = GetHeadHeight(senderEntity);
+			p.End = end;
+			float distance = GetGame().GetWorld().TraceMove(p, null);
+			if (p.TraceEnt == null)
+			{
+				found = true;
+				break;
+			}
+				
+			
+			if (!p.TraceEnt.FindComponent(BaseLoadoutClothComponent))
+				if (Vehicle.Cast(p.TraceEnt.GetRootParent()))
+				{
+					foundEnitity = p.TraceEnt;
+					isVehicle = true;
+					found = true;
+					break;
+				}
+				else if (Building.Cast(p.TraceEnt))
+				{
+					foundEnitity = p.TraceEnt;
+					found = true;
+					break;
+				}
+			
+			
+			excludeEntities.Insert(p.TraceEnt);
+		}
 		
-		autoptr TraceParam p = new TraceParam;
-		vector end = senderEntity.GetOrigin();
-		end[1] = end[1] + 100;
-		p.Exclude = senderEntity;
-		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
-		p.Start = GetHeadHeight(senderEntity);
-		p.End = end;
-		float distance = GetGame().GetWorld().TraceMove(p, null);
-		if (p.TraceEnt == null)
+		if (foundEnitity)
+			building = foundEnitity;
+		if (!building)
 			return false;
-		
-		building = p.TraceEnt;
 		return true;
 	}
 	
@@ -792,6 +864,7 @@ modded class SCR_VONController
 		vector end = senderEntity.GetOrigin();
 		p.Exclude = player;
 		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+		p.LayerMask = EPhysicsLayerDefs.Projectile;
 		p.Start = GetHeadHeight(senderEntity);
 		p.End = GetHeadHeight(player);
 		float distance = GetGame().GetWorld().TraceMove(p, null);
@@ -807,6 +880,7 @@ modded class SCR_VONController
 		end[1] = end[1] + 100;
 		p.Exclude = entity;
 		p.Flags = TraceFlags.DEFAULT | TraceFlags.ANY_CONTACT;
+		p.LayerMask = EPhysicsLayerDefs.Projectile;
 		p.Start = GetHeadHeight(entity);
 		p.End = end;
 		float distanceUp = GetGame().GetWorld().TraceMove(p, null) * 100;
@@ -827,21 +901,19 @@ modded class SCR_VONController
 		IEntity player = SCR_PlayerController.GetLocalControlledEntity();
 		IEntity receiverBuilding;
 		IEntity senderBuilding;
-		bool isSenderInBuilding = IsInBuildingOrVehicle(senderEntity, senderBuilding);
-		bool isPlayerInBuilding = IsInBuildingOrVehicle(player, receiverBuilding);
-		
+		bool isSenderInVehicle;
+		bool isPlayerInVehicle;
+		bool isSenderInBuilding = IsInBuildingOrVehicle(senderEntity, senderBuilding, isSenderInVehicle);
+		bool isPlayerInBuilding = IsInBuildingOrVehicle(player, receiverBuilding, isPlayerInVehicle);
 		if (!isSenderInBuilding && !isPlayerInBuilding)
 			return false;
 		
 		if (isPlayerInBuilding != isSenderInBuilding)
 		{
-			loweredDecibles = CVON_DB_ATTEN_BUILDING;
-			return true;
-		}
-		
-		if (senderBuilding != receiverBuilding)
-		{
-			loweredDecibles = CVON_DB_ATTEN_BUILDING * 2;
+			if (isPlayerInVehicle || isSenderInVehicle)
+				loweredDecibles = CVON_DB_ATTEN_VEHICLE;
+			else
+				loweredDecibles = CVON_DB_ATTEN_BUILDING;
 			return true;
 		}
 		float top;
@@ -891,7 +963,7 @@ modded class SCR_VONController
 			VONServerData.StartObject("ServerData");
 			VONServerData.SetMaxDecimalPlaces(1);
 			VONServerData.WriteValue("InGame", true);
-			VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
+			VONServerData.WriteValue("TSClientID", m_PlayerController.GetTeamspeakClientId());
 			VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 			VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
@@ -902,13 +974,16 @@ modded class SCR_VONController
 		{
 			string ChannelName;
 			string ChannelPassword;
+			int TSClientId = 0;
 			bool InGame;
 			VONLoad.StartObject("ServerData");
 			VONLoad.ReadValue("InGame", InGame);
 			VONLoad.ReadValue("VONChannelName", ChannelName);
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
 			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
-			VONLoad.ReadValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
+			VONLoad.ReadValue("TSClientID", TSClientId);
+			if (m_PlayerController.GetTeamspeakClientId() != TSClientId)
+				m_PlayerController.SetTeamspeakClientId(TSClientId);
 			VONLoad.EndObject();
 			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion || InGame != true)
 			{
@@ -916,7 +991,7 @@ modded class SCR_VONController
 				VONServerData.StartObject("ServerData");
 				VONServerData.SetMaxDecimalPlaces(1);
 				VONServerData.WriteValue("InGame", true);
-				VONServerData.WriteValue("TSClientID", m_PlayerController.m_iTeamSpeakClientId);
+				VONServerData.WriteValue("TSClientID", m_PlayerController.GetTeamspeakClientId());
 				VONServerData.WriteValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 				VONServerData.WriteValue("VONChannelName", m_VONGameModeComponent.m_sTeamSpeakChannelName);
 				VONServerData.WriteValue("VONChannelPassword", m_VONGameModeComponent.m_sTeamSpeakChannelPassword);
@@ -933,17 +1008,17 @@ modded class SCR_VONController
 			{
 				m_VONHud.ShowWarning();
 			}
-			if (m_PlayerController.m_iTeamSpeakClientId == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
+			if (m_PlayerController.GetTeamspeakClientId() == 0 && !m_PlayerController.m_bHasBeenGivenInitialWarning && SCR_PlayerController.GetLocalControlledEntity())
 			{
 				m_PlayerController.m_bHasBeenGivenInitialWarning = true;
 				GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
 			}
-			else if (!m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId != 0)
+			else if (!m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.GetTeamspeakClientId() != 0)
 			{
 				m_PlayerController.m_bHasBeenGivenInitialWarning = true;
 				m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime = true;
 			}
-			else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.m_iTeamSpeakClientId == 0 && SCR_PlayerController.GetLocalControlledEntity())
+			else if (m_PlayerController.m_bHasConnectedToTeamspeakForFirstTime && m_PlayerController.GetTeamspeakClientId() == 0 && SCR_PlayerController.GetLocalControlledEntity())
 			{
 				m_VONHud.ShowWarning();
 				m_bShowingSecondWarning = true;

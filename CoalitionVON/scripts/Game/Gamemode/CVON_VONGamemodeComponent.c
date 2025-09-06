@@ -20,7 +20,10 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 	//These are stored from server settings on the server so clients can know what ChannelName and whats the password to join that VOIP channel.
 	[RplProp()] string m_sTeamSpeakChannelName = "";
 	[RplProp()] string m_sTeamSpeakChannelPassword = "";
-	string m_sTeamspeakPluginVersion = "1.5";
+	[RplProp()] ref array<int> m_aPlayerVolumes = {};
+	[RplProp()] ref array<int> m_aPlayerClientIds = {};
+	[RplProp()] ref array<int> m_aPlayerIds = {};
+	string m_sTeamspeakPluginVersion = "1.6";
 	
 	//If disabled everyone shares the same frequencies.
 	[Attribute("1")] bool m_bUseFactionEcncryption;
@@ -60,6 +63,35 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 			m_FreqConfig = CVON_FreqConfig.Cast(BaseContainerTools.CreateInstanceFromContainer(BaseContainerTools.LoadContainer(m_sFreqConfig).GetResource().ToBaseContainer()));
 	}
 	
+	override void OnPlayerConnected(int playerId)
+	{
+		super.OnPlayerConnected(playerId);
+		m_aPlayerVolumes.Insert(SCR_PlayerController.m_aVolumeValues[2]);
+		m_aPlayerClientIds.Insert(0);
+		m_aPlayerIds.Insert(playerId);
+		Replication.BumpMe();
+	}
+	
+	override void OnPlayerDisconnected(int playerId, KickCauseCode cause, int timeout)
+	{
+		super.OnPlayerDisconnected(playerId, cause, timeout);
+		if (!m_aPlayerIds.Contains(playerId))
+			return;
+		
+		int index = m_aPlayerIds.Find(playerId);
+		m_aPlayerVolumes.RemoveOrdered(index);
+		m_aPlayerClientIds.RemoveOrdered(index);
+		m_aPlayerIds.RemoveOrdered(index);
+		Replication.BumpMe();
+	}
+	
+	void UpdateClientId(int playerId, int clientId)
+	{
+		int index = m_aPlayerIds.Find(playerId);
+		m_aPlayerClientIds.Set(index, clientId);
+		Replication.BumpMe();
+	}
+	
 	//Explained above
 	//==========================================================================================================================================================================
 	void InitializeChannelId()
@@ -89,6 +121,37 @@ class CVON_VONGameModeComponent: SCR_BaseGameModeComponent
 	static CVON_VONGameModeComponent GetInstance()
 	{
 		return m_Instance;
+	}
+	
+	void UpdateVolume(int playerId, int input)
+	{
+		int index = m_aPlayerIds.Find(playerId);
+		int currentVolume = SCR_PlayerController.m_aVolumeValues.Find(m_aPlayerVolumes.Get(index));
+
+		if (currentVolume == 0 && input == -1)
+			return;
+		
+		if (currentVolume == 4 && input == 1)
+			return;
+		
+		currentVolume += input;
+		int newVolume = 0;
+		switch(currentVolume)
+		{
+			case 0: {newVolume = SCR_PlayerController.m_aVolumeValues[0];  break;}
+			case 1: {newVolume = SCR_PlayerController.m_aVolumeValues[1]; break;}
+			case 2: {newVolume = SCR_PlayerController.m_aVolumeValues[2]; break;}
+			case 3: {newVolume = SCR_PlayerController.m_aVolumeValues[3]; break;}
+			case 4: {newVolume = SCR_PlayerController.m_aVolumeValues[4]; break;}
+		}
+		m_aPlayerVolumes.Set(index, newVolume);
+		Replication.BumpMe();
+	}
+	
+	int GetPlayerVolume(int playerId)
+	{
+		int index = m_aPlayerIds.Find(playerId);
+		return m_aPlayerVolumes.Get(index);
 	}
 	
 	//I go into more detail in the VONController but this broadcasts to any player in the playerId array
