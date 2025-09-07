@@ -21,7 +21,7 @@ modded class SCR_PlayerController
 	string m_sTeamspeakPluginVersion = "0";
 	
 	//How we link what level the enum below should be at.
-	static ref array<int> m_aVolumeValues = {5, 15, 25, 40, 60};
+	static ref array<int> m_aVolumeValues = {3, 8, 25, 40, 60};
 	
 	//Used so we don't spam the player with initial warnings if their TS crashes, just when they first connect.
 	bool m_bHasBeenGivenInitialWarning = false;

@@ -487,7 +487,18 @@ modded class SCR_VONController
 			
 			IEntity player = m_PlayerManager.GetPlayerControlledEntity(playerId);
 			if (!player)
-				continue;;
+				continue;
+			SCR_CharacterControllerComponent charCont = SCR_CharacterControllerComponent.Cast(ChimeraCharacter.Cast(player).GetCharacterController());
+			if (charCont.IsDead() || charCont.IsUnconscious())
+				if (m_PlayerController.m_aLocalActiveVONEntriesIds.Contains(playerId))
+				{
+					int index = m_PlayerController.m_aLocalActiveVONEntriesIds.Find(playerId);
+					m_PlayerController.m_aLocalActiveVONEntriesIds.RemoveOrdered(index);
+					m_PlayerController.m_aLocalActiveVONEntries.RemoveOrdered(index);
+					continue;
+				}
+				else
+					continue;
 			
 			float distance = vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
 			if (distance > maxDistance)
@@ -607,35 +618,7 @@ modded class SCR_VONController
 	// Geometry only: pan + rear shadow + elevation + bleed.
 	// Multiply the returned L/R by your own plugin volume afterward.
 	//==========================================================================================================================================================================
-	static const float SPEECH_NORMAL_M       = 25.0;   // "normal talk" meters
-	static const float INTENSITY_FADE_FACTOR = 0.6;    // how quickly yelling falls off
 	static const float MAX_OUT_GAIN          = 1.3;    // safety cap; raise or set -1 for no cap
-	
-	static float LoudnessIntensity(float volume_m, float distance_m)
-	{
-	    if (volume_m <= 0.01) volume_m = 0.01;
-	    if (distance_m <  0.0) distance_m = 0.0;
-	
-	    // How "loud" compared to normal talk (15 m):
-	    float intent = volume_m / SPEECH_NORMAL_M;       // e.g. 40/15 ≈ 2.67 for screaming
-	    float base   = Math.Pow(intent, 0.5);            // gentle growth (sqrt): 1..~1.63
-	
-	    // Fade that extra loudness with distance, scaled by the loudness range itself
-	    float denom = INTENSITY_FADE_FACTOR * volume_m;  // larger volume_m → longer fade
-	    if (denom < 0.01) denom = 0.01;
-	    float x = distance_m / denom;
-		float fade = ExpNegFast(x);
-	
-	    return 1.0 + (base - 1.0) * fade;                // 1.0 at normal; >1 near loud sources
-	}
-	
-	// Approx exp(-x) ~ (1 + 0.5*x + 0.12*x*x) / (1 + x + 0.48*x*x)
-	// Max rel. error ~1–2% on [0, 8]
-	static float ExpNegFast(float x)
-	{
-	    float x2 = x * x;
-	    return (1.0 + 0.5 * x + 0.12 * x2) / (1.0 + x + 0.48 * x2);
-	}
 	
 	// 0 dB at d=0, −45 dB at d=inaudible_m (volume_m).
 	static float AttenuationDb(float d_m, float inaudible_m, float shapeExp = 1.6)
@@ -735,11 +718,8 @@ modded class SCR_VONController
 	
 	    float distGain = GainFromDb(distDb);
 	
-	    // ---- Loudness push (near-field boost that fades → 1.0 with distance)
-	    float loud = LoudnessIntensity(volume_m, dist);
-	
 	    // ---- Final per-ear gains
-	    float gain = rearAtt * distGain * loud;
+	    float gain = rearAtt * distGain;
 	    outLeft  = L * gain;
 	    outRight = R * gain;
 	
@@ -982,7 +962,7 @@ modded class SCR_VONController
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
 			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", TSClientId);
-			if (m_PlayerController.GetTeamspeakClientId() != TSClientId)
+			if (m_PlayerController.GetTeamspeakClientId() != TSClientId && TSClientId != 0)
 				m_PlayerController.SetTeamspeakClientId(TSClientId);
 			VONLoad.EndObject();
 			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion || InGame != true)

@@ -277,8 +277,8 @@ class CVON_RadioMenu: MenuBase
 		m_wLine1.SetVisible(true);
 		m_wLine2.SetVisible(true);
 		m_wLine3.SetVisible(true);
-		UpdateChannelMenu();
-		LoadFrequencyMenu();
+		UpdateChannelMenu(0);
+		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel);
 		m_wKnobWidget.LoadImageTexture(1, m_RadioComponent.m_sDialOn);
 		m_wKnobWidget.SetImage(1);
 		m_bIsEditing = false;
@@ -304,24 +304,18 @@ class CVON_RadioMenu: MenuBase
 	void ChangeChannel(int input)
 	{
 		if (m_RadioComponent.m_iCurrentChannel == 1 && input == -1)
-		{
-			m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_aChannels.Count());
-			UpdateChannelMenu();
-			LoadFrequencyMenu();
 			return;
-		}
 		else if (m_RadioComponent.m_iCurrentChannel == 99 && input == 1)
 		{
 			m_RadioComponent.UpdateChannelClient(1);
-			UpdateChannelMenu();
-			LoadFrequencyMenu();
+			UpdateChannelMenu(9);
+			LoadFrequencyMenu(1);
 			return;
 		}
 		
-		m_RadioComponent.m_iCurrentChannel += input;
-		m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_iCurrentChannel);
-		UpdateChannelMenu();
-		LoadFrequencyMenu();
+		m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_iCurrentChannel + input);
+		UpdateChannelMenu(input);
+		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel + input);
 	}
 	
 	//Changes the stereo settings based on the input from the MenuUp and Down methods
@@ -379,7 +373,7 @@ class CVON_RadioMenu: MenuBase
 	{
 		switch (m_ERadioMenu)
 		{
-			case CVON_ERadioMenu.FREQ: {LoadFrequencyMenu(); break;}
+			case CVON_ERadioMenu.FREQ: {LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel); break;}
 			case CVON_ERadioMenu.VOL: {LoadVolumeMenu(); break;}
 			case CVON_ERadioMenu.STEREO: {LoadStereoMenu(); break;}
 			case CVON_ERadioMenu.TIME: {LoadTimeMenu(); break;}
@@ -388,26 +382,31 @@ class CVON_RadioMenu: MenuBase
 	
 	//Used when we need to shift to a new channel
 	//==========================================================================================================================================================================
-	void UpdateChannelMenu()
+	void UpdateChannelMenu(int input)
 	{
 		int channels = m_RadioComponent.m_aChannels.Count();
-		if (channels < m_RadioComponent.m_iCurrentChannel)
+		Print( m_RadioComponent.m_aChannels.Count());
+		Print(m_RadioComponent.m_iCurrentChannel + input);
+		if (channels < m_RadioComponent.m_iCurrentChannel + input)
 		{
 			m_RadioComponent.UpdateFrequencyClient("55500");
 			m_RadioComponent.AddChannelClient();
 		}
 		else
 		{
-			string freq = m_RadioComponent.m_aChannels.Get(m_RadioComponent.m_iCurrentChannel - 1);
+			string freq = m_RadioComponent.m_aChannels.Get(m_RadioComponent.m_iCurrentChannel + input - 1);
 			m_RadioComponent.UpdateFrequencyClient(freq);
 		}
 	}
 	
 	//==========================================================================================================================================================================
-	void LoadFrequencyMenu()
+	void LoadFrequencyMenu(int channel)
 	{
 		m_wLine1.SetText("Frequency");
-		m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency));
+		if(m_RadioComponent.m_aChannels.Count() < channel)
+			m_wLine2.SetText(PrepFinalFreq("55500", channel));
+		else
+			m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_aChannels.Get(channel - 1), channel));
 		m_wLine3.SetVisible(false);
 	}
 	
@@ -443,9 +442,9 @@ class CVON_RadioMenu: MenuBase
 	
 	//Preps what the frequency looks like on the screen
 	//==========================================================================================================================================================================
-	string PrepFinalFreq(string input)
+	string PrepFinalFreq(string input, int channel)
 	{
-		return "0" + m_RadioComponent.m_iCurrentChannel.ToString() + ": " + input;
+		return "0" + channel.ToString() + ": " + input;
 	}
 	
 	//Used when we start editing
@@ -458,7 +457,7 @@ class CVON_RadioMenu: MenuBase
 		if (m_ERadioMenu != CVON_ERadioMenu.FREQ)
 			return;
 		m_sTempFrequency = "_____";
-		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency));
+		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency, m_RadioComponent.m_iCurrentChannel));
 		m_bIsEditing = true;
 	}
 	
@@ -474,12 +473,12 @@ class CVON_RadioMenu: MenuBase
 		int tempFreq = m_sTempFrequency.ToInt();
 		if (tempFreq < 30000 || tempFreq > 87975 || tempFreq % 25 != 0)
 		{
-			m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency));
+			m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency, m_RadioComponent.m_iCurrentChannel));
 			m_sTempFrequency = "_____";
 			return;
 		}
 		m_RadioComponent.UpdateFrequencyClient(m_RadioComponent.m_sFrequency);
-		m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency));
+		m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency, m_RadioComponent.m_iCurrentChannel));
 		m_sTempFrequency = "_____";
 		m_bIsEditing = false;
 	}
@@ -498,7 +497,7 @@ class CVON_RadioMenu: MenuBase
 		m_iToInsert = -1;
 		newFreq = newFreq.Substring(1, 5);
 		m_sTempFrequency = newFreq;
-		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency));
+		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency, m_RadioComponent.m_iCurrentChannel));
 		m_bIsEditing = true;
 	}
 	
@@ -515,7 +514,7 @@ class CVON_RadioMenu: MenuBase
 		string newFreq = "_" + m_sTempFrequency;
 		newFreq = newFreq.Substring(0, 5);
 		m_sTempFrequency = newFreq;
-		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency));
+		m_wLine2.SetText(PrepFinalFreq(m_sTempFrequency, m_RadioComponent.m_iCurrentChannel));
 	}
 	
 	//Im not marking all these below but it's how you type

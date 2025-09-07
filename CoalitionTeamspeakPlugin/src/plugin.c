@@ -1403,7 +1403,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.6";
+    return "1.7";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1549,6 +1549,11 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
 
     const VonEntry* e = find_entry(clientID);
     if (!e) {
+        if (g_Von.loaded) {
+            const int total = sampleCount * (channels > 0 ? channels : 1);
+            for (int i = 0; i < total; ++i)
+                samples[i] = 0;
+        }
         return;
     }
 
