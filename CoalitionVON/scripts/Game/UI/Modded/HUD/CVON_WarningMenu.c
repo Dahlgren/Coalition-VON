@@ -39,6 +39,12 @@ class CVON_WarningMenu: ChimeraMenuBase
 		}
 	}
 	
+	override void OnMenuClose()
+	{
+		if (m_PlayerController.GetTeamspeakClientId() == 0 && m_PlayerController.m_sTeamspeakPluginVersion != m_VONGamemode.m_sTeamspeakPluginVersion)
+			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
+	}
+	
 	void CopyToClipboard()
 	{
 		System.ExportToClipboard(LINK_TO_COPY);
