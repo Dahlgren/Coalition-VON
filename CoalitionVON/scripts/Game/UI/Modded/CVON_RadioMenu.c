@@ -385,8 +385,6 @@ class CVON_RadioMenu: MenuBase
 	void UpdateChannelMenu(int input)
 	{
 		int channels = m_RadioComponent.m_aChannels.Count();
-		Print( m_RadioComponent.m_aChannels.Count());
-		Print(m_RadioComponent.m_iCurrentChannel + input);
 		if (channels < m_RadioComponent.m_iCurrentChannel + input)
 		{
 			m_RadioComponent.UpdateFrequencyClient("55500");
