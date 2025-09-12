@@ -652,7 +652,7 @@ modded class SCR_VONController
 	    float   rearPanBoost   = 0.55,
 	    float   rearShadow     = 0.12,
 	    float   elevNarrow     = 0.25,
-	    float   bleed          = 0.10,
+	    float   bleed          = 0.0,
 	    bool    normalizePeak  = true
 	)
 	{
@@ -1041,7 +1041,7 @@ modded class SCR_VONController
 			}
 				
 				
-			VONSave.StartObject(container.m_iClientId.ToString());
+			VONSave.StartObject(m_PlayerController.GetPlayersTeamspeakClientId(container.m_iPlayerId).ToString());
 			VONSave.SetMaxDecimalPlaces(3);
 			VONSave.WriteValue("VONType", container.m_eVonType);
 			VONSave.WriteValue("Frequency", frequency);

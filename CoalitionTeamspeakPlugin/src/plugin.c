@@ -53,6 +53,14 @@ typedef uint16_t anyID;
 #include "teamspeak/public_rare_definitions.h"
 #include "ts3_functions.h"
 
+/* Not always present in public_definitions.h */
+#define CLIENT_INPUT_MODE 46
+#define CLIENT_INPUT_DEACTIVATED 47
+
+#define INPUT_PUSH_TO_TALK 0
+#define INPUT_CONTINUOUS 1
+#define INPUT_VOICE_ACTIVATION 2
+
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
@@ -798,7 +806,6 @@ static void load_json_snapshot(void)
 {
     g_Von.count      = 0;
     g_Von.loaded     = 0;
-    g_IsTransmitting = 0;
     if (!g_Von.jsonPath[0])
         return;
 
@@ -997,16 +1004,50 @@ static void update_von_active_flag(uint64 sch)
     InterlockedExchange(&g_inVonActiveFlag, active ? 1 : 0);
 }
 
+/* Track last known input mode we successfully read; -1 means unknown */
+static int g_lastKnownInputMode = -1;
+
 static void apply_mic_state(uint64 sch)
 {
-    static int g_LastMicActive = -1;
-    int        wantActive      = g_IsTransmitting ? 1 : 0;
-    if (g_LastMicActive == wantActive)
+    if (!sch)
         return;
-    ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, wantActive ? 0 : 1);
-    ts3Functions.flushClientSelfUpdates(sch, NULL);
-    g_LastMicActive = wantActive;
+
+    int inputMode = -1;
+    if (ts3Functions.getClientSelfVariableAsInt(sch, CLIENT_INPUT_MODE, &inputMode) == ERROR_ok) {
+        g_lastKnownInputMode = inputMode;
+    } else {
+        return; // skip if unreadable
+    }
+
+    /* --- If not Push-to-Talk, never override mic --- */
+    if (g_lastKnownInputMode != INPUT_PUSH_TO_TALK) {
+        g_LastMicActive = -1; // forget state, but do NOT send anything
+        return;
+    }
+
+    /* --- In Push-to-Talk: follow IsTransmitting --- */
+    int wantActive = g_IsTransmitting ? 1 : 0; // 1=active, 0=deactivated
+    if (g_LastMicActive != wantActive) {
+        ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, wantActive ? 0 : 1);
+        ts3Functions.flushClientSelfUpdates(sch, NULL);
+        g_LastMicActive = wantActive;
+    }
 }
+
+/* Reset mic state at init/shutdown so user is not left muted */
+static void reset_mic_state(uint64 sch)
+{
+    if (!sch)
+        return;
+
+    // Clear our tracking
+    g_LastMicActive = -1;
+
+    // Force TS to mark mic as not deactivated
+    ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, 0);
+    ts3Functions.flushClientSelfUpdates(sch, NULL);
+}
+
 
 static void read_serverdata_from_disk(void)
 {
@@ -1312,7 +1353,7 @@ static DWORD WINAPI worker_main(LPVOID param)
         DWORD  now = GetTickCount();
         uint64 sch = g_currentSch;
 
-        /* ServerData reload (if file changed and not suppressed) */
+        /* ---------------- ServerData reload/write ---------------- */
         if (now >= g_nextServerReloadTick) {
             g_nextServerReloadTick = now + SERVERDATA_RELOAD_MS;
             if ((DWORD)now >= g_serverWatchSuppressUntil) {
@@ -1326,18 +1367,14 @@ static DWORD WINAPI worker_main(LPVOID param)
             write_serverdata_if_changed(sch);
         }
 
-        /* Attempt move with backoff */
+        /* ---------------- Channel moves ---------------- */
         try_ensure_move(sch);
-
-        /* If out of game, try returning the user to their previous channel */
         try_return_to_previous(sch);
 
-        /* Mic toggle */
-        if (sch)
-            apply_mic_state(sch);
+        /* ---------------- Mic toggle ---------------- */
+        apply_mic_state(sch);
 
-
-        /* VONData */
+        /* ---------------- VONData reload ---------------- */
         if (now >= g_nextVonReloadTick) {
             g_nextVonReloadTick = now + VONDATA_RELOAD_MS;
             FILETIME wt;
@@ -1346,7 +1383,7 @@ static DWORD WINAPI worker_main(LPVOID param)
             }
         }
 
-        /* RadioData */
+        /* ---------------- RadioData reload ---------------- */
         if (now >= g_nextRadioReloadTick) {
             g_nextRadioReloadTick = now + RADIODATA_RELOAD_MS;
             FILETIME wt;
@@ -1355,11 +1392,13 @@ static DWORD WINAPI worker_main(LPVOID param)
             }
         }
 
-        /* Update active flag */
+        /* ---------------- Active flag update ---------------- */
         update_von_active_flag(sch);
 
+        /* ---------------- Sleep until next tick ---------------- */
         Sleep(WORKER_TICK_MS);
     }
+
     logf("[CRF] Worker exiting\n");
     return 0;
 }
@@ -1403,7 +1442,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.7";
+    return "1.8";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1460,11 +1499,23 @@ PL_EXPORT int ts3plugin_init()
     InterlockedExchange(&g_workerQuit, 0);
     g_workerThread = CreateThread(NULL, 0, worker_main, NULL, 0, NULL);
 
+    g_workerThread = CreateThread(NULL, 0, worker_main, NULL, 0, NULL);
+
+    // Safety: ensure mic is not left closed
+    if (g_currentSch) {
+        reset_mic_state(g_currentSch);
+    }
+
     logf("[CRF] Init complete\n");
     return 0;
 }
 PL_EXPORT void ts3plugin_shutdown()
 {
+
+    if (g_currentSch) {
+        reset_mic_state(g_currentSch);
+    }
+
     InterlockedExchange(&g_workerQuit, 1);
     if (g_workerThread) {
         WaitForSingleObject(g_workerThread, 3000);

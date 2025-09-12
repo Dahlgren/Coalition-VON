@@ -5,7 +5,7 @@ modded enum ChimeraMenuPreset
 
 class CVON_WarningMenu: ChimeraMenuBase
 {
-	const string LINK_TO_COPY = "https://files.coalitiongroup.net/Coalition_Teamspeak_PluginV1.7.Ts3_Plugin";
+	const string LINK_TO_COPY = "https://coalitiongroup.net/files/Coalition_Teamspeak_PluginV1.8.ts3_plugin";
 	SCR_ButtonTextComponent m_wCopyButton;
 	Widget m_wRoot;
 	SCR_PlayerController m_PlayerController;

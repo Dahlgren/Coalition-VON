@@ -10,8 +10,6 @@ modded class SCR_PlayerController
 	//This is how we store who is talking to us and how, we use this in the VONController to populate the JSON.
 	ref array<ref CVON_VONContainer> m_aLocalActiveVONEntries = {};
 	
-	CVON_VONGameModeComponent m_VONGamemode;
-	
 	//Used so we can find the entry by playerId
 	ref array<int> m_aLocalActiveVONEntriesIds = {};
 	
@@ -35,7 +33,6 @@ modded class SCR_PlayerController
 	override void EOnInit(IEntity owner)
 	{
 		super.EOnInit(owner);
-		m_VONGamemode = CVON_VONGameModeComponent.GetInstance();
 	}
 	
 	void SetTeamspeakClientId(int input)
@@ -51,18 +48,18 @@ modded class SCR_PlayerController
 	
 	int GetTeamspeakClientId()
 	{
-		if (!m_VONGamemode.m_aPlayerIds.Contains(GetPlayerId()))
+		if (!CVON_VONGameModeComponent.GetInstance().m_aPlayerIds.Contains(GetPlayerId()))
 			return 0;
-		int index = m_VONGamemode.m_aPlayerIds.Find(GetPlayerId());
-		return m_VONGamemode.m_aPlayerClientIds.Get(index);
+		int index = CVON_VONGameModeComponent.GetInstance().m_aPlayerIds.Find(GetPlayerId());
+		return CVON_VONGameModeComponent.GetInstance().m_aPlayerClientIds.Get(index);
 	}
 	
 	int GetPlayersTeamspeakClientId(int playerId)
 	{
-		if (!m_VONGamemode.m_aPlayerIds.Contains(playerId))
+		if (!CVON_VONGameModeComponent.GetInstance().m_aPlayerIds.Contains(playerId))
 			return 0;
-		int index = m_VONGamemode.m_aPlayerIds.Find(playerId);
-		return m_VONGamemode.m_aPlayerClientIds.Get(index);
+		int index = CVON_VONGameModeComponent.GetInstance().m_aPlayerIds.Find(playerId);
+		return CVON_VONGameModeComponent.GetInstance().m_aPlayerClientIds.Get(index);
 	}
 	
 	
@@ -162,12 +159,12 @@ modded class SCR_PlayerController
 	//==========================================================================================================================================================================
 	int ReturnLocalVoiceRange()
 	{
-		return m_aVolumeValues.Find(m_VONGamemode.GetPlayerVolume(GetLocalPlayerId()));
+		return m_aVolumeValues.Find(CVON_VONGameModeComponent.GetInstance().GetPlayerVolume(GetLocalPlayerId()));
 	}
 	
 	int ReturnLocalVoiceVolume()
 	{
-		return m_VONGamemode.GetPlayerVolume(GetLocalPlayerId());
+		return CVON_VONGameModeComponent.GetInstance().GetPlayerVolume(GetLocalPlayerId());
 	}
 
 	//Links an actual volume I can give to teamspeak to the enum in game.

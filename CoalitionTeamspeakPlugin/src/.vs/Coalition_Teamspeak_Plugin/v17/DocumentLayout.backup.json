@@ -7,11 +7,20 @@
       "RelativeMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|solutionrelative:plugin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Microsoft\\VC\\v170\\Microsoft.CppBuild.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\ts3_functions.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\teamspeak\\public_definitions.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\plugin_definitions.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{192D646D-748B-450B-AF3D-BF8EDD5FC897}|test_plugin.vcxproj|solutionrelative:plugin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Microsoft\\VC\\v170\\Microsoft.CppBuild.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,11 +30,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "public_definitions.h",
+              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\teamspeak\\public_definitions.h",
+              "RelativeDocumentMoniker": "..\\include\\teamspeak\\public_definitions.h",
+              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\teamspeak\\public_definitions.h",
+              "RelativeToolTip": "..\\include\\teamspeak\\public_definitions.h",
+              "ViewState": "AgIAABMCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-09-12T11:42:38.952Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "ts3_functions.h",
+              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\ts3_functions.h",
+              "RelativeDocumentMoniker": "..\\include\\ts3_functions.h",
+              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\ts3_functions.h",
+              "RelativeToolTip": "..\\include\\ts3_functions.h",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAswMYAAAB6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-09-12T11:42:36.1Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "plugin_definitions.h",
+              "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\plugin_definitions.h",
+              "RelativeDocumentMoniker": "..\\include\\plugin_definitions.h",
+              "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\include\\plugin_definitions.h",
+              "RelativeToolTip": "..\\include\\plugin_definitions.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-09-12T11:42:33.345Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "Microsoft.CppBuild.targets",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Microsoft\\VC\\v170\\Microsoft.CppBuild.targets",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Microsoft\\VC\\v170\\Microsoft.CppBuild.targets",
@@ -37,7 +85,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "plugin.h",
               "DocumentMoniker": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.h",
               "RelativeDocumentMoniker": "plugin.h",
@@ -45,7 +93,8 @@
               "RelativeToolTip": "plugin.h",
               "ViewState": "AgIAABEAAAAAAAAAAAAAABEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-20T14:49:25.319Z"
+              "WhenOpened": "2025-08-20T14:49:25.319Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -55,7 +104,7 @@
               "RelativeDocumentMoniker": "plugin.c",
               "ToolTip": "C:\\Users\\tyler\\OneDrive\\Documents\\My Games\\ArmaReforgerWorkbench\\projects\\Coalition-VON\\CoalitionTeamspeakPlugin\\src\\plugin.c",
               "RelativeToolTip": "plugin.c",
-              "ViewState": "AgIAAGMFAAAAAAAAAAAswH0FAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAAM0FAAAAAAAAAAAswPMFAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2025-08-19T21:23:50.631Z",
               "EditorCaption": ""
