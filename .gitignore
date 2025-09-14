@@ -1,2 +1,11 @@
+# Visual Studio
+.vs/
+*.user
+Debug/
+Release/
+
+# TeamSpeak plugin
+*.ts3_plugin
+
 resourceDatabase.rdb
 CoalitionVON\resourceDatabase.rdb
