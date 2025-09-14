@@ -477,15 +477,29 @@ static int           g_IsTransmitting = 0, g_LastMicActive = -1;
 static uint64        g_currentSch      = 0;
 static volatile LONG g_inVonActiveFlag = 0; /* 0/1 set by worker, read by audio */
 
-/* Per-client volume modifier state (kept but unused after removing volume meddling) */
+/* Per-client volume modifier state and muting control */
 typedef struct {
     anyID id;
     int   have;
     int   lastMuted;
     float lastDb;
+    int   isMutedByPlugin;    /* NEW: tracks if we muted this client */
+    int   lastInRange;        /* NEW: tracks if client was in range last check */
 } ClientApplyState;
 static ClientApplyState g_Last[4096];
 static size_t           g_LastCount = 0;
+
+/* Threshold for considering a user "out of range" (very low gain) */
+#define OUT_OF_RANGE_THRESHOLD 0.001f
+
+/* ---------------------------------------------------------------------------
+   Proximity-based muting functions
+   
+   These functions implement automatic muting of users who are not within
+   audible range of the local player. When a speaker's gain values (indicating
+   proximity/volume) fall below the threshold, they are muted via the TeamSpeak
+   API. When they come back into range, they are automatically unmuted.
+--------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------------
    Filters / DSP for RADIO
@@ -1402,9 +1416,108 @@ static DWORD WINAPI worker_main(LPVOID param)
     return 0;
 }
 
-/* ---------------------------------------------------------------------------
-   Lookup
---------------------------------------------------------------------------- */
+/* Find or create client state for muting tracking */
+static ClientApplyState* get_client_state(anyID clientID)
+{
+    for (size_t i = 0; i < g_LastCount; ++i) {
+        if (g_Last[i].id == clientID) {
+            return &g_Last[i];
+        }
+    }
+    
+    if (g_LastCount < sizeof(g_Last) / sizeof(g_Last[0])) {
+        ClientApplyState* state = &g_Last[g_LastCount++];
+        memset(state, 0, sizeof(*state));
+        state->id = clientID;
+        state->have = 1;
+        state->isMutedByPlugin = 0;
+        state->lastInRange = 1; /* assume in range initially */
+        return state;
+    }
+    
+    return NULL; /* array full */
+}
+
+/* Mute a client via TeamSpeak API */
+static void mute_client(uint64 sch, anyID clientID)
+{
+    if (!sch || clientID == 0)
+        return;
+        
+    ClientApplyState* state = get_client_state(clientID);
+    if (!state || state->isMutedByPlugin)
+        return; /* already muted by us */
+    
+    anyID clientArray[2] = {clientID, 0}; /* null-terminated array */
+    unsigned int err = ts3Functions.requestMuteClients(sch, clientArray, NULL);
+    
+    if (err == ERROR_ok) {
+        state->isMutedByPlugin = 1;
+        logf("[CRF] Muted client %u (out of range)\n", (unsigned)clientID);
+    } else {
+        logf("[CRF] Failed to mute client %u, error %u\n", (unsigned)clientID, err);
+    }
+}
+
+/* Unmute a client via TeamSpeak API */
+static void unmute_client(uint64 sch, anyID clientID)
+{
+    if (!sch || clientID == 0)
+        return;
+        
+    ClientApplyState* state = get_client_state(clientID);
+    if (!state || !state->isMutedByPlugin)
+        return; /* not muted by us */
+    
+    anyID clientArray[2] = {clientID, 0}; /* null-terminated array */
+    unsigned int err = ts3Functions.requestUnmuteClients(sch, clientArray, NULL);
+    
+    if (err == ERROR_ok) {
+        state->isMutedByPlugin = 0;
+        logf("[CRF] Unmuted client %u (back in range)\n", (unsigned)clientID);
+    } else {
+        logf("[CRF] Failed to unmute client %u, error %u\n", (unsigned)clientID, err);
+    }
+}
+
+/* Check if a user should be muted based on their proximity */
+static void check_and_apply_muting(uint64 sch, anyID clientID, const VonEntry* entry)
+{
+    if (!sch || clientID == 0)
+        return;
+        
+    ClientApplyState* state = get_client_state(clientID);
+    if (!state)
+        return;
+        
+    int inRange;
+    
+    if (!entry) {
+        /* No VON entry means completely out of range/not transmitting */
+        inRange = 0;
+    } else {
+        /* Check if gains are above threshold (user is in audible range) */
+        float maxGain = (entry->leftGain > entry->rightGain) ? entry->leftGain : entry->rightGain;
+        inRange = (maxGain > OUT_OF_RANGE_THRESHOLD) ? 1 : 0;
+    }
+    
+    /* Only change mute state if range status changed */
+    if (inRange != state->lastInRange) {
+        if (inRange) {
+            /* User came into range - unmute if we muted them */
+            if (state->isMutedByPlugin) {
+                unmute_client(sch, clientID);
+            }
+        } else {
+            /* User went out of range - mute them */
+            if (!state->isMutedByPlugin) {
+                mute_client(sch, clientID);
+            }
+        }
+        
+        state->lastInRange = inRange;
+    }
+}
 static const VonEntry* find_entry(anyID clientID)
 {
     for (size_t i = 0; i < g_Von.count; ++i)
@@ -1441,7 +1554,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.9";
+    return "1.10";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1453,7 +1566,7 @@ PL_EXPORT const char* ts3plugin_author()
 }
 PL_EXPORT const char* ts3plugin_description()
 {
-    return "A tool for Arma Reforger to communicate with Teamspeak";
+    return "A tool for Arma Reforger to communicate with Teamspeak - includes proximity-based automatic muting";
 }
 PL_EXPORT void ts3plugin_setFunctionPointers(const struct TS3Functions funcs)
 {
@@ -1476,6 +1589,7 @@ PL_EXPORT int ts3plugin_init()
         ensureParentDirExists(g_RadioPath);
 
     g_LastCount                = 0;
+    memset(g_Last, 0, sizeof(g_Last));  /* Clear client state tracking */
     g_vonDataWatch.loadedOnce  = 0;
     g_serverWatch.loadedOnce   = 0;
     g_radioWatch.loadedOnce    = 0;
@@ -1512,6 +1626,13 @@ PL_EXPORT void ts3plugin_shutdown()
 
     if (g_currentSch) {
         reset_mic_state(g_currentSch);
+        
+        /* Unmute all clients that were muted by the plugin */
+        for (size_t i = 0; i < g_LastCount; ++i) {
+            if (g_Last[i].isMutedByPlugin) {
+                unmute_client(g_currentSch, g_Last[i].id);
+            }
+        }
     }
 
     InterlockedExchange(&g_workerQuit, 1);
@@ -1571,8 +1692,19 @@ PL_EXPORT void ts3plugin_onClientMoveEvent(uint64 sch, anyID clientID, uint64 ol
 {
     (void)oldCh;
     (void)newCh;
-    (void)visibility;
     (void)moveMessage;
+    
+    /* Clean up muting state for clients who leave visibility */
+    if (visibility == LEAVE_VISIBILITY) {
+        ClientApplyState* state = get_client_state(clientID);
+        if (state && state->isMutedByPlugin) {
+            /* Client is leaving - clear our muting state */
+            state->isMutedByPlugin = 0;
+            state->lastInRange = 1; /* reset for next time */
+            logf("[CRF] Client %u left, cleared muting state\n", (unsigned)clientID);
+        }
+    }
+    
     anyID me = 0;
     if (ts3Functions.getClientID(sch, &me) != ERROR_ok || me == 0)
         return;
@@ -1586,7 +1718,6 @@ PL_EXPORT void ts3plugin_onClientMoveEvent(uint64 sch, anyID clientID, uint64 ol
 --------------------------------------------------------------------------- */
 PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clientID, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask)
 {
-    (void)sch;
     (void)channelSpeakerArray;
     (void)channelFillMask;
 
@@ -1597,6 +1728,10 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
         return;
 
     const VonEntry* e = find_entry(clientID);
+    
+    /* Check and apply proximity-based muting */
+    check_and_apply_muting(sch, clientID, e);
+    
     if (!e) {
         if (g_Von.loaded) {
             const int total = sampleCount * (channels > 0 ? channels : 1);
