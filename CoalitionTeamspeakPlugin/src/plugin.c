@@ -53,13 +53,7 @@ typedef uint16_t anyID;
 #include "teamspeak/public_rare_definitions.h"
 #include "ts3_functions.h"
 
-/* Not always present in public_definitions.h */
-#define CLIENT_INPUT_MODE 46
-#define CLIENT_INPUT_DEACTIVATED 47
-
-#define INPUT_PUSH_TO_TALK 0
-#define INPUT_CONTINUOUS 1
-#define INPUT_VOICE_ACTIVATION 2
+#define CLIENT_INPUT_DEACTIVATED 10
 
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
@@ -89,7 +83,7 @@ typedef uint16_t anyID;
 #define SERVERDATA_RELOAD_MS 500
 
 /* Worker + move handling */
-#define WORKER_TICK_MS 500
+#define WORKER_TICK_MS 200
 #define SERVER_WRITE_SUPPRESS_MS 750
 #define MOVE_BACKOFF_MIN_MS 1500
 #define MOVE_BACKOFF_MAX_MS 30000
@@ -1004,35 +998,40 @@ static void update_von_active_flag(uint64 sch)
     InterlockedExchange(&g_inVonActiveFlag, active ? 1 : 0);
 }
 
-/* Track last known input mode we successfully read; -1 means unknown */
-static int g_lastKnownInputMode = -1;
+/* Did we activate the mic (0/1)? */
+static int g_pluginActivatedMic = 0;
 
 static void apply_mic_state(uint64 sch)
 {
     if (!sch)
         return;
 
-    int inputMode = -1;
-    if (ts3Functions.getClientSelfVariableAsInt(sch, CLIENT_INPUT_MODE, &inputMode) == ERROR_ok) {
-        g_lastKnownInputMode = inputMode;
-    } else {
-        return; // skip if unreadable
-    }
+    int wantActive = g_IsTransmitting ? 1 : 0;
 
-    /* --- If not Push-to-Talk, never override mic --- */
-    if (g_lastKnownInputMode != INPUT_PUSH_TO_TALK) {
-        g_LastMicActive = -1; // forget state, but do NOT send anything
+    // Query current mic state from TS3
+    int currentDeact = -1;
+    if (ts3Functions.getClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, &currentDeact) != ERROR_ok)
         return;
-    }
 
-    /* --- In Push-to-Talk: follow IsTransmitting --- */
-    int wantActive = g_IsTransmitting ? 1 : 0; // 1=active, 0=deactivated
-    if (g_LastMicActive != wantActive) {
-        ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, wantActive ? 0 : 1);
-        ts3Functions.flushClientSelfUpdates(sch, NULL);
-        g_LastMicActive = wantActive;
+    if (wantActive) {
+        // If plugin wants mic ON but TS has it OFF, turn it on
+        if (currentDeact == INPUT_DEACTIVATED) {
+            ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, INPUT_ACTIVE);
+            ts3Functions.flushClientSelfUpdates(sch, NULL);
+            g_pluginActivatedMic = 1; // remember WE forced it on
+        }
+    } else {
+        // Only deactivate if WE were the ones who activated it
+        if (g_pluginActivatedMic) {
+            ts3Functions.setClientSelfVariableAsInt(sch, CLIENT_INPUT_DEACTIVATED, INPUT_DEACTIVATED);
+            ts3Functions.flushClientSelfUpdates(sch, NULL);
+            g_pluginActivatedMic = 0;
+        }
     }
 }
+
+
+
 
 /* Reset mic state at init/shutdown so user is not left muted */
 static void reset_mic_state(uint64 sch)
@@ -1442,7 +1441,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.8";
+    return "1.9";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1499,7 +1498,6 @@ PL_EXPORT int ts3plugin_init()
     InterlockedExchange(&g_workerQuit, 0);
     g_workerThread = CreateThread(NULL, 0, worker_main, NULL, 0, NULL);
 
-    g_workerThread = CreateThread(NULL, 0, worker_main, NULL, 0, NULL);
 
     // Safety: ensure mic is not left closed
     if (g_currentSch) {

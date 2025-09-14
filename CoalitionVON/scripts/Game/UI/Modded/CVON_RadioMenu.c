@@ -313,9 +313,8 @@ class CVON_RadioMenu: MenuBase
 			return;
 		}
 		
-		m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_iCurrentChannel + input);
 		UpdateChannelMenu(input);
-		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel + input);
+		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel);
 	}
 	
 	//Changes the stereo settings based on the input from the MenuUp and Down methods
@@ -387,12 +386,14 @@ class CVON_RadioMenu: MenuBase
 		int channels = m_RadioComponent.m_aChannels.Count();
 		if (channels < m_RadioComponent.m_iCurrentChannel + input)
 		{
-			m_RadioComponent.UpdateFrequencyClient("55500");
 			m_RadioComponent.AddChannelClient();
+			m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_iCurrentChannel + input);
+			m_RadioComponent.UpdateFrequencyClient("55500");
 		}
 		else
 		{
 			string freq = m_RadioComponent.m_aChannels.Get(m_RadioComponent.m_iCurrentChannel + input - 1);
+			m_RadioComponent.UpdateChannelClient(m_RadioComponent.m_iCurrentChannel + input);
 			m_RadioComponent.UpdateFrequencyClient(freq);
 		}
 	}
@@ -471,12 +472,12 @@ class CVON_RadioMenu: MenuBase
 		int tempFreq = m_sTempFrequency.ToInt();
 		if (tempFreq < 30000 || tempFreq > 87975 || tempFreq % 25 != 0)
 		{
-			m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency, m_RadioComponent.m_iCurrentChannel));
+			m_wLine2.SetText(PrepFinalFreq(tempFreq.ToString(), m_RadioComponent.m_iCurrentChannel));
 			m_sTempFrequency = "_____";
 			return;
 		}
-		m_RadioComponent.UpdateFrequencyClient(m_RadioComponent.m_sFrequency);
-		m_wLine2.SetText(PrepFinalFreq(m_RadioComponent.m_sFrequency, m_RadioComponent.m_iCurrentChannel));
+		m_RadioComponent.UpdateFrequencyClient(tempFreq.ToString());
+		m_wLine2.SetText(PrepFinalFreq(tempFreq.ToString(), m_RadioComponent.m_iCurrentChannel));
 		m_sTempFrequency = "_____";
 		m_bIsEditing = false;
 	}

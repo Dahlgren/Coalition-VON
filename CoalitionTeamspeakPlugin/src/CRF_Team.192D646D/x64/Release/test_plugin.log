@@ -1,4 +1,3 @@
-﻿  plugin.c
-  LINK : C:\Users\tyler\OneDrive\Documents\My Games\ArmaReforgerWorkbench\projects\Coalition-VON\CoalitionTeamspeakPlugin\src\x64\Release\CRF_Teamspeak_Plugin_Main.dll not found or not built by the last incremental link; performing full link
+﻿  LINK : C:\Users\tyler\OneDrive\Documents\My Games\ArmaReforgerWorkbench\projects\Coalition-VON\CoalitionTeamspeakPlugin\src\x64\Release\CRF_Teamspeak_Plugin_Main.dll not found or not built by the last incremental link; performing full link
      Creating library C:\Users\tyler\OneDrive\Documents\My Games\ArmaReforgerWorkbench\projects\Coalition-VON\CoalitionTeamspeakPlugin\src\x64\Release\CRF_Teamspeak_Plugin_Main.lib and object C:\Users\tyler\OneDrive\Documents\My Games\ArmaReforgerWorkbench\projects\Coalition-VON\CoalitionTeamspeakPlugin\src\x64\Release\CRF_Teamspeak_Plugin_Main.exp
   test_plugin.vcxproj -> C:\Users\tyler\OneDrive\Documents\My Games\ArmaReforgerWorkbench\projects\Coalition-VON\CoalitionTeamspeakPlugin\src\x64\Release\CRF_Teamspeak_Plugin_Main.dll

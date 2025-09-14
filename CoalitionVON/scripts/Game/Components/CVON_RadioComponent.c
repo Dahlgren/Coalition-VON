@@ -82,11 +82,11 @@ class CVON_RadioComponent: ScriptComponent
 	
 	//Called on the authority, updates the Frequency.
 	//==========================================================================================================================================================================
-	void UpdateFrequncyServer(string freq)
+	void UpdateFrequncyServer(string freq, int input = -1)
 	{
 		//Update the channels array for the new freq
 		if (m_aChannels.Count() >= m_iCurrentChannel)
-			m_aChannels.Set(m_iCurrentChannel - 1, freq);
+			m_aChannels.Set(m_iCurrentChannel + input, freq);
 		m_sFrequency = freq;
 		bool isShared = false;
 		FactionAffiliationComponent factionComp = FactionAffiliationComponent.Cast(GetOwner().GetRootParent().FindComponent(FactionAffiliationComponent));
