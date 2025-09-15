@@ -823,11 +823,7 @@ static void load_json_snapshot(void)
             e.muffledDb = (float)muffledDecibelsJSON->valuedouble;
         }
 
-        g_Von.entries[g_Von.count++] = e;
-        char buf[256];
-        snprintf(buf, sizeof(buf), "[CRF] Loaded VON entry: id=%u type=%s L=%.2f R=%.2f Freq=%s TimeDev=%d ConnQ=%.2f Muffle=%.1f", (unsigned)e.id, e.type == VON_RADIO ? "RADIO" : "DIRECT", e.leftGain, e.rightGain, e.txFreq, e.txTimeDev, e.connQ,
-                 e.muffledDb);
-        ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", 0);
+        g_Von.entries[g_Von.count++] = e; 
     }
 
     cJSON_Delete(vonDataJSON);
@@ -1326,32 +1322,21 @@ static const VonEntry* find_entry(anyID clientID)
 
 static void apply_proximity_muting(uint64 sch)
 {
-    if (!sch) {
-        ts3Functions.logMessage("[CRF] apply_proximity_muting: no sch", LogLevel_DEBUG, "CRF Plugin", 0);
+    if (!sch)
         return;
-    }
+
 
     anyID myID;
-    if (ts3Functions.getClientID(sch, &myID) != ERROR_ok) {
-        ts3Functions.logMessage("[CRF] getClientID failed", LogLevel_ERROR, "CRF Plugin", sch);
+    if (ts3Functions.getClientID(sch, &myID) != ERROR_ok)
         return;
-    }
 
     uint64 myChannel;
-    if (ts3Functions.getChannelOfClient(sch, myID, &myChannel) != ERROR_ok) {
-        ts3Functions.logMessage("[CRF] getChannelOfClient failed", LogLevel_ERROR, "CRF Plugin", sch);
+    if (ts3Functions.getChannelOfClient(sch, myID, &myChannel) != ERROR_ok)
         return;
-    }
 
     anyID* clients = NULL;
-    if (ts3Functions.getChannelClientList(sch, myChannel, &clients) != ERROR_ok || !clients) {
-        ts3Functions.logMessage("[CRF] getChannelClientList failed or returned NULL", LogLevel_ERROR, "CRF Plugin", sch);
+    if (ts3Functions.getChannelClientList(sch, myChannel, &clients) != ERROR_ok || !clients)
         return;
-    }
-
-    char buf[128];
-    snprintf(buf, sizeof(buf), "[CRF] Found channel client list");
-    ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
 
     for (int i = 0; clients[i]; ++i) {
         anyID cid = clients[i];
@@ -1360,15 +1345,10 @@ static void apply_proximity_muting(uint64 sch)
 
         const VonEntry* e = find_entry(cid);
 
-        if (!e) {
-            snprintf(buf, sizeof(buf), "[CRF] Client %u → NO VON ENTRY (muting)", (unsigned)cid);
-            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+        if (!e)
             ts3Functions.requestMuteClients(sch, &cid, NULL);
-        } else {
-            snprintf(buf, sizeof(buf), "[CRF] Client %u → HAS VON ENTRY (unmuting)", (unsigned)cid);
-            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+        else
             ts3Functions.requestUnmuteClients(sch, &cid, NULL);
-        }
     }
 
     ts3Functions.freeMemory(clients);
@@ -1379,8 +1359,6 @@ static DWORD WINAPI worker_main(LPVOID param)
 {
     (void)param;
 
-    ts3Functions.logMessage("[CRF] Worker_main entered", LogLevel_INFO, "CRF Plugin", 0);
-
     while (InterlockedCompareExchange(&g_workerQuit, 0, 0) == 0) {
         DWORD  now = GetTickCount();
         uint64 sch = ts3Functions.getCurrentServerConnectionHandlerID();;
@@ -1390,10 +1368,8 @@ static DWORD WINAPI worker_main(LPVOID param)
             g_nextServerReloadTick = now + SERVERDATA_RELOAD_MS;
             if ((DWORD)now >= g_serverWatchSuppressUntil) {
                 FILETIME wt;
-                if (g_ServerPath[0] && file_modified_since_last(g_ServerPath, &g_serverWatch, &wt)) {
-                    ts3Functions.logMessage("[CRF] ServerData changed on disk", LogLevel_DEBUG, "CRF Plugin", sch);
+                if (g_ServerPath[0] && file_modified_since_last(g_ServerPath, &g_serverWatch, &wt))
                     read_serverdata_from_disk();
-                }
             }
             write_serverdata_if_changed(sch);
         }
@@ -1415,19 +1391,13 @@ static DWORD WINAPI worker_main(LPVOID param)
                 FILETIME wt;
                 int      changed = file_modified_since_last(g_Von.jsonPath, &g_vonDataWatch, &wt);
                 if (changed) {
-                    ts3Functions.logMessage("[CRF] Detected change in VONData.json", LogLevel_INFO, "CRF Plugin", sch);
                     load_json_snapshot();
                     reloaded = 1;
-                } else {
-                    ts3Functions.logMessage("[CRF] No change in VONData.json", LogLevel_DEBUG, "CRF Plugin", sch);
                 }
             }
 
 
             if (sch) {
-                if (reloaded) {
-                    ts3Functions.logMessage("[CRF] VONData reloaded, applying mute sweep", LogLevel_DEBUG, "CRF Plugin", sch);
-                }
                 apply_proximity_muting(sch);
             }
         }
@@ -1448,8 +1418,6 @@ static DWORD WINAPI worker_main(LPVOID param)
             Sleep(50);
         }
     }
-
-    ts3Functions.logMessage("[CRF] Worker_main exiting", LogLevel_INFO, "CRF Plugin", 0);
     return 0;
 }
 
@@ -1502,7 +1470,6 @@ PL_EXPORT void ts3plugin_setFunctionPointers(const struct TS3Functions funcs)
 
 PL_EXPORT int ts3plugin_init()
 {
-    ts3Functions.logMessage("[CRF] ts3plugin_init called", LogLevel_INFO, "CRF Plugin", 0);
     InitializeCriticalSection(&g_radioLock);
     InitializeCriticalSection(&g_directLock); /* NEW */
 
@@ -1553,7 +1520,6 @@ PL_EXPORT int ts3plugin_init()
 }
 PL_EXPORT void ts3plugin_shutdown()
 {
-    ts3Functions.logMessage("[CRF] ts3plugin_shutdown called", LogLevel_INFO, "CRF Plugin", 0);
     if (ts3Functions.getCurrentServerConnectionHandlerID()) {
         reset_mic_state(ts3Functions.getCurrentServerConnectionHandlerID());
         
