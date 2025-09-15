@@ -400,7 +400,6 @@ static WatchedFileState g_vonDataWatch = {0}, g_serverWatch = {0}, g_radioWatch 
 
 /* Mic + state gate (worker sets; audio reads) */
 static int           g_IsTransmitting = 0, g_LastMicActive = -1;
-static uint64        g_currentSch      = 0;
 static volatile LONG g_inVonActiveFlag = 0; /* 0/1 set by worker, read by audio */
 
 /* Per-client volume modifier state and muting control */
@@ -1528,7 +1527,6 @@ PL_EXPORT int ts3plugin_init()
     g_SD_chanPass[0]           = '\0';
     g_serverWatchSuppressUntil = 0;
     g_lastServerWritten.valid  = 0;
-    g_currentSch               = 0;
     InterlockedExchange(&g_inVonActiveFlag, 0);
 
     g_directCount = 0; /* NEW */
@@ -1599,7 +1597,6 @@ PL_EXPORT void ts3plugin_onConnectStatusChangeEvent(uint64 sch, int newStatus, u
 {
     (void)errorNumber;
     if (newStatus == STATUS_CONNECTION_ESTABLISHED) {
-        g_currentSch           = sch;
         apply_proximity_muting(sch);
         g_nextVonReloadTick    = 0;
         g_nextRadioReloadTick  = 0;
@@ -1618,7 +1615,6 @@ PL_EXPORT void ts3plugin_onConnectStatusChangeEvent(uint64 sch, int newStatus, u
 }
 PL_EXPORT void ts3plugin_currentServerConnectionChanged(uint64 sch)
 {
-    g_currentSch = sch;
     g_LastCount  = 0;
 }
 PL_EXPORT void ts3plugin_onClientMoveEvent(uint64 sch, anyID clientID, uint64 oldCh, uint64 newCh, int visibility, const char* moveMessage)
