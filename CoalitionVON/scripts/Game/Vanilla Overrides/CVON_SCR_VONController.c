@@ -962,7 +962,7 @@ modded class SCR_VONController
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
 			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", TSClientId);
-			if (m_PlayerController.GetTeamspeakClientId() != TSClientId && TSClientId != 0)
+			if (m_PlayerController.GetTeamspeakClientId() != TSClientId)
 				m_PlayerController.SetTeamspeakClientId(TSClientId);
 			VONLoad.EndObject();
 			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion || InGame != true)
