@@ -1449,7 +1449,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.10";
+    return "1.9.5";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
