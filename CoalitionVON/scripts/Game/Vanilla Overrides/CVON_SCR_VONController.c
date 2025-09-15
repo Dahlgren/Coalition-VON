@@ -504,7 +504,7 @@ modded class SCR_VONController
 				else
 					continue;
 			
-			float distance = vector.Distance(player.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
+			float distance = vector.Distance(GetGame().GetCameraManager().CurrentCamera().GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
 			if (distance > maxDistance)
 			{
 				if (m_PlayerController.m_aLocalActiveVONEntriesIds.Contains(playerId))
