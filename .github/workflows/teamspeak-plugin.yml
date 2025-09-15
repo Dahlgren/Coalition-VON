@@ -1,0 +1,27 @@
+name: TeamSpeak Plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      working-directory: CoalitionTeamspeakPlugin/src
+      run: msbuild /m /p:Configuration=Release /p:Platform=x64 Coalition_Teamspeak_Plugin.sln
