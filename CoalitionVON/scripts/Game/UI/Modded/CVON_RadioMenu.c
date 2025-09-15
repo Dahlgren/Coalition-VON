@@ -314,7 +314,12 @@ class CVON_RadioMenu: MenuBase
 		}
 		
 		UpdateChannelMenu(input);
+		//Have to compensate in multiplayer the delay between when we set the new channel on the server and it instantly happening on the client
+		#ifdef WORKBENCH
 		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel);
+		#else
+		LoadFrequencyMenu(m_RadioComponent.m_iCurrentChannel + input);
+		#endif
 	}
 	
 	//Changes the stereo settings based on the input from the MenuUp and Down methods
