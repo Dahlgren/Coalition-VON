@@ -403,15 +403,29 @@ static int           g_IsTransmitting = 0, g_LastMicActive = -1;
 static uint64        g_currentSch      = 0;
 static volatile LONG g_inVonActiveFlag = 0; /* 0/1 set by worker, read by audio */
 
-/* Per-client volume modifier state (kept but unused after removing volume meddling) */
+/* Per-client volume modifier state and muting control */
 typedef struct {
     anyID id;
     int   have;
     int   lastMuted;
     float lastDb;
+    int   isMutedByPlugin;    /* NEW: tracks if we muted this client */
+    int   lastInRange;        /* NEW: tracks if client was in range last check */
 } ClientApplyState;
 static ClientApplyState g_Last[4096];
 static size_t           g_LastCount = 0;
+
+/* Threshold for considering a user "out of range" (very low gain) */
+#define OUT_OF_RANGE_THRESHOLD 0.001f
+
+/* ---------------------------------------------------------------------------
+   Proximity-based muting functions
+   
+   These functions implement automatic muting of users who are not within
+   audible range of the local player. When a speaker's gain values (indicating
+   proximity/volume) fall below the threshold, they are muted via the TeamSpeak
+   API. When they come back into range, they are automatically unmuted.
+--------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------------
    Filters / DSP for RADIO
@@ -1235,6 +1249,131 @@ static DWORD g_nextVonReloadTick    = 0;
 static DWORD g_nextRadioReloadTick  = 0;
 static DWORD g_nextServerReloadTick = 0;
 
+/* Find or create client state for muting tracking */
+static ClientApplyState* get_client_state(anyID clientID)
+{
+    for (size_t i = 0; i < g_LastCount; ++i) {
+        if (g_Last[i].id == clientID) {
+            return &g_Last[i];
+        }
+    }
+    
+    if (g_LastCount < sizeof(g_Last) / sizeof(g_Last[0])) {
+        ClientApplyState* state = &g_Last[g_LastCount++];
+        memset(state, 0, sizeof(*state));
+        state->id = clientID;
+        state->have = 1;
+        state->isMutedByPlugin = 0;
+        state->lastInRange = 1; /* assume in range initially */
+        return state;
+    }
+    
+    return NULL; /* array full */
+}
+
+/* Mute a client via TeamSpeak API */
+static void mute_client(uint64 sch, anyID clientID)
+{
+    if (!sch || clientID == 0)
+        return;
+        
+    ClientApplyState* state = get_client_state(clientID);
+    if (!state || state->isMutedByPlugin)
+        return; /* already muted by us */
+    
+    anyID clientArray[2] = {clientID, 0}; /* null-terminated array */
+    unsigned int err = ts3Functions.requestMuteClients(sch, clientArray, NULL);
+    
+    if (err == ERROR_ok) {
+        state->isMutedByPlugin = 1;
+        logf("[CRF] Muted client %u (out of range)\n", (unsigned)clientID);
+    } else {
+        logf("[CRF] Failed to mute client %u, error %u\n", (unsigned)clientID, err);
+    }
+}
+
+/* Unmute a client via TeamSpeak API */
+static void unmute_client(uint64 sch, anyID clientID)
+{
+    if (!sch || clientID == 0)
+        return;
+        
+    ClientApplyState* state = get_client_state(clientID);
+    if (!state || !state->isMutedByPlugin)
+        return; /* not muted by us */
+    
+    anyID clientArray[2] = {clientID, 0}; /* null-terminated array */
+    unsigned int err = ts3Functions.requestUnmuteClients(sch, clientArray, NULL);
+    
+    if (err == ERROR_ok) {
+        state->isMutedByPlugin = 0;
+        logf("[CRF] Unmuted client %u (back in range)\n", (unsigned)clientID);
+    } else {
+        logf("[CRF] Failed to unmute client %u, error %u\n", (unsigned)clientID, err);
+    }
+}
+
+static const VonEntry* find_entry(anyID clientID)
+{
+    for (size_t i = 0; i < g_Von.count; ++i)
+        if (g_Von.entries[i].id == clientID)
+            return &g_Von.entries[i];
+    return NULL;
+}
+
+static void apply_proximity_muting(uint64 sch)
+{
+    if (!sch)
+        return;
+
+    anyID*       clients = NULL;
+    unsigned int error;
+    char         buf[256];
+
+    // Get own client ID
+    anyID myID;
+    error = ts3Functions.getClientID(sch, &myID);
+    if (error != ERROR_ok) {
+        ts3Functions.logMessage("[CRF] Failed to get own client ID", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Get channel ID of self
+    uint64 myChannel;
+    error = ts3Functions.getChannelOfClient(sch, myID, &myChannel);
+    if (error != ERROR_ok) {
+        ts3Functions.logMessage("[CRF] Failed to get own channel", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Get all clients in channel
+    error = ts3Functions.getChannelClientList(sch, myChannel, &clients);
+    if (error != ERROR_ok || !clients) {
+        ts3Functions.logMessage("[CRF] Failed to get channel client list", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Walk through each client
+    for (int i = 0; clients[i]; ++i) {
+        anyID cid = clients[i];
+        if (cid == myID)
+            continue; // skip self
+
+        const VonEntry* e = find_entry(cid);
+        if (!e) {
+            snprintf(buf, sizeof(buf), "[CRF] Client %u OUT OF RANGE → muting", (unsigned)cid);
+            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+            mute_client(sch, cid);
+        } else {
+            snprintf(buf, sizeof(buf), "[CRF] Client %u IN RANGE → unmuting", (unsigned)cid);
+            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+            unmute_client(sch, cid);
+        }
+    }
+
+    ts3Functions.freeMemory(clients);
+}
+
 static DWORD WINAPI worker_main(LPVOID param)
 {
     (void)param;
@@ -1271,6 +1410,7 @@ static DWORD WINAPI worker_main(LPVOID param)
             FILETIME wt;
             if (g_Von.jsonPath[0] && file_modified_since_last(g_Von.jsonPath, &g_vonDataWatch, &wt)) {
                 load_json_snapshot();
+                apply_proximity_muting(sch); // NEW: handle mute/unmute instead of DSP zeroing
             }
         }
 
@@ -1292,17 +1432,6 @@ static DWORD WINAPI worker_main(LPVOID param)
 
     logf("[CRF] Worker exiting\n");
     return 0;
-}
-
-/* ---------------------------------------------------------------------------
-   Lookup
---------------------------------------------------------------------------- */
-static const VonEntry* find_entry(anyID clientID)
-{
-    for (size_t i = 0; i < g_Von.count; ++i)
-        if (g_Von.entries[i].id == clientID)
-            return &g_Von.entries[i];
-    return NULL;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1333,7 +1462,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.9";
+    return "1.10";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {
@@ -1345,7 +1474,7 @@ PL_EXPORT const char* ts3plugin_author()
 }
 PL_EXPORT const char* ts3plugin_description()
 {
-    return "A tool for Arma Reforger to communicate with Teamspeak";
+    return "A tool for Arma Reforger to communicate with Teamspeak - includes proximity-based automatic muting";
 }
 PL_EXPORT void ts3plugin_setFunctionPointers(const struct TS3Functions funcs)
 {
@@ -1368,6 +1497,7 @@ PL_EXPORT int ts3plugin_init()
         ensureParentDirExists(g_RadioPath);
 
     g_LastCount                = 0;
+    memset(g_Last, 0, sizeof(g_Last));  /* Clear client state tracking */
     g_vonDataWatch.loadedOnce  = 0;
     g_serverWatch.loadedOnce   = 0;
     g_radioWatch.loadedOnce    = 0;
@@ -1404,6 +1534,13 @@ PL_EXPORT void ts3plugin_shutdown()
 
     if (g_currentSch) {
         reset_mic_state(g_currentSch);
+        
+        /* Unmute all clients that were muted by the plugin */
+        for (size_t i = 0; i < g_LastCount; ++i) {
+            if (g_Last[i].isMutedByPlugin) {
+                unmute_client(g_currentSch, g_Last[i].id);
+            }
+        }
     }
 
     InterlockedExchange(&g_workerQuit, 1);
@@ -1463,8 +1600,19 @@ PL_EXPORT void ts3plugin_onClientMoveEvent(uint64 sch, anyID clientID, uint64 ol
 {
     (void)oldCh;
     (void)newCh;
-    (void)visibility;
     (void)moveMessage;
+    
+    /* Clean up muting state for clients who leave visibility */
+    if (visibility == LEAVE_VISIBILITY) {
+        ClientApplyState* state = get_client_state(clientID);
+        if (state && state->isMutedByPlugin) {
+            /* Client is leaving - clear our muting state */
+            state->isMutedByPlugin = 0;
+            state->lastInRange = 1; /* reset for next time */
+            logf("[CRF] Client %u left, cleared muting state\n", (unsigned)clientID);
+        }
+    }
+    
     anyID me = 0;
     if (ts3Functions.getClientID(sch, &me) != ERROR_ok || me == 0)
         return;
@@ -1478,7 +1626,6 @@ PL_EXPORT void ts3plugin_onClientMoveEvent(uint64 sch, anyID clientID, uint64 ol
 --------------------------------------------------------------------------- */
 PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clientID, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask)
 {
-    (void)sch;
     (void)channelSpeakerArray;
     (void)channelFillMask;
 
@@ -1489,14 +1636,9 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
         return;
 
     const VonEntry* e = find_entry(clientID);
-    if (!e) {
-        if (g_Von.loaded) {
-            const int total = sampleCount * (channels > 0 ? channels : 1);
-            for (int i = 0; i < total; ++i)
-                samples[i] = 0;
-        }
+    
+    if (!e)
         return;
-    }
 
     /* ----------------------------- RADIO talkers ----------------------------- */
     if (e->type == VON_RADIO) {
