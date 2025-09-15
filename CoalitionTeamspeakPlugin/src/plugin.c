@@ -1354,6 +1354,36 @@ static void apply_proximity_muting(uint64 sch)
     ts3Functions.freeMemory(clients);
 }
 
+static void unmute_all_clients(uint64 sch)
+{
+    if (!sch)
+        return;
+
+    anyID myID;
+    if (ts3Functions.getClientID(sch, &myID) != ERROR_ok)
+        return;
+
+    anyID* clients = NULL;
+    if (ts3Functions.getClientList(sch, &clients) != ERROR_ok || !clients)
+        return;
+
+    for (int i = 0; clients[i]; ++i) {
+        anyID cid = clients[i];
+        if (cid == myID)
+            continue; // don't touch ourselves
+
+        anyID        arr[2] = {cid, 0}; // null-terminated array
+        unsigned int err    = ts3Functions.requestUnmuteClients(sch, arr, NULL);
+        if (err == ERROR_ok) {
+            logf("[CRF] Unmuted client %u\n", (unsigned)cid);
+        } else {
+            logf("[CRF] Failed to unmute client %u, error %u\n", (unsigned)cid, err);
+        }
+    }
+
+    ts3Functions.freeMemory(clients);
+}
+
 
 static DWORD WINAPI worker_main(LPVOID param)
 {
@@ -1398,7 +1428,10 @@ static DWORD WINAPI worker_main(LPVOID param)
 
 
             if (sch) {
-                apply_proximity_muting(sch);
+                if (g_SD_inGame)
+                    apply_proximity_muting(sch);
+                else
+                    unmute_all_clients(sch);
             }
         }
 
@@ -1449,7 +1482,7 @@ PL_EXPORT const char* ts3plugin_name()
 }
 PL_EXPORT const char* ts3plugin_version()
 {
-    return "1.9.5";
+    return "1.9.6";
 }
 PL_EXPORT int ts3plugin_apiVersion()
 {

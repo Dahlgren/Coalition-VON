@@ -478,6 +478,10 @@ modded class SCR_VONController
 		if (!m_PlayerManager)
 			m_PlayerManager = GetGame().GetPlayerManager();
 		
+		CameraBase camera = GetGame().GetCameraManager().CurrentCamera();
+		if (!camera)
+			return;
+		
 		ref array<int> playerIds = {};
 		m_PlayerManager.GetPlayers(playerIds);
 		int maxDistance = m_PlayerController.m_aVolumeValues.Get(4);
@@ -504,7 +508,7 @@ modded class SCR_VONController
 				else
 					continue;
 			
-			float distance = vector.Distance(GetGame().GetCameraManager().CurrentCamera().GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
+			float distance = vector.Distance(player.GetOrigin(), camera.GetOrigin());
 			if (distance > maxDistance)
 			{
 				if (m_PlayerController.m_aLocalActiveVONEntriesIds.Contains(playerId))
@@ -547,7 +551,7 @@ modded class SCR_VONController
 			
 			container.m_iVolume = m_VONGameModeComponent.GetPlayerVolume(container.m_iPlayerId);
 			
-			float distance = vector.Distance(container.m_SoundSource.GetOrigin(), SCR_PlayerController.GetLocalControlledEntity().GetOrigin());
+			float distance = vector.Distance(container.m_SoundSource.GetOrigin(), camera.GetOrigin());
 			if (distance < maxDistance)
 				container.m_fDistanceToSender = distance;
 			else
@@ -1004,6 +1008,8 @@ modded class SCR_VONController
 		SCR_JsonSaveContext VONSave = new SCR_JsonSaveContext();
 		VONSave.WriteValue("IsTransmitting", m_bIsBroadcasting);
 		IEntity localEntity = GetGame().GetCameraManager().CurrentCamera();
+		if (!localEntity)
+			return;
 		foreach (CVON_VONContainer container: m_PlayerController.m_aLocalActiveVONEntries)
 		{
 			IEntity soundSource;
