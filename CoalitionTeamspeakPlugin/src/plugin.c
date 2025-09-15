@@ -47,6 +47,7 @@ typedef uint64_t uint64;
 typedef uint16_t anyID;
 
 #include "plugin.h"
+#include "cJSON.h"
 #include "teamspeak/public_definitions.h"
 #include "teamspeak/public_errors.h"
 #include "teamspeak/public_errors_rare.h"
@@ -296,83 +297,8 @@ static int file_modified_since_last(const char* path, WatchedFileState* st, FILE
 }
 
 /* ---------------------------------------------------------------------------
-   JSON utils + reusable buffers
+   Reusable buffers
 --------------------------------------------------------------------------- */
-static void json_escape_string(const char* in, char* out, size_t outSize)
-{
-    size_t oi = 0;
-    for (size_t i = 0; in && in[i] && oi + 2 < outSize; ++i) {
-        char c = in[i];
-        if (c == '\\' || c == '\"') {
-            if (oi + 2 >= outSize)
-                break;
-            out[oi++] = '\\';
-            out[oi++] = c;
-        } else if ((unsigned char)c < 0x20) {
-            if (oi + 1 >= outSize)
-                break;
-            out[oi++] = ' ';
-        } else {
-            out[oi++] = c;
-        }
-    }
-    if (outSize)
-        out[oi < outSize ? oi : outSize - 1] = '\0';
-}
-static int parse_float_field(const char* obj, const char* key, float* out)
-{
-    const char* k = strstr(obj, key);
-    if (!k)
-        return 0;
-    double tmp = 0.0;
-    if (sscanf(k, "%*[^:]: %lf", &tmp) == 1) {
-        *out = (float)tmp;
-        return 1;
-    }
-    return 0;
-}
-static int parse_int_field(const char* obj, const char* key, int* out)
-{
-    const char* k = strstr(obj, key);
-    if (!k)
-        return 0;
-    int v = 0;
-    if (sscanf(k, "%*[^:]: %d", &v) == 1) {
-        *out = v;
-        return 1;
-    }
-    return 0;
-}
-static int parse_string_field(const char* obj, const char* key, char* out, size_t outSize)
-{
-    const char* k = strstr(obj, key);
-    if (!k)
-        return 0;
-    const char* colon = strchr(k, ':');
-    if (!colon)
-        return 0;
-    const char* q1 = strchr(colon, '\"');
-    if (q1) {
-        const char* q2 = strchr(q1 + 1, '\"');
-        if (!q2)
-            return 0;
-        size_t len = (size_t)(q2 - (q1 + 1));
-        if (len >= outSize)
-            len = outSize - 1;
-        memcpy(out, q1 + 1, len);
-        out[len] = '\0';
-        return 1;
-    } else {
-        double num = 0.0;
-        if (sscanf(colon + 1, "%lf", &num) == 1) {
-            _snprintf(out, (int)outSize, "%.0f", num);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-/* Reusable buffers */
 static char*  g_vonBuf   = NULL;
 static size_t g_vonCap   = 0;
 static char*  g_radioBuf = NULL;
@@ -806,106 +732,89 @@ static void load_json_snapshot(void)
     long sz = 0;
     if (!read_file_reuse(g_Von.jsonPath, &g_vonBuf, &g_vonCap, &sz))
         return;
-    char* buf = g_vonBuf;
-    buf[sz]   = '\0';
 
-    /* IsTransmitting */
-    {
-        const char* p = strstr(buf, "\"IsTransmitting\"");
-        if (p) {
-            if (strstr(p, "true"))
-                g_IsTransmitting = 1;
-            else if (strstr(p, "false"))
-                g_IsTransmitting = 0;
-            else {
-                int it = 0;
-                if (sscanf(p, "%*[^:]: %d", &it) == 1)
-                    g_IsTransmitting = (it != 0);
-            }
+    cJSON* vonDataJSON = cJSON_Parse(g_vonBuf);
+    if (vonDataJSON == NULL) {
+        const char* error = cJSON_GetErrorPtr();
+        if (error != NULL) {
+            logf("Error reading VONData: %s\n", error);
         }
+        return;
     }
 
-    const char* s = buf;
-    while ((s = strchr(s, '\"')) != NULL) {
-        const char* keyStart = s + 1;
-        const char* keyEnd   = strchr(keyStart, '\"');
-        if (!keyEnd)
+    cJSON* isTransmittingJSON = cJSON_GetObjectItem(vonDataJSON, "IsTransmitting");
+    if (cJSON_IsBool(isTransmittingJSON)) {
+        g_IsTransmitting = isTransmittingJSON->valueint;
+    }
+
+    cJSON* vonJSON;
+    cJSON_ArrayForEach(vonJSON, vonDataJSON){
+        if (g_Von.count >= MAX_TRACKED)
             break;
-        int isDigits = 1;
-        for (const char* k = keyStart; k < keyEnd; ++k) {
-            if (*k < '0' || *k > '9') {
-                isDigits = 0;
-                break;
-            }
-        }
-        const char* after = keyEnd + 1;
-        while (*after == ' ' || *after == '\t' || *after == '\r' || *after == '\n')
-            ++after;
-        if (*after == ':')
-            ++after;
-        while (*after == ' ' || *after == '\t' || *after == '\r' || *after == '\n')
-            ++after;
 
-        if (isDigits && *after == '{') {
-            int         depth    = 1;
-            const char* objStart = after;
-            const char* q        = objStart + 1;
-            while (*q && depth > 0) {
-                if (*q == '{')
-                    ++depth;
-                else if (*q == '}')
-                    --depth;
-                ++q;
-            }
-            if (depth == 0 && g_Von.count < MAX_TRACKED) {
-                VonEntry e;
-                memset(&e, 0, sizeof(e));
-                e.id           = (anyID)atoi(keyStart);
-                e.type         = VON_DIRECT;
-                e.leftGain     = 1.0f;
-                e.rightGain    = 1.0f;
-                e.txFreq[0]    = '\0';
-                e.txTimeDev    = INT_MIN;
-                e.connQ        = 1.0f;
-                e.txFaction[0] = '\0';
-                e.muffledDb    = 0.0f; /* default none */
-
-                char   tmp[8192];
-                size_t len = (size_t)(q - objStart);
-                if (len >= sizeof(tmp))
-                    len = sizeof(tmp) - 1;
-                memcpy(tmp, objStart, len);
-                tmp[len] = '\0';
-
-                if (strstr(tmp, "RADIO"))
-                    e.type = VON_RADIO;
-                else if (strstr(tmp, "DIRECT"))
-                    e.type = VON_DIRECT;
-                else {
-                    int vt = 0;
-                    if (sscanf(tmp, "%*[^V]VONType%*[^0-9-]%d", &vt) == 1)
-                        e.type = (vt == 1) ? VON_RADIO : VON_DIRECT;
-                }
-
-                parse_float_field(tmp, "\"LeftGain\"", &e.leftGain);
-                parse_float_field(tmp, "\"RightGain\"", &e.rightGain);
-                parse_string_field(tmp, "\"Frequency\"", e.txFreq, sizeof(e.txFreq));
-                trim_inplace(e.txFreq);
-                parse_int_field(tmp, "\"TimeDeviation\"", &e.txTimeDev);
-                parse_float_field(tmp, "\"ConnectionQuality\"", &e.connQ);
-                e.connQ = clampf(e.connQ, 0.0f, 1.0f);
-                parse_string_field(tmp, "\"FactionKey\"", e.txFaction, sizeof(e.txFaction));
-                trim_inplace(e.txFaction);
-                /* NEW: MuffledDecibels (negative number) */
-                parse_float_field(tmp, "\"MuffledDecibels\"", &e.muffledDb);
-
-                g_Von.entries[g_Von.count++] = e;
-            }
-            s = q;
+        if (strcmp(vonJSON->string, "IsTransmitting") == 0)
             continue;
+
+        VonEntry e;
+        memset(&e, 0, sizeof(e));
+        e.id           = (anyID)atoi(vonJSON->string);
+        e.type         = VON_DIRECT;
+        e.leftGain     = 1.0f;
+        e.rightGain    = 1.0f;
+        e.txFreq[0]    = '\0';
+        e.txTimeDev    = INT_MIN;
+        e.connQ        = 1.0f;
+        e.txFaction[0] = '\0';
+        e.muffledDb    = 0.0f; /* default none */
+
+        cJSON* vonTypeJSON = cJSON_GetObjectItem(vonJSON, "VONType");
+        if (cJSON_IsNumber(vonTypeJSON)) {
+            e.type = (vonTypeJSON->valueint == 1) ? VON_RADIO : VON_DIRECT;
         }
-        s = keyEnd + 1;
+
+        cJSON* leftGainJSON = cJSON_GetObjectItem(vonJSON, "LeftGain");
+        if (cJSON_IsNumber(leftGainJSON)) {
+            e.leftGain = (float)leftGainJSON->valuedouble;
+        }
+
+        cJSON* rightGainJSON = cJSON_GetObjectItem(vonJSON, "RightGain");
+        if (cJSON_IsNumber(rightGainJSON)) {
+            e.rightGain = (float)rightGainJSON->valuedouble;
+        }
+
+        cJSON* frequencyJSON = cJSON_GetObjectItem(vonJSON, "Frequency");
+        if (cJSON_IsString(frequencyJSON)) {
+            strncpy(e.txFreq, frequencyJSON->valuestring, sizeof(e.txFreq) - 1);
+            trim_inplace(e.txFreq);
+        }
+
+        cJSON* timeDeviationJSON = cJSON_GetObjectItem(vonJSON, "TimeDeviation");
+        if (cJSON_IsNumber(timeDeviationJSON)) {
+            e.txTimeDev = timeDeviationJSON->valueint;
+        }
+
+        cJSON* connectionQualityJSON = cJSON_GetObjectItem(vonJSON, "ConnectionQuality");
+        if (cJSON_IsNumber(connectionQualityJSON)) {
+            e.connQ = clampf((float)connectionQualityJSON->valuedouble, 0.0f, 1.0f);
+        }
+
+        cJSON* factionKeyJSON = cJSON_GetObjectItem(vonJSON, "FactionKey");
+        if (cJSON_IsString(factionKeyJSON)) {
+            strncpy(e.txFaction, factionKeyJSON->valuestring, sizeof(e.txFaction) - 1);
+            trim_inplace(e.txFaction);
+        }
+
+        /* NEW: MuffledDecibels (negative number) */
+        cJSON* muffledDecibelsJSON = cJSON_GetObjectItem(vonJSON, "MuffledDecibels");
+        if (cJSON_IsNumber(muffledDecibelsJSON)) {
+            e.muffledDb = (float)muffledDecibelsJSON->valuedouble;
+        }
+
+        g_Von.entries[g_Von.count++] = e;
     }
+
+    cJSON_Delete(vonDataJSON);
+
     g_Von.loaded = 1;
 }
 
@@ -918,65 +827,66 @@ static void load_radio_snapshot(void)
     long sz = 0;
     if (!read_file_reuse(g_RadioPath, &g_radioBuf, &g_radioCap, &sz))
         return;
-    char* buf = g_radioBuf;
-    buf[sz]   = '\0';
 
-    const char* s = buf;
-    while ((s = strchr(s, '\"')) != NULL) {
-        const char* keyEnd = strchr(s + 1, '\"');
-        if (!keyEnd)
-            break;
-        const char* after = keyEnd + 1;
-        while (*after == ' ' || *after == '\t' || *after == '\r' || *after == '\n')
-            ++after;
-        if (*after == ':')
-            ++after;
-        while (*after == ' ' || *after == '\t' || *after == '\r' || *after == '\n')
-            ++after;
-        if (*after == '{') {
-            int         depth    = 1;
-            const char* objStart = after;
-            const char* q        = objStart + 1;
-            while (*q && depth > 0) {
-                if (*q == '{')
-                    ++depth;
-                else if (*q == '}')
-                    --depth;
-                ++q;
-            }
-            if (depth == 0 && g_Radios.count < (sizeof(g_Radios.list) / sizeof(g_Radios.list[0]))) {
-                char   tmp[4096];
-                size_t len = (size_t)(q - objStart);
-                if (len >= sizeof(tmp))
-                    len = sizeof(tmp) - 1;
-                memcpy(tmp, objStart, len);
-                tmp[len] = '\0';
-                RadioLocal r;
-                memset(&r, 0, sizeof(r));
-                r.timeDev = INT_MIN;
-                r.volStep = 0;
-                r.stereo  = 0;
-                parse_string_field(tmp, "\"Freq\"", r.freq, sizeof(r.freq));
-                trim_inplace(r.freq);
-                parse_int_field(tmp, "\"TimeDeviation\"", &r.timeDev);
-                parse_int_field(tmp, "\"Volume\"", &r.volStep);
-                parse_int_field(tmp, "\"Stereo\"", &r.stereo);
-                parse_string_field(tmp, "\"FactionKey\"", r.faction, sizeof(r.faction));
-                trim_inplace(r.faction);
-                if (r.volStep < 0)
-                    r.volStep = 0;
-                if (r.volStep > 9)
-                    r.volStep = 9;
-                if (r.stereo < 0 || r.stereo > 2)
-                    r.stereo = 0;
-                if (r.freq[0])
-                    g_Radios.list[g_Radios.count++] = r;
-            }
-            s = q;
-            continue;
+    cJSON* radioDataJSON = cJSON_Parse(g_radioBuf);
+    if (radioDataJSON == NULL) {
+        const char* error = cJSON_GetErrorPtr();
+        if (error != NULL) {
+            logf("Error reading RadioData: %s\n", error);
         }
-        s = keyEnd + 1;
+        return;
     }
+
+    cJSON* radioJSON;
+    cJSON_ArrayForEach(radioJSON, radioDataJSON) {
+        if (g_Radios.count >= (sizeof(g_Radios.list) / sizeof(g_Radios.list[0])))
+            break;
+
+        RadioLocal r;
+        memset(&r, 0, sizeof(r));
+        r.timeDev = INT_MIN;
+        r.volStep = 0;
+        r.stereo  = 0;
+
+        cJSON* freqJSON = cJSON_GetObjectItem(radioJSON, "Freq");
+        if (cJSON_IsString(freqJSON)) {
+            strncpy(r.freq, freqJSON->valuestring, sizeof(r.freq) - 1);
+            trim_inplace(r.freq);
+        }
+
+        cJSON* timeDeviationJSON = cJSON_GetObjectItem(radioJSON, "TimeDeviation");
+        if (cJSON_IsNumber(timeDeviationJSON)) {
+            r.timeDev = timeDeviationJSON->valueint;
+        }
+
+        cJSON* volumeJSON = cJSON_GetObjectItem(radioJSON, "Volume");
+        if (cJSON_IsNumber(volumeJSON)) {
+            r.volStep = volumeJSON->valueint;
+        }
+
+        cJSON* stereoJSON = cJSON_GetObjectItem(radioJSON, "Stereo");
+        if (cJSON_IsNumber(stereoJSON)) {
+            r.stereo = stereoJSON->valueint;
+        }
+
+        cJSON* factionKeyJSON = cJSON_GetObjectItem(radioJSON, "FactionKey");
+        if (cJSON_IsString(factionKeyJSON)) {
+            strncpy(r.faction, factionKeyJSON->valuestring, sizeof(r.freq) - 1);
+            trim_inplace(r.faction);
+        }
+
+        if (r.volStep < 0)
+            r.volStep = 0;
+        if (r.volStep > 9)
+            r.volStep = 9;
+        if (r.stereo < 0 || r.stereo > 2)
+            r.stereo = 0;
+        if (r.freq[0])
+            g_Radios.list[g_Radios.count++] = r;
+    }
+
+    cJSON_Delete(radioDataJSON);
+
     g_Radios.loaded = 1;
 }
 
@@ -1058,77 +968,52 @@ static void read_serverdata_from_disk(void)
     long sz = 0;
     if (!read_file_reuse(g_ServerPath, &g_srvBuf, &g_srvCap, &sz))
         return;
-    char* buf = g_srvBuf;
-    buf[sz]   = '\0';
 
-    int  have = 0, inGame = g_SD_inGame;
-    char chanName[512] = {0}, chanPass[512] = {0};
-
-    const char* sd = strstr(buf, "\"ServerData\"");
-    if (sd) {
-        have            = 1;
-        const char* pIG = strstr(sd, "\"InGame\"");
-        if (pIG) {
-            if (strstr(pIG, "true"))
-                inGame = 1;
-            else if (strstr(pIG, "false"))
-                inGame = 0;
-            else {
-                int iv = 0;
-                if (sscanf(pIG, "%*[^:]: %d", &iv) == 1)
-                    inGame = (iv != 0);
-            }
+    cJSON* serverDataRootJSON = cJSON_Parse(g_srvBuf);
+    if (serverDataRootJSON == NULL) {
+        const char* error = cJSON_GetErrorPtr();
+        if (error != NULL) {
+            logf("Error reading VONServerData: %s\n", error);
         }
-        const char* pCN = strstr(sd, "\"VONChannelName\"");
-        if (pCN) {
-            const char* c = strchr(pCN, ':');
-            if (c) {
-                const char* q1 = strchr(c, '\"');
-                if (q1) {
-                    const char* q2 = strchr(q1 + 1, '\"');
-                    if (q2 && q2 > q1 + 1) {
-                        size_t len = (size_t)(q2 - (q1 + 1));
-                        if (len >= sizeof(chanName))
-                            len = sizeof(chanName) - 1;
-                        memcpy(chanName, q1 + 1, len);
-                        chanName[len] = '\0';
-                    }
-                }
-            }
-        }
-        const char* pPW = strstr(sd, "\"VONChannelPassword\"");
-        if (pPW) {
-            const char* c = strchr(pPW, ':');
-            if (c) {
-                const char* q1 = strchr(c, '\"');
-                if (q1) {
-                    const char* q2 = strchr(q1 + 1, '\"');
-                    if (q2 && q2 > q1 + 1) {
-                        size_t len = (size_t)(q2 - (q1 + 1));
-                        if (len >= sizeof(chanPass))
-                            len = sizeof(chanPass) - 1;
-                        memcpy(chanPass, q1 + 1, len);
-                        chanPass[len] = '\0';
-                    }
-                }
-            }
-        }
+        return;
     }
 
-    trim_inplace(chanName);
-    trim_inplace(chanPass);
-    if (have) {
+    int inGame = g_SD_inGame;
+    char* chanName = NULL;
+    char* chanPass = NULL;
+
+    cJSON* serverDataJSON = cJSON_GetObjectItem(serverDataRootJSON, "ServerData");
+    if (cJSON_IsObject(serverDataJSON)) {
+        cJSON* inGameJSON = cJSON_GetObjectItem(serverDataJSON, "InGame");
+        if (cJSON_IsBool(inGameJSON)) {
+            inGame = inGameJSON->valueint;
+        }
+
+        cJSON* chanNameJSON = cJSON_GetObjectItem(serverDataJSON, "VONChannelName");
+        if (cJSON_IsString(chanNameJSON)) {
+            chanName = chanNameJSON->valuestring;
+            trim_inplace(chanName);
+        }
+
+        cJSON* chanPassJSON = cJSON_GetObjectItem(serverDataJSON, "VONChannelPassword");
+        if (cJSON_IsString(chanPassJSON)) {
+            chanPass = chanPassJSON->valuestring;
+            trim_inplace(chanPass);
+        }
+
         g_SD_have   = 1;
         g_SD_inGame = inGame;
-        if (chanName[0]) {
+        if (chanName) {
             strncpy(g_SD_chanName, chanName, sizeof(g_SD_chanName) - 1);
             g_SD_chanName[sizeof(g_SD_chanName) - 1] = '\0';
         }
-        if (chanPass[0]) {
+        if (chanPass) {
             strncpy(g_SD_chanPass, chanPass, sizeof(g_SD_chanPass) - 1);
             g_SD_chanPass[sizeof(g_SD_chanPass) - 1] = '\0';
         }
     }
+
+    cJSON_Delete(serverDataRootJSON);
 }
 
 static void write_serverdata_if_changed(uint64 sch)
@@ -1161,27 +1046,34 @@ static void write_serverdata_if_changed(uint64 sch)
         return;
 
     ensureParentDirExists(g_ServerPath);
-    char chanEsc[1024] = {0}, passEsc[1024] = {0};
-    json_escape_string(g_SD_chanName, chanEsc, sizeof(chanEsc));
-    json_escape_string(g_SD_chanPass, passEsc, sizeof(passEsc));
+
+    cJSON* serverDataJSON = cJSON_CreateObject();
+    cJSON_AddBoolToObject(serverDataJSON, "InGame", g_SD_inGame);
+    cJSON_AddNumberToObject(serverDataJSON, "TSClientID", myID);
+    cJSON_AddStringToObject(serverDataJSON, "TSPluginVersion", pvStr);
+    cJSON_AddStringToObject(serverDataJSON, "VONChannelName", g_SD_chanName);
+    cJSON_AddStringToObject(serverDataJSON, "VONChannelPassword", g_SD_chanPass);
+
+    cJSON* serverDataRootJSON = cJSON_CreateObject();
+    cJSON_AddItemToObject(serverDataRootJSON, "ServerData", serverDataJSON);
+
+    char* serverDataRootStr = cJSON_Print(serverDataRootJSON);
+    if (!serverDataRootStr) {
+        logf("[CRF] Failed to create JSON for VONServerData.json\n");
+        cJSON_Delete(serverDataRootJSON);
+        return;
+    }
 
     FILE* wf = fopen(g_ServerPath, "wb");
     if (!wf) {
         logf("[CRF] Failed to open VONServerData.json for write\n");
+        cJSON_Delete(serverDataRootJSON);
         return;
     }
-    fprintf(wf,
-            "{\n"
-            "  \"ServerData\": {\n"
-            "    \"InGame\": %s,\n"
-            "    \"TSClientID\": %u,\n"
-            "    \"TSPluginVersion\": \"%s\",\n" // now string
-            "    \"VONChannelName\": \"%s\",\n"
-            "    \"VONChannelPassword\": \"%s\"\n"
-            "  }\n"
-            "}\n",
-            (g_SD_inGame ? "true" : "false"), (unsigned)myID, pvStr, chanEsc, passEsc);
+
+    fprintf(wf, serverDataRootStr);
     fclose(wf);
+    cJSON_Delete(serverDataRootJSON);
 
     g_lastServerWritten.tsClientID = (unsigned)myID;
     g_lastServerWritten.inGame     = g_SD_inGame;

@@ -141,9 +141,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\cJSON.c" />
     <ClCompile Include="plugin.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\cJSON.h" />
     <ClInclude Include="..\include\plugin_definitions.h" />
     <ClInclude Include="..\include\teamlog\logtypes.h" />
     <ClInclude Include="..\include\teamspeak\clientlib_publicdefinitions.h" />
