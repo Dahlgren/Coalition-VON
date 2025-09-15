@@ -455,10 +455,14 @@ modded class SCR_VONController
 	//The meat, this is where we determine who we send a VONEntry too and if we've already sent one.
 	//Differentiates behavior for Direct and Radio in here as well. If a player is more than 200m away and you try to use direct he will not receive that direct VONEntry.
 	//==========================================================================================================================================================================
-	float m_bWriteJsonCooldown = 0;
+	float m_fWriteTeamspeakClientIdCooldown = 0;
 	override void EOnFixedFrame(IEntity owner, float timeSlice)
 	{
 		super.EOnFixedFrame(owner, timeSlice);
+		if (m_fWriteTeamspeakClientIdCooldown > 0)
+			m_fWriteTeamspeakClientIdCooldown -= timeSlice;
+		else
+			m_fWriteTeamspeakClientIdCooldown = 0;
 		//Just in case....
 		if (!CVON_VONGameModeComponent.GetInstance())
 			return;
@@ -962,8 +966,12 @@ modded class SCR_VONController
 			VONLoad.ReadValue("VONChannelPassword", ChannelPassword);
 			VONLoad.ReadValue("TSPluginVersion", m_PlayerController.m_sTeamspeakPluginVersion);
 			VONLoad.ReadValue("TSClientID", TSClientId);
-			if (m_PlayerController.GetTeamspeakClientId() != TSClientId)
+			if (m_PlayerController.GetTeamspeakClientId() != TSClientId && m_fWriteTeamspeakClientIdCooldown <= 0)
+			{
+				m_fWriteTeamspeakClientIdCooldown = 1;
 				m_PlayerController.SetTeamspeakClientId(TSClientId);
+			}
+				
 			VONLoad.EndObject();
 			if (ChannelName != m_VONGameModeComponent.m_sTeamSpeakChannelName || ChannelPassword != m_VONGameModeComponent.m_sTeamSpeakChannelPassword || m_PlayerController.m_sTeamspeakPluginVersion != m_VONGameModeComponent.m_sTeamspeakPluginVersion || InGame != true)
 			{
