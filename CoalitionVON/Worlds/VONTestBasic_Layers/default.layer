@@ -4,7 +4,6 @@ SCR_AIWorld : "{E0A05C76552E7F58}Prefabs/AI/SCR_AIWorld.et" {
 SCR_GameModeEditor GameMode_Editor_Full1 : "{DA3986AF1B5032B7}Prefabs/MP/Modes/Editor/GameMode_Editor_Full.et" {
  components {
   CVON_VONGameModeComponent "{6624E607CC6D4CC8}" {
-   m_bTeamspeakChecks 0
    m_sFreqConfig "{6E5382392F5A7528}Configs/FreqConfigs/Example.conf"
   }
  }

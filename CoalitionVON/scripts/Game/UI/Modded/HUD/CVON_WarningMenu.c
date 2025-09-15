@@ -12,6 +12,9 @@ class CVON_WarningMenu: ChimeraMenuBase
 	CVON_VONGameModeComponent m_VONGamemode;
 	TextWidget m_wExplanation;
 	
+	//Used for exiting the menu
+	protected bool m_bFocused = true;
+	
 	override void OnMenuOpen()
 	{
 		m_wRoot = GetRootWidget();
@@ -41,12 +44,37 @@ class CVON_WarningMenu: ChimeraMenuBase
 	
 	override void OnMenuClose()
 	{
-		if (m_PlayerController.GetTeamspeakClientId() == 0 && m_PlayerController.m_sTeamspeakPluginVersion != m_VONGamemode.m_sTeamspeakPluginVersion)
-			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
+//		if (m_PlayerController.GetTeamspeakClientId() == 0 && m_PlayerController.m_sTeamspeakPluginVersion != m_VONGamemode.m_sTeamspeakPluginVersion)
+//			GetGame().GetMenuManager().OpenMenu(ChimeraMenuPreset.CVON_WarningMenu);
 	}
 	
 	void CopyToClipboard()
 	{
 		System.ExportToClipboard(LINK_TO_COPY);
+	}
+	
+	override void OnMenuFocusLost()
+	{
+		m_bFocused = false;
+		GetGame().GetInputManager().RemoveActionListener(UIConstants.MENU_ACTION_OPEN, EActionTrigger.DOWN, OpenPauseMenu);
+		#ifdef WORKBENCH
+			GetGame().GetInputManager().RemoveActionListener(UIConstants.MENU_ACTION_OPEN_WB, EActionTrigger.DOWN, OpenPauseMenu);
+		#endif
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	override void OnMenuFocusGained()
+	{
+		m_bFocused = true;
+		GetGame().GetInputManager().AddActionListener(UIConstants.MENU_ACTION_OPEN, EActionTrigger.DOWN, OpenPauseMenu);
+		#ifdef WORKBENCH
+			GetGame().GetInputManager().AddActionListener(UIConstants.MENU_ACTION_OPEN_WB, EActionTrigger.DOWN, OpenPauseMenu);
+		#endif
+	}
+	
+	protected void OpenPauseMenu()
+	{
+		if (!GetGame().GetMenuManager().IsAnyDialogOpen() && IsFocused())
+			ArmaReforgerScripted.OpenPauseMenu();
 	}
 }
