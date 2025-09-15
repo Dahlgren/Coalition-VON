@@ -1357,65 +1357,6 @@ static DWORD g_nextVonReloadTick    = 0;
 static DWORD g_nextRadioReloadTick  = 0;
 static DWORD g_nextServerReloadTick = 0;
 
-static DWORD WINAPI worker_main(LPVOID param)
-{
-    (void)param;
-
-    logf("[CRF] Worker started\n");
-    while (InterlockedCompareExchange(&g_workerQuit, 0, 0) == 0) {
-        DWORD  now = GetTickCount();
-        uint64 sch = g_currentSch;
-
-        /* ---------------- ServerData reload/write ---------------- */
-        if (now >= g_nextServerReloadTick) {
-            g_nextServerReloadTick = now + SERVERDATA_RELOAD_MS;
-            if ((DWORD)now >= g_serverWatchSuppressUntil) {
-                FILETIME wt;
-                if (g_ServerPath[0] && file_modified_since_last(g_ServerPath, &g_serverWatch, &wt)) {
-                    logf("[CRF] ServerData changed on disk\n");
-                    read_serverdata_from_disk();
-                }
-            }
-            /* Always write our current state if changed */
-            write_serverdata_if_changed(sch);
-        }
-
-        /* ---------------- Channel moves ---------------- */
-        try_ensure_move(sch);
-        try_return_to_previous(sch);
-
-        /* ---------------- Mic toggle ---------------- */
-        apply_mic_state(sch);
-
-        /* ---------------- VONData reload ---------------- */
-        if (now >= g_nextVonReloadTick) {
-            g_nextVonReloadTick = now + VONDATA_RELOAD_MS;
-            FILETIME wt;
-            if (g_Von.jsonPath[0] && file_modified_since_last(g_Von.jsonPath, &g_vonDataWatch, &wt)) {
-                load_json_snapshot();
-            }
-        }
-
-        /* ---------------- RadioData reload ---------------- */
-        if (now >= g_nextRadioReloadTick) {
-            g_nextRadioReloadTick = now + RADIODATA_RELOAD_MS;
-            FILETIME wt;
-            if (g_RadioPath[0] && file_modified_since_last(g_RadioPath, &g_radioWatch, &wt)) {
-                load_radio_snapshot();
-            }
-        }
-
-        /* ---------------- Active flag update ---------------- */
-        update_von_active_flag(sch);
-
-        /* ---------------- Sleep until next tick ---------------- */
-        Sleep(WORKER_TICK_MS);
-    }
-
-    logf("[CRF] Worker exiting\n");
-    return 0;
-}
-
 /* Find or create client state for muting tracking */
 static ClientApplyState* get_client_state(anyID clientID)
 {
@@ -1480,50 +1421,125 @@ static void unmute_client(uint64 sch, anyID clientID)
     }
 }
 
-/* Check if a user should be muted based on their proximity */
-static void check_and_apply_muting(uint64 sch, anyID clientID, const VonEntry* entry)
-{
-    if (!sch || clientID == 0)
-        return;
-        
-    ClientApplyState* state = get_client_state(clientID);
-    if (!state)
-        return;
-        
-    int inRange;
-    
-    if (!entry) {
-        /* No VON entry means completely out of range/not transmitting */
-        inRange = 0;
-    } else {
-        /* Check if gains are above threshold (user is in audible range) */
-        float maxGain = (entry->leftGain > entry->rightGain) ? entry->leftGain : entry->rightGain;
-        inRange = (maxGain > OUT_OF_RANGE_THRESHOLD) ? 1 : 0;
-    }
-    
-    /* Only change mute state if range status changed */
-    if (inRange != state->lastInRange) {
-        if (inRange) {
-            /* User came into range - unmute if we muted them */
-            if (state->isMutedByPlugin) {
-                unmute_client(sch, clientID);
-            }
-        } else {
-            /* User went out of range - mute them */
-            if (!state->isMutedByPlugin) {
-                mute_client(sch, clientID);
-            }
-        }
-        
-        state->lastInRange = inRange;
-    }
-}
 static const VonEntry* find_entry(anyID clientID)
 {
     for (size_t i = 0; i < g_Von.count; ++i)
         if (g_Von.entries[i].id == clientID)
             return &g_Von.entries[i];
     return NULL;
+}
+
+static void apply_proximity_muting(uint64 sch)
+{
+    if (!sch)
+        return;
+
+    anyID*       clients = NULL;
+    unsigned int error;
+    char         buf[256];
+
+    // Get own client ID
+    anyID myID;
+    error = ts3Functions.getClientID(sch, &myID);
+    if (error != ERROR_ok) {
+        ts3Functions.logMessage("[CRF] Failed to get own client ID", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Get channel ID of self
+    uint64 myChannel;
+    error = ts3Functions.getChannelOfClient(sch, myID, &myChannel);
+    if (error != ERROR_ok) {
+        ts3Functions.logMessage("[CRF] Failed to get own channel", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Get all clients in channel
+    error = ts3Functions.getChannelClientList(sch, myChannel, &clients);
+    if (error != ERROR_ok || !clients) {
+        ts3Functions.logMessage("[CRF] Failed to get channel client list", LogLevel_ERROR, "CRF Plugin", sch);
+        return;
+    }
+
+    // Walk through each client
+    for (int i = 0; clients[i]; ++i) {
+        anyID cid = clients[i];
+        if (cid == myID)
+            continue; // skip self
+
+        const VonEntry* e = find_entry(cid);
+        if (!e) {
+            snprintf(buf, sizeof(buf), "[CRF] Client %u OUT OF RANGE → muting", (unsigned)cid);
+            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+            mute_client(sch, cid);
+        } else {
+            snprintf(buf, sizeof(buf), "[CRF] Client %u IN RANGE → unmuting", (unsigned)cid);
+            ts3Functions.logMessage(buf, LogLevel_INFO, "CRF Plugin", sch);
+            unmute_client(sch, cid);
+        }
+    }
+
+    ts3Functions.freeMemory(clients);
+}
+
+static DWORD WINAPI worker_main(LPVOID param)
+{
+    (void)param;
+
+    logf("[CRF] Worker started\n");
+    while (InterlockedCompareExchange(&g_workerQuit, 0, 0) == 0) {
+        DWORD  now = GetTickCount();
+        uint64 sch = g_currentSch;
+
+        /* ---------------- ServerData reload/write ---------------- */
+        if (now >= g_nextServerReloadTick) {
+            g_nextServerReloadTick = now + SERVERDATA_RELOAD_MS;
+            if ((DWORD)now >= g_serverWatchSuppressUntil) {
+                FILETIME wt;
+                if (g_ServerPath[0] && file_modified_since_last(g_ServerPath, &g_serverWatch, &wt)) {
+                    logf("[CRF] ServerData changed on disk\n");
+                    read_serverdata_from_disk();
+                }
+            }
+            /* Always write our current state if changed */
+            write_serverdata_if_changed(sch);
+        }
+
+        /* ---------------- Channel moves ---------------- */
+        try_ensure_move(sch);
+        try_return_to_previous(sch);
+
+        /* ---------------- Mic toggle ---------------- */
+        apply_mic_state(sch);
+
+        /* ---------------- VONData reload ---------------- */
+        if (now >= g_nextVonReloadTick) {
+            g_nextVonReloadTick = now + VONDATA_RELOAD_MS;
+            FILETIME wt;
+            if (g_Von.jsonPath[0] && file_modified_since_last(g_Von.jsonPath, &g_vonDataWatch, &wt)) {
+                load_json_snapshot();
+                apply_proximity_muting(sch); // NEW: handle mute/unmute instead of DSP zeroing
+            }
+        }
+
+        /* ---------------- RadioData reload ---------------- */
+        if (now >= g_nextRadioReloadTick) {
+            g_nextRadioReloadTick = now + RADIODATA_RELOAD_MS;
+            FILETIME wt;
+            if (g_RadioPath[0] && file_modified_since_last(g_RadioPath, &g_radioWatch, &wt)) {
+                load_radio_snapshot();
+            }
+        }
+
+        /* ---------------- Active flag update ---------------- */
+        update_von_active_flag(sch);
+
+        /* ---------------- Sleep until next tick ---------------- */
+        Sleep(WORKER_TICK_MS);
+    }
+
+    logf("[CRF] Worker exiting\n");
+    return 0;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1729,17 +1745,8 @@ PL_EXPORT void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 sch, anyID clien
 
     const VonEntry* e = find_entry(clientID);
     
-    /* Check and apply proximity-based muting */
-    check_and_apply_muting(sch, clientID, e);
-    
-    if (!e) {
-        if (g_Von.loaded) {
-            const int total = sampleCount * (channels > 0 ? channels : 1);
-            for (int i = 0; i < total; ++i)
-                samples[i] = 0;
-        }
+    if (!e)
         return;
-    }
 
     /* ----------------------------- RADIO talkers ----------------------------- */
     if (e->type == VON_RADIO) {
