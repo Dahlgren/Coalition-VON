@@ -2,7 +2,6 @@
 .vs/
 *.user
 Debug/
-Release/
 
 # TeamSpeak plugin
 *.ts3_plugin
