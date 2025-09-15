@@ -179,7 +179,7 @@ modded class SCR_VONController
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.RIGHT;
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
-		m_VONHud.ShowVONChange();
+		m_VONHud.ShowVONChange(radioComp.m_iCurrentChannel - 1);
 	}
 	
 	//Change ear keybind
@@ -192,7 +192,7 @@ modded class SCR_VONController
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.LEFT;
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
-		m_VONHud.ShowVONChange();
+		m_VONHud.ShowVONChange(radioComp.m_iCurrentChannel - 1);
 	}
 	
 	//Change ear keybind
@@ -205,7 +205,7 @@ modded class SCR_VONController
 		CVON_RadioComponent radioComp = CVON_RadioComponent.Cast(m_PlayerController.m_aRadios.Get(0).FindComponent(CVON_RadioComponent));
 		radioComp.m_eStereo = CVON_EStereo.BOTH;
 		radioComp.WriteJSON(SCR_PlayerController.GetLocalControlledEntity());
-		m_VONHud.ShowVONChange();
+		m_VONHud.ShowVONChange(radioComp.m_iCurrentChannel - 1);
 	}
 	
 	//Keybind to open active radio
@@ -247,24 +247,39 @@ modded class SCR_VONController
 
 		if (radioComp.m_iCurrentChannel == 1 && input == -1)
 		{
-			radioComp.UpdateChannelClient(radioComp.m_aChannels.Count());
+			return;
 		}
 		else if (radioComp.m_iCurrentChannel == 99 && input == 1)
 		{
 			radioComp.UpdateChannelClient(1);
+			string freq = radioComp.m_aChannels.Get(0);
+			radioComp.UpdateFrequencyClient(freq);
+			m_VONHud.ShowVONChange(0);
+			return;
 		}
-		else
-		{
-			radioComp.UpdateChannelClient(radioComp.m_iCurrentChannel);
-		}
-		
-		if (radioComp.m_iCurrentChannel > channelCount)
+		else if (radioComp.m_iCurrentChannel + input > channelCount)
 		{
 			radioComp.UpdateChannelClient(1);
+			string freq = radioComp.m_aChannels.Get(0);
+			radioComp.UpdateFrequencyClient(freq);
+			m_VONHud.ShowVONChange(0);
+			return;
+		}	
+		else
+		{
+			radioComp.UpdateChannelClient(radioComp.m_iCurrentChannel + input);
 		}
+		#ifdef WORKBENCH
 		string freq = radioComp.m_aChannels.Get(radioComp.m_iCurrentChannel - 1);
+		#else
+		string freq = radioComp.m_aChannels.Get(radioComp.m_iCurrentChannel - 1 + input);
+		#endif
 		radioComp.UpdateFrequencyClient(freq);
-		m_VONHud.ShowVONChange();
+		#ifdef WORKBENCH
+		m_VONHud.ShowVONChange(radioComp.m_iCurrentChannel - 1);
+		#else
+		m_VONHud.ShowVONChange(radioComp.m_iCurrentChannel - 1 + input);
+		#endif
 	}
 	
 	//Fetches the VON HUD, delay is necessary.

@@ -105,6 +105,9 @@ modded class SCR_PlayerController
 	void InitializeRadios(IEntity to)
 	{
 		m_aRadios.Clear();
+		//Reforger Lobby bs
+		m_aLocalActiveVONEntries.Clear();
+		m_aLocalActiveVONEntriesIds.Clear();
 		array<RplId> radios = CVON_VONGameModeComponent.GetInstance().GetRadios(to);
 		if (!radios)
 			return;
@@ -409,10 +412,20 @@ modded class SCR_PlayerController
 	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
 	void RpcAsk_RotateActiveChannelServer(int playerId)
 	{
+		#ifdef WORKBENCH
+		#else
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId));
-		IEntity radioEntity = playerController.m_aRadios.Get(playerController.m_aRadios.Count() - 1);
-		playerController.m_aRadios.RemoveOrdered(playerController.m_aRadios.Count() - 1);
-		playerController.m_aRadios.InsertAt(radioEntity, 0);
+		int count = playerController.m_aRadios.Count();
+		if (count < 2) return;
+	
+		IEntity last = playerController.m_aRadios[count - 1];
+	
+	    for (int i = count - 1; i > 0; i--)
+	    {
+	        playerController.m_aRadios[i] = playerController.m_aRadios[i - 1];
+	    }
+	    playerController.m_aRadios[0] = last;
+		#endif
 	}
 	
 	void GrabHandMicServer(int playerId, RplId radioId)
